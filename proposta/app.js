@@ -2,8 +2,7 @@
 //  LK Comunicação Digital · Sistema de Propostas Comerciais
 // =================================================================
 
-const DB_KEY   = 'lk_propostas_v1';
-const SERV_KEY = 'lk_servicos_v1';
+const DB_KEY = 'lk_propostas_v1';
 
 function getAll() {
   try { return JSON.parse(localStorage.getItem(DB_KEY)) || []; } catch { return []; }
@@ -15,18 +14,6 @@ function upsert(p) {
   const list = getAll(), i = list.findIndex(x => x.id === p.id);
   if (i >= 0) list[i] = p; else list.unshift(p);
   saveAll(list);
-}
-
-function getAllServicos() {
-  try { return JSON.parse(localStorage.getItem(SERV_KEY)) || []; } catch { return []; }
-}
-function saveServicos(list) { localStorage.setItem(SERV_KEY, JSON.stringify(list)); }
-function getServico(id) { return getAllServicos().find(s => s.id === id) || null; }
-function deleteServico(id) { saveServicos(getAllServicos().filter(s => s.id !== id)); }
-function upsertServico(s) {
-  const list = getAllServicos(), i = list.findIndex(x => x.id === s.id);
-  if (i >= 0) list[i] = s; else list.unshift(s);
-  saveServicos(list);
 }
 
 function genId() { return 'p' + Date.now() + Math.random().toString(36).slice(2, 6); }
@@ -54,16 +41,16 @@ const STATUS = {
   reprovada:   { label: 'Reprovada',   cls: 'status--no'      },
 };
 
-const KANBAN_COLS = ['enviada', 'sem_retorno', 'aprovada', 'reprovada'];
+const KANBAN_COLS = ['enviada','sem_retorno','aprovada','reprovada'];
 
 function calcSubtotal(itens) {
-  return (itens||[]).reduce((s,it) => s+(Number(it.qtd)||0)*(Number(it.unit)||0), 0);
+  return (itens||[]).reduce((s,it) => s + (Number(it.qtd)||0) * (Number(it.unit)||0), 0);
 }
 function calcTotal(v) {
   return calcSubtotal((v||{}).itens) - (Number((v||{}).desconto)||0);
 }
 
-let _form = {}, _step = 1, _serv = {};
+let _form = {}, _step = 1;
 const STEPS = 3;
 const STEP_TITLES = ['Dados do Cliente','Escopo do Serviço','Valores & Condições'];
 function go(hash) { location.hash = hash; }
@@ -75,12 +62,9 @@ function route() {
   const h = location.hash || '#';
   const app = document.getElementById('app');
   if (!h || h === '#' || h === '#dashboard') renderDashboard(app);
-  else if (h === '#servicos')                renderCatalogo(app);
-  else if (h === '#servicos/novo')           renderServicoForm(app, null);
-  else if (h.startsWith('#servicos/editar/')) renderServicoForm(app, h.slice(17));
-  else if (h === '#nova')                    renderForm(app, null);
-  else if (h.startsWith('#editar/'))         renderForm(app, h.slice(8));
-  else if (h.startsWith('#ver/'))            renderView(app, h.slice(5));
+  else if (h === '#nova')            renderForm(app, null);
+  else if (h.startsWith('#editar/')) renderForm(app, h.slice(8));
+  else if (h.startsWith('#ver/'))    renderView(app, h.slice(5));
   else renderDashboard(app);
 }
 window.addEventListener('hashchange', route);
@@ -92,8 +76,7 @@ window.addEventListener('DOMContentLoaded', route);
 function sidebarHTML() {
   const h = location.hash || '#';
   const isDash = !h || h === '#' || h === '#dashboard';
-  const isNova = h === '#nova';
-  const isServ = h.startsWith('#servicos');
+  const isNova = h === '#nova' || h.startsWith('#editar/') || h.startsWith('#ver/');
   return `
     <aside class="sidebar">
       <div class="sidebar__logo">
@@ -112,11 +95,8 @@ function sidebarHTML() {
         <a href="#dashboard" class="sidebar__link ${isDash?'active':''}">
           <span class="sidebar__link-icon">📋</span> Propostas
         </a>
-        <a href="#nova" class="sidebar__link ${isNova?'active':''}">
+        <a href="#nova" class="sidebar__link ${h==='#nova'?'active':''}">
           <span class="sidebar__link-icon">✏️</span> Nova Proposta
-        </a>
-        <a href="#servicos" class="sidebar__link ${isServ?'active':''}">
-          <span class="sidebar__link-icon">🛠️</span> Meus Serviços
         </a>
       </nav>
       <div class="sidebar__footer">
@@ -172,7 +152,7 @@ function kanbanHTML(list) {
 
 function kanbanColHTML(status, cards) {
   const st = STATUS[status];
-  const slug = status.replace('_', '-');
+  const slug = status.replace('_','-');
   return `
     <div class="kanban-col kanban-col--${slug}" data-status="${status}"
          ondragover="event.preventDefault();this.classList.add('kanban-col--over')"
@@ -183,8 +163,8 @@ function kanbanColHTML(status, cards) {
         <span class="kanban-col__badge">${cards.length}</span>
       </div>
       <div class="kanban-col__body">
-        ${cards.length === 0
-          ? `<div class="kanban-empty">Arraste uma proposta aqui</div>`
+        ${cards.length===0
+          ? '<div class="kanban-empty">Arraste uma proposta aqui</div>'
           : cards.map(p => kanbanCardHTML(p, true)).join('')}
       </div>
     </div>`;
@@ -197,9 +177,7 @@ function kanbanCardHTML(p, draggable) {
   const st      = STATUS[p.status] || STATUS.rascunho;
   return `
     <div class="kanban-card"
-         ${draggable
-           ? `draggable="true" ondragstart="onKanbanDragStart(event,'${esc(p.id)}')" ondragend="this.style.opacity='1'"`
-           : ''}>
+         ${draggable ? `draggable="true" ondragstart="onKanbanDragStart(event,'${esc(p.id)}')" ondragend="this.style.opacity='1'"` : ''}>
       <div class="kanban-card__top">
         <span class="kanban-card__date">${fmtDate(p.criadaEm)}</span>
         ${!draggable ? `<span class="status-badge ${st.cls}">${st.label}</span>` : ''}
@@ -240,112 +218,7 @@ window.doDelete = function(id) {
 };
 
 // =================================================================
-//  CATÁLOGO DE SERVIÇOS
-// =================================================================
-function renderCatalogo(app) {
-  const list = getAllServicos();
-  app.innerHTML = `
-    <div class="layout">
-      ${sidebarHTML()}
-      <main class="main">
-        <header class="topbar">
-          <div>
-            <h1 class="page-title">Meus Serviços</h1>
-            <p class="page-sub">Catálogo de serviços e valores padrão</p>
-          </div>
-          <a href="#servicos/novo" class="btn btn--primary">+ Novo Serviço</a>
-        </header>
-        ${list.length===0 ? emptyCatalogoHTML() : catalogoGridHTML(list)}
-      </main>
-    </div>`;
-}
-function emptyCatalogoHTML() {
-  return `<div class="empty">
-    <div class="empty__icon">🛠️</div>
-    <h3>Nenhum serviço cadastrado</h3>
-    <p>Cadastre seus serviços e valores padrão para selecioná-los rapidamente nas propostas.</p>
-    <a href="#servicos/novo" class="btn btn--primary">Cadastrar primeiro serviço</a>
-  </div>`;
-}
-function catalogoGridHTML(list) {
-  return `<div class="card-grid">${list.map(s=>`
-    <div class="prop-card">
-      <div class="prop-card__top">
-        <span class="status-badge status--sent">${esc(s.categoria||'Serviço')}</span>
-      </div>
-      <h3 class="prop-card__title">${esc(s.nome)}</h3>
-      ${s.descricao?`<p class="prop-card__client">${esc(s.descricao)}</p>`:''}
-      <p class="prop-card__total">${fmtMoney(s.valor)}<span>/unid</span></p>
-      <div class="prop-card__actions">
-        <a href="#servicos/editar/${esc(s.id)}" class="btn btn--sm btn--outline">Editar</a>
-        <button class="btn btn--sm btn--danger" onclick="doDeleteServico('${esc(s.id)}')">Excluir</button>
-      </div>
-    </div>`).join('')}</div>`;
-}
-window.doDeleteServico = function(id) {
-  if (!confirm('Excluir este serviço do catálogo?')) return;
-  deleteServico(id);
-  renderCatalogo(document.getElementById('app'));
-};
-
-function renderServicoForm(app, id) {
-  const existing = id ? getServico(id) : null;
-  _serv = existing ? JSON.parse(JSON.stringify(existing)) : { id: genId() };
-  app.innerHTML = `
-    <div class="layout">
-      ${sidebarHTML()}
-      <main class="main">
-        <header class="topbar">
-          <div>
-            <a href="#servicos" class="back-link">← Voltar para Meus Serviços</a>
-            <h1 class="page-title">${existing?'Editar Serviço':'Novo Serviço'}</h1>
-          </div>
-        </header>
-        <div class="form-shell">
-          <div class="form-card">
-            <h2 class="form-section-title">Dados do Serviço</h2>
-            <div class="form-grid">
-              <div class="form-group form-group--full">
-                <label>Nome do serviço <span class="required">*</span></label>
-                <input id="s-nome" type="text" value="${esc(_serv.nome||'')}" placeholder="Ex: Gestão de Social Media, Reels, Identidade Visual..." />
-              </div>
-              <div class="form-group">
-                <label>Categoria</label>
-                <input id="s-categoria" type="text" value="${esc(_serv.categoria||'')}" placeholder="Ex: Social Media, Design, Vídeo..." />
-              </div>
-              <div class="form-group">
-                <label>Valor padrão (R$) <span class="required">*</span></label>
-                <input id="s-valor" type="number" min="0" step="0.01" value="${_serv.valor||\'\'}" placeholder="0,00" />
-              </div>
-              <div class="form-group form-group--full">
-                <label>Descrição <span class="label-hint">(aparece na proposta)</span></label>
-                <textarea id="s-descricao" rows="3" placeholder="Descreva brevemente o que inclui este serviço...">${esc(_serv.descricao||'')}</textarea>
-              </div>
-            </div>
-            <div class="form-nav">
-              <a href="#servicos" class="btn btn--outline">Cancelar</a>
-              <button class="btn btn--primary" onclick="saveServico()">💾 Salvar Serviço</button>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>`;
-}
-window.saveServico = function() {
-  const nome  = document.getElementById('s-nome')?.value?.trim();
-  const valor = parseFloat(document.getElementById('s-valor')?.value);
-  if (!nome)           { alert('Informe o nome do serviço.'); return; }
-  if (!valor||valor<=0){ alert('Informe um valor válido.'); return; }
-  _serv.nome      = nome;
-  _serv.valor     = valor;
-  _serv.categoria = document.getElementById('s-categoria')?.value?.trim()||'';
-  _serv.descricao = document.getElementById('s-descricao')?.value?.trim()||'';
-  upsertServico(_serv);
-  go('#servicos');
-};
-
-// =================================================================
-//  FORM (multi-step)
+//  FORM
 // =================================================================
 function renderForm(app, id) {
   const existing = id ? getById(id) : null;
@@ -358,6 +231,7 @@ function renderForm(app, id) {
   _step = 1;
   renderStep(app);
 }
+
 function renderStep(app) {
   const isEdit = !!getById(_form.id);
   app.innerHTML = `
@@ -391,7 +265,9 @@ function renderStep(app) {
         </div>
       </main>
     </div>`;
-  if (_step === 3) bindStep3Events();
+  if (_step===3) {
+    document.getElementById('f-desconto')?.addEventListener('input', refreshTotals);
+  }
 }
 
 // ── Step 1
@@ -426,7 +302,7 @@ function step1HTML() {
 // ── Step 2
 function step2HTML() {
   const s = _form.servico||{};
-  const entregas = (s.entregas&&s.entregas.length>0)?s.entregas:[''];
+  const entregas = (s.entregas&&s.entregas.length>0) ? s.entregas : [''];
   return `
     <h2 class="form-section-title">Escopo do Serviço</h2>
     <div class="form-grid">
@@ -447,18 +323,18 @@ function step2HTML() {
       </div>
     </div>`;
 }
-function entregaRowHTML(val,i) {
+
+function entregaRowHTML(val, i) {
   return `<div class="entrega-row" data-idx="${i}">
     <input type="text" class="entrega-input" value="${esc(val)}" placeholder="Ex: 12 posts por mês, Relatório mensal..." />
     <button type="button" class="rm-btn" onclick="removeEntrega(${i})">×</button>
   </div>`;
 }
 
-// ── Step 3 — Service selector
+// ── Step 3
 function step3HTML() {
   const v = _form.valores||{};
   const itens = v.itens||[];
-  const catalogo = getAllServicos();
   const subtotal = calcSubtotal(itens);
   const desconto = Number(v.desconto)||0;
   const total = subtotal - desconto;
@@ -466,38 +342,25 @@ function step3HTML() {
   return `
     <h2 class="form-section-title">Valores & Condições</h2>
 
-    <!-- Seletor de serviço -->
     <div class="form-group form-group--full" style="margin-bottom:1.5rem">
-      <label>Selecionar serviço</label>
-      ${catalogo.length>0?`
-      <div class="service-selector">
-        <select id="sel-servico" class="service-selector__select" onchange="onServSelect()">
-          <option value="">— Escolha um serviço —</option>
-          ${catalogo.map(s=>`<option value="${esc(s.id)}" data-val="${s.valor}">${esc(s.nome)} — ${fmtMoney(s.valor)}</option>`).join('')}
-          <option value="__custom">✏️ Item personalizado...</option>
-        </select>
-        <input type="number" id="sel-qtd" value="1" min="1" class="service-selector__qtd" placeholder="Qtd" />
-        <button type="button" class="btn btn--primary" onclick="addServiceFromSelect()">+ Adicionar</button>
+      <label>Serviços & Itens</label>
+      <div class="items-table">
+        <div class="items-table__header">
+          <span>Serviço / Item</span>
+          <span class="text-center">Qtd</span>
+          <span class="text-right">Valor unit.</span>
+          <span class="text-right">Subtotal</span>
+          <span></span>
+        </div>
+        <div id="items-list">
+          ${itens.length>0
+            ? itens.map((it,i)=>itemRowHTML(it,i)).join('')
+            : '<div class="items-empty" style="border:none;border-radius:0;background:transparent">Nenhum item. Clique em + Adicionar para começar.</div>'}
+        </div>
       </div>
-      <div id="custom-row" class="custom-item-row" style="display:none">
-        <input type="text"   id="custom-desc"  placeholder="Nome do serviço personalizado" />
-        <input type="number" id="custom-valor" placeholder="Valor R$" min="0" step="0.01" />
-      </div>`
-      :`<div class="catalog-empty-hint">💡 Nenhum serviço cadastrado. <a href="#servicos">Cadastre em Meus Serviços</a> para selecionar aqui.</div>`}
+      <button type="button" class="btn btn--sm btn--outline add-btn" onclick="addItem()">+ Adicionar item</button>
     </div>
 
-    <!-- Itens adicionados -->
-    <div class="form-group form-group--full" style="margin-bottom:1.25rem">
-      <label>Serviços desta proposta</label>
-      <div id="selected-items-list">
-        ${itens.length>0
-          ? itens.map((it,i)=>selectedItemHTML(it,i)).join('')
-          : `<div class="items-empty">Nenhum serviço adicionado ainda.</div>`
-        }
-      </div>
-    </div>
-
-    <!-- Condições -->
     <div class="form-grid">
       <div class="form-group">
         <label>Desconto (R$)</label>
@@ -517,7 +380,7 @@ function step3HTML() {
       </div>
       <div class="form-group">
         <label>Validade da proposta</label>
-        <input id="f-validade" type="date" value="${v.validade||\'\'}" />
+        <input id="f-validade" type="date" value="${v.validade||''}" />
       </div>
       <div class="form-group">
         <label>Status</label>
@@ -538,67 +401,41 @@ function step3HTML() {
     </div>`;
 }
 
-function selectedItemHTML(it, i) {
-  const sub = (Number(it.qtd)||0)*(Number(it.unit)||0);
+function itemRowHTML(it, i) {
+  const sub = (Number(it.qtd)||0) * (Number(it.unit)||0);
   return `
-    <div class="selected-item" data-idx="${i}">
-      <div class="selected-item__info">
-        <span class="selected-item__name">${esc(it.desc||'—')}</span>
-        <span class="selected-item__unit">${fmtMoney(it.unit)} / unid</span>
-      </div>
-      <div class="selected-item__controls">
-        <button type="button" class="qty-btn" onclick="changeQty(${i},-1)">−</button>
-        <span class="qty-val">${it.qtd||1}</span>
-        <button type="button" class="qty-btn" onclick="changeQty(${i},1)">+</button>
-      </div>
-      <span class="selected-item__total">${fmtMoney(sub)}</span>
-      <button type="button" class="rm-btn" onclick="removeSelectedItem(${i})">×</button>
+    <div class="item-row" data-idx="${i}">
+      <input type="text" class="item-desc" value="${esc(it.desc||'')}" placeholder="Descrição do serviço ou item"
+             oninput="updateItem(${i},'desc',this.value)" />
+      <input type="number" class="item-qtd" value="${Number(it.qtd)||1}" min="1"
+             oninput="updateItem(${i},'qtd',this.value)" />
+      <input type="number" class="item-unit" value="${Number(it.unit)||''}" min="0" step="0.01"
+             placeholder="0,00" oninput="updateItem(${i},'unit',this.value)" />
+      <span class="item-sub" data-idx="${i}">${fmtMoney(sub)}</span>
+      <button type="button" class="rm-btn" onclick="removeItem(${i})">×</button>
     </div>`;
 }
 
-function bindStep3Events() {
-  document.getElementById('f-desconto')?.addEventListener('input', refreshTotals);
-}
-
-window.onServSelect = function() {
-  const sel = document.getElementById('sel-servico');
-  const customRow = document.getElementById('custom-row');
-  if (!customRow) return;
-  customRow.style.display = sel.value === '__custom' ? 'grid' : 'none';
-};
-
-window.addServiceFromSelect = function() {
+window.addItem = function() {
   collectStep3();
-  const sel = document.getElementById('sel-servico');
-  const qtd = Math.max(1, parseInt(document.getElementById('sel-qtd')?.value)||1);
-  if (!sel.value) { alert('Selecione um serviço.'); return; }
-
-  if (sel.value === '__custom') {
-    const desc  = document.getElementById('custom-desc')?.value?.trim();
-    const valor = parseFloat(document.getElementById('custom-valor')?.value)||0;
-    if (!desc)  { alert('Informe o nome do serviço personalizado.'); return; }
-    if (!valor) { alert('Informe o valor do serviço personalizado.'); return; }
-    _form.valores.itens.push({ desc, qtd, unit: valor });
-  } else {
-    const s = getServico(sel.value);
-    if (!s) return;
-    _form.valores.itens.push({ desc: s.nome, qtd, unit: s.valor });
-  }
+  (_form.valores.itens = _form.valores.itens||[]).push({desc:'', qtd:1, unit:0});
   renderStep(document.getElementById('app'));
 };
 
-window.changeQty = function(i, delta) {
-  collectStep3();
-  const it = _form.valores.itens[i];
-  if (!it) return;
-  it.qtd = Math.max(1, (Number(it.qtd)||1) + delta);
-  renderStep(document.getElementById('app'));
-};
-
-window.removeSelectedItem = function(i) {
+window.removeItem = function(i) {
   collectStep3();
   _form.valores.itens.splice(i, 1);
   renderStep(document.getElementById('app'));
+};
+
+window.updateItem = function(i, field, val) {
+  if (!_form.valores?.itens?.[i]) return;
+  _form.valores.itens[i][field] = field==='desc' ? val : (Number(val)||0);
+  const it = _form.valores.itens[i];
+  const sub = (Number(it.qtd)||0) * (Number(it.unit)||0);
+  const el = document.querySelector(`.item-sub[data-idx="${i}"]`);
+  if (el) el.textContent = fmtMoney(sub);
+  refreshTotals();
 };
 
 function refreshTotals() {
@@ -611,12 +448,11 @@ function refreshTotals() {
   if (e2) e2.textContent = fmtMoney(sub-d);
 }
 
-// ── Collect
-function collectStep1(v) {
+function collectStep1(validate) {
   const empresa = document.getElementById('f-empresa')?.value?.trim();
   const resp    = document.getElementById('f-responsavel')?.value?.trim();
-  if (v&&!empresa){ alert('Informe o nome da empresa ou cliente.'); return false; }
-  if (v&&!resp)   { alert('Informe o nome do responsável.'); return false; }
+  if (validate && !empresa) { alert('Informe o nome da empresa ou cliente.'); return false; }
+  if (validate && !resp)    { alert('Informe o nome do responsável.'); return false; }
   _form.cliente = {
     empresa: empresa||'', responsavel: resp||'',
     email:    document.getElementById('f-email')?.value?.trim()||'',
@@ -625,15 +461,25 @@ function collectStep1(v) {
   };
   return true;
 }
-function collectStep2(v) {
+
+function collectStep2(validate) {
   const titulo = document.getElementById('f-titulo')?.value?.trim();
-  if (v&&!titulo){ alert('Informe o título da proposta.'); return false; }
+  if (validate && !titulo) { alert('Informe o título da proposta.'); return false; }
   const entregas = [...document.querySelectorAll('.entrega-input')].map(el=>el.value.trim()).filter(Boolean);
   _form.servico = { titulo:titulo||'', descricao:document.getElementById('f-descricao')?.value?.trim()||'', entregas };
   return true;
 }
+
 function collectStep3() {
-  if (!_form.valores) _form.valores = { itens: [] };
+  if (!_form.valores) _form.valores = { itens:[] };
+  const rows = document.querySelectorAll('.item-row');
+  if (rows.length > 0) {
+    _form.valores.itens = [...rows].map(row => ({
+      desc: row.querySelector('.item-desc')?.value?.trim()||'',
+      qtd:  Number(row.querySelector('.item-qtd')?.value)||1,
+      unit: Number(row.querySelector('.item-unit')?.value)||0,
+    }));
+  }
   _form.valores.desconto  = parseFloat(document.getElementById('f-desconto')?.value)||0;
   _form.valores.prazo     = document.getElementById('f-prazo')?.value?.trim()||'';
   _form.valores.pagamento = document.getElementById('f-pagamento')?.value?.trim()||'';
@@ -657,14 +503,24 @@ window.prevStep = function() {
 };
 window.saveForm = function() { collectStep3(); upsert(_form); go('#ver/'+_form.id); };
 
-window.addEntrega    = function() { collectStep2(false); (_form.servico.entregas=_form.servico.entregas||[]).push(''); renderStep(document.getElementById('app')); };
-window.removeEntrega = function(i) { collectStep2(false); const l=_form.servico.entregas||[]; if(l.length>1)l.splice(i,1); else _form.servico.entregas=['\'']; renderStep(document.getElementById('app')); };
+window.addEntrega = function() {
+  collectStep2(false);
+  (_form.servico.entregas = _form.servico.entregas||[]).push('');
+  renderStep(document.getElementById('app'));
+};
+window.removeEntrega = function(i) {
+  collectStep2(false);
+  const l = _form.servico.entregas||[];
+  if (l.length>1) l.splice(i,1); else _form.servico.entregas = [''];
+  renderStep(document.getElementById('app'));
+};
 
 // =================================================================
 //  PROPOSAL VIEW
 // =================================================================
 function renderView(app, id) {
-  const p = getById(id); if (!p){ go('#dashboard'); return; }
+  const p = getById(id);
+  if (!p) { go('#dashboard'); return; }
   app.innerHTML = `
     <div class="layout">
       ${sidebarHTML()}
