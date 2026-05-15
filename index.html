@@ -16,9 +16,17 @@
   <nav class="nav" id="nav">
     <div class="nav__inner container">
       <a href="#hero" class="nav__logo" aria-label="LK Comunicação Digital">
-        <svg class="nav__logo-svg" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect width="56" height="56" rx="14" fill="#D91B5B"/>
-          <text x="8" y="40" font-family="Inter" font-weight="900" font-size="28" fill="#fff">lk</text>
+        <svg class="nav__logo-svg" viewBox="0 0 54 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- L stroke -->
+          <line x1="8" y1="7" x2="8" y2="40" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
+          <!-- K vertical stem -->
+          <line x1="23" y1="7" x2="23" y2="40" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
+          <!-- K upper arm -->
+          <line x1="23" y1="22" x2="46" y2="7" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
+          <!-- K lower arm -->
+          <line x1="23" y1="22" x2="39" y2="34" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
+          <!-- Speech bubble dot -->
+          <circle cx="45" cy="46" r="6" fill="#E8175D"/>
         </svg>
         <span class="nav__logo-text">LK <em>Comunicação Digital</em></span>
       </a>
@@ -26,6 +34,7 @@
         <span></span><span></span><span></span>
       </button>
       <ul class="nav__links" id="navLinks">
+        <li><a href="#capa">Início</a></li>
         <li><a href="#sobre">Sobre</a></li>
         <li><a href="#solucao">Solução</a></li>
         <li><a href="#servicos">Serviços</a></li>
@@ -38,9 +47,48 @@
 
   <main>
 
+    <!-- ══════════════════ CAPA / PROPOSTA COVER ══════════════════ -->
+    <section class="capa" id="capa">
+      <div class="capa__pattern" aria-hidden="true"></div>
+      <div class="container capa__inner">
+        <div class="capa__logo" data-reveal>
+          <!-- Logo LK grande na capa -->
+          <svg viewBox="0 0 200 210" fill="none" xmlns="http://www.w3.org/2000/svg" class="capa__lk-mark" aria-hidden="true">
+            <!-- L stroke -->
+            <line x1="24" y1="16" x2="24" y2="150" stroke="#E8175D" stroke-width="30" stroke-linecap="round"/>
+            <!-- K vertical stem -->
+            <line x1="82" y1="16" x2="82" y2="150" stroke="#E8175D" stroke-width="30" stroke-linecap="round"/>
+            <!-- K upper arm -->
+            <line x1="82" y1="82" x2="164" y2="16" stroke="#E8175D" stroke-width="30" stroke-linecap="round"/>
+            <!-- K lower arm -->
+            <line x1="82" y1="82" x2="150" y2="134" stroke="#E8175D" stroke-width="30" stroke-linecap="round"/>
+            <!-- Speech bubble dot -->
+            <circle cx="166" cy="163" r="20" fill="#E8175D"/>
+          </svg>
+          <div class="capa__brand-text">
+            <span class="capa__brand-name">LK</span>
+            <span class="capa__brand-sub">Comunicação Digital</span>
+          </div>
+        </div>
+        <div class="capa__right" data-reveal-right>
+          <p class="capa__proposta-label">Proposta de serviço</p>
+          <h2 class="capa__proposta-title">Social<br/>Media</h2>
+          <p class="capa__proposta-desc">
+            Preparamos esta proposta especialmente para você.<br/>
+            Nela você encontra os serviços, entregas, investimento<br/>
+            e tudo o que precisamos para transformar sua marca digital.
+          </p>
+          <a href="#sobre" class="btn btn--primary capa__btn">
+            Conhecer a proposta ↓
+          </a>
+        </div>
+      </div>
+    </section>
+
     <!-- ══════════════════ 1 · HERO ══════════════════ -->
     <section class="hero" id="hero">
-      <div class="hero__bg-grid" aria-hidden="true"></div>
+      <!-- Brand speech-bubble pattern overlay on dark hero -->
+      <div class="hero__brand-pattern" aria-hidden="true"></div>
       <div class="hero__glow hero__glow--1" aria-hidden="true"></div>
       <div class="hero__glow hero__glow--2" aria-hidden="true"></div>
 
@@ -762,9 +810,17 @@
     <div class="container footer__inner">
       <div class="footer__brand">
         <a href="#hero" class="footer__logo" aria-label="LK Comunicação Digital">
-          <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40" aria-hidden="true">
-            <rect width="56" height="56" rx="14" fill="#D91B5B"/>
-            <text x="8" y="40" font-family="Inter" font-weight="900" font-size="28" fill="#fff">lk</text>
+          <svg viewBox="0 0 54 56" fill="none" xmlns="http://www.w3.org/2000/svg" width="44" height="44" aria-hidden="true">
+            <!-- L stroke -->
+            <line x1="8" y1="7" x2="8" y2="40" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
+            <!-- K vertical stem -->
+            <line x1="23" y1="7" x2="23" y2="40" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
+            <!-- K upper arm -->
+            <line x1="23" y1="22" x2="46" y2="7" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
+            <!-- K lower arm -->
+            <line x1="23" y1="22" x2="39" y2="34" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
+            <!-- Speech bubble dot -->
+            <circle cx="45" cy="46" r="6" fill="#E8175D"/>
           </svg>
           <span>LK <em>Comunicação Digital</em></span>
         </a>
@@ -818,7 +874,7 @@
     <div class="footer__bottom">
       <div class="container">
         <p>© 2025 LK Comunicação Digital · Todos os direitos reservados.</p>
-        <p>Desenvolvido com <span style="color:#D91B5B">♥</span> pela LK</p>
+        <p>Desenvolvido com <span style="color:#E8175D">♥</span> pela LK</p>
       </div>
     </div>
   </footer>
