@@ -2,35 +2,38 @@
 //  LK Comunicação Digital · Sistema de Propostas Comerciais
 // =================================================================
 
-const DB_KEY = 'lk_propostas_v1';
+const DB_KEY   = 'lk_propostas_v1';
+const SERV_KEY = 'lk_servicos_v1';
 
-// ── Storage helpers
+// ── Propostas
 function getAll() {
-  try { return JSON.parse(localStorage.getItem(DB_KEY)) || []; }
-  catch { return []; }
+  try { return JSON.parse(localStorage.getItem(DB_KEY)) || []; } catch { return []; }
 }
-function saveAll(list) {
-  localStorage.setItem(DB_KEY, JSON.stringify(list));
-}
-function getById(id) {
-  return getAll().find(p => p.id === id) || null;
-}
-function deleteById(id) {
-  saveAll(getAll().filter(p => p.id !== id));
-}
-function upsert(proposta) {
-  const list = getAll();
-  const i = list.findIndex(p => p.id === proposta.id);
-  if (i >= 0) list[i] = proposta;
-  else list.unshift(proposta);
+function saveAll(list) { localStorage.setItem(DB_KEY, JSON.stringify(list)); }
+function getById(id) { return getAll().find(p => p.id === id) || null; }
+function deleteById(id) { saveAll(getAll().filter(p => p.id !== id)); }
+function upsert(p) {
+  const list = getAll(), i = list.findIndex(x => x.id === p.id);
+  if (i >= 0) list[i] = p; else list.unshift(p);
   saveAll(list);
 }
-function genId() {
-  return 'p' + Date.now() + Math.random().toString(36).slice(2, 6);
+
+// ── Catálogo de Serviços
+function getAllServicos() {
+  try { return JSON.parse(localStorage.getItem(SERV_KEY)) || []; } catch { return []; }
 }
-function today() {
-  return new Date().toISOString().slice(0, 10);
+function saveServicos(list) { localStorage.setItem(SERV_KEY, JSON.stringify(list)); }
+function getServico(id) { return getAllServicos().find(s => s.id === id) || null; }
+function deleteServico(id) { saveServicos(getAllServicos().filter(s => s.id !== id)); }
+function upsertServico(s) {
+  const list = getAllServicos(), i = list.findIndex(x => x.id === s.id);
+  if (i >= 0) list[i] = s; else list.unshift(s);
+  saveServicos(list);
 }
+
+// ── Helpers
+function genId() { return 'p' + Date.now() + Math.random().toString(36).slice(2, 6); }
+function today() { return new Date().toISOString().slice(0, 10); }
 function fmtDate(d) {
   if (!d) return '—';
   const p = d.split('-');
@@ -42,14 +45,10 @@ function fmtMoney(n) {
 function esc(str) {
   if (!str) return '';
   return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
 }
 
-// ── Status config
 const STATUS = {
   rascunho: { label: 'Rascunho', cls: 'status--draft' },
   enviada:  { label: 'Enviada',  cls: 'status--sent'  },
@@ -57,20 +56,16 @@ const STATUS = {
   recusada: { label: 'Recusada', cls: 'status--no'    },
 };
 
-// ── Calculations
 function calcSubtotal(itens) {
-  return (itens || []).reduce((s, it) => s + (Number(it.qtd) || 0) * (Number(it.unit) || 0), 0);
+  return (itens || []).reduce((s, it) => s + (Number(it.qtd)||0)*(Number(it.unit)||0), 0);
 }
-function calcTotal(valores) {
-  return calcSubtotal((valores || {}).itens) - (Number((valores || {}).desconto) || 0);
+function calcTotal(v) {
+  return calcSubtotal((v||{}).itens) - (Number((v||{}).desconto)||0);
 }
 
-// ── Form state (module-level)
-let _form = {};
-let _step = 1;
+let _form = {}, _step = 1, _serv = {};
 const STEPS = 3;
-const STEP_TITLES = ['Dados do Cliente', 'Escopo do Serviço', 'Valores & Condições'];
-
+const STEP_TITLES = ['Dados do Cliente','Escopo do Serviço','Valores & Condições'];
 function go(hash) { location.hash = hash; }
 
 // =================================================================
@@ -79,19 +74,15 @@ function go(hash) { location.hash = hash; }
 function route() {
   const h = location.hash || '#';
   const app = document.getElementById('app');
-  if (!h || h === '#' || h === '#dashboard') {
-    renderDashboard(app);
-  } else if (h === '#nova') {
-    renderForm(app, null);
-  } else if (h.startsWith('#editar/')) {
-    renderForm(app, h.slice(8));
-  } else if (h.startsWith('#ver/')) {
-    renderView(app, h.slice(5));
-  } else {
-    renderDashboard(app);
-  }
+  if (!h || h === '#' || h === '#dashboard') renderDashboard(app);
+  else if (h === '#servicos')               renderCatalogo(app);
+  else if (h === '#servicos/novo')          renderServicoForm(app, null);
+  else if (h.startsWith('#servicos/editar/')) renderServicoForm(app, h.slice(17));
+  else if (h === '#nova')                   renderForm(app, null);
+  else if (h.startsWith('#editar/'))        renderForm(app, h.slice(8));
+  else if (h.startsWith('#ver/'))           renderView(app, h.slice(5));
+  else renderDashboard(app);
 }
-
 window.addEventListener('hashchange', route);
 window.addEventListener('DOMContentLoaded', route);
 
@@ -102,27 +93,30 @@ function sidebarHTML() {
   const h = location.hash || '#';
   const isDash = !h || h === '#' || h === '#dashboard';
   const isNova = h === '#nova';
+  const isServ = h.startsWith('#servicos');
   return `
     <aside class="sidebar">
       <div class="sidebar__logo">
-        <svg viewBox="0 0 54 56" fill="none" xmlns="http://www.w3.org/2000/svg" width="34" height="34">
-          <line x1="8"  y1="7"  x2="8"  y2="40" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
-          <line x1="23" y1="7"  x2="23" y2="40" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
-          <line x1="23" y1="22" x2="46" y2="7"  stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
+        <img src="logo.png" alt="LK" class="sidebar__logo-img"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+        <svg style="display:none" viewBox="0 0 54 56" fill="none" width="34" height="34">
+          <line x1="8" y1="7" x2="8" y2="40" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
+          <line x1="23" y1="7" x2="23" y2="40" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
+          <line x1="23" y1="22" x2="46" y2="7" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
           <line x1="23" y1="22" x2="39" y2="34" stroke="#E8175D" stroke-width="8" stroke-linecap="round"/>
           <circle cx="45" cy="46" r="6" fill="#E8175D"/>
         </svg>
-        <div class="sidebar__logo-text">
-          <strong>LK</strong>
-          <span>Propostas</span>
-        </div>
+        <div class="sidebar__logo-text"><strong>LK</strong><span>Propostas</span></div>
       </div>
       <nav class="sidebar__nav">
-        <a href="#dashboard" class="sidebar__link ${isDash ? 'active' : ''}">
+        <a href="#dashboard" class="sidebar__link ${isDash?'active':''}">
           <span class="sidebar__link-icon">📋</span> Propostas
         </a>
-        <a href="#nova" class="sidebar__link ${isNova ? 'active' : ''}">
+        <a href="#nova" class="sidebar__link ${isNova?'active':''}">
           <span class="sidebar__link-icon">✏️</span> Nova Proposta
+        </a>
+        <a href="#servicos" class="sidebar__link ${isServ?'active':''}">
+          <span class="sidebar__link-icon">🛠️</span> Meus Serviços
         </a>
       </nav>
       <div class="sidebar__footer">
@@ -146,7 +140,7 @@ function renderDashboard(app) {
         <header class="topbar">
           <div>
             <h1 class="page-title">Propostas Comerciais</h1>
-            <p class="page-sub">${list.length} proposta${list.length !== 1 ? 's' : ''}</p>
+            <p class="page-sub">${list.length} proposta${list.length!==1?'s':''}</p>
           </div>
           <a href="#nova" class="btn btn--primary">+ Nova Proposta</a>
         </header>
@@ -155,7 +149,6 @@ function renderDashboard(app) {
     </div>
   `;
 }
-
 function emptyStateHTML() {
   return `
     <div class="empty">
@@ -163,19 +156,16 @@ function emptyStateHTML() {
       <h3>Nenhuma proposta ainda</h3>
       <p>Crie sua primeira proposta comercial e envie para seus clientes.</p>
       <a href="#nova" class="btn btn--primary">Criar primeira proposta</a>
-    </div>
-  `;
+    </div>`;
 }
-
 function gridHTML(list) {
   return `<div class="card-grid">${list.map(cardHTML).join('')}</div>`;
 }
-
 function cardHTML(p) {
   const st = STATUS[p.status] || STATUS.rascunho;
   const total = calcTotal(p.valores);
-  const empresa = (p.cliente && (p.cliente.empresa || p.cliente.responsavel)) || '—';
-  const titulo = (p.servico && p.servico.titulo) || 'Sem título';
+  const empresa = (p.cliente&&(p.cliente.empresa||p.cliente.responsavel))||'—';
+  const titulo = (p.servico&&p.servico.titulo)||'Sem título';
   return `
     <div class="prop-card">
       <div class="prop-card__top">
@@ -190,14 +180,123 @@ function cardHTML(p) {
         <a href="#editar/${esc(p.id)}" class="btn btn--sm btn--outline">Editar</a>
         <button class="btn btn--sm btn--danger" onclick="doDelete('${esc(p.id)}')">Excluir</button>
       </div>
+    </div>`;
+}
+window.doDelete = function(id) {
+  if (!confirm('Excluir esta proposta?')) return;
+  deleteById(id);
+  renderDashboard(document.getElementById('app'));
+};
+
+// =================================================================
+//  CATÁLOGO DE SERVIÇOS
+// =================================================================
+function renderCatalogo(app) {
+  const list = getAllServicos();
+  app.innerHTML = `
+    <div class="layout">
+      ${sidebarHTML()}
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <h1 class="page-title">Meus Serviços</h1>
+            <p class="page-sub">Catálogo de serviços e valores padrão</p>
+          </div>
+          <a href="#servicos/novo" class="btn btn--primary">+ Novo Serviço</a>
+        </header>
+        ${list.length === 0 ? emptyCatalogoHTML() : catalogoGridHTML(list)}
+      </main>
     </div>
   `;
 }
+function emptyCatalogoHTML() {
+  return `
+    <div class="empty">
+      <div class="empty__icon">🛠️</div>
+      <h3>Nenhum serviço cadastrado</h3>
+      <p>Cadastre seus serviços e valores padrão para adicioná-los rapidamente nas propostas.</p>
+      <a href="#servicos/novo" class="btn btn--primary">Cadastrar primeiro serviço</a>
+    </div>`;
+}
+function catalogoGridHTML(list) {
+  return `
+    <div class="card-grid">
+      ${list.map(s => `
+        <div class="prop-card">
+          <div class="prop-card__top">
+            <span class="status-badge status--sent">${esc(s.categoria||'Serviço')}</span>
+          </div>
+          <h3 class="prop-card__title">${esc(s.nome)}</h3>
+          ${s.descricao?`<p class="prop-card__client">${esc(s.descricao)}</p>`:''}
+          <p class="prop-card__total">${fmtMoney(s.valor)}<span>/unid</span></p>
+          <div class="prop-card__actions">
+            <a href="#servicos/editar/${esc(s.id)}" class="btn btn--sm btn--outline">Editar</a>
+            <button class="btn btn--sm btn--danger" onclick="doDeleteServico('${esc(s.id)}')">Excluir</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+window.doDeleteServico = function(id) {
+  if (!confirm('Excluir este serviço do catálogo?')) return;
+  deleteServico(id);
+  renderCatalogo(document.getElementById('app'));
+};
 
-window.doDelete = function(id) {
-  if (!confirm('Tem certeza que deseja excluir esta proposta?')) return;
-  deleteById(id);
-  renderDashboard(document.getElementById('app'));
+function renderServicoForm(app, id) {
+  const existing = id ? getServico(id) : null;
+  _serv = existing ? JSON.parse(JSON.stringify(existing)) : { id: genId() };
+  app.innerHTML = `
+    <div class="layout">
+      ${sidebarHTML()}
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <a href="#servicos" class="back-link">← Voltar para Meus Serviços</a>
+            <h1 class="page-title">${existing?'Editar Serviço':'Novo Serviço'}</h1>
+          </div>
+        </header>
+        <div class="form-shell">
+          <div class="form-card">
+            <h2 class="form-section-title">Dados do Serviço</h2>
+            <div class="form-grid">
+              <div class="form-group form-group--full">
+                <label>Nome do serviço <span class="required">*</span></label>
+                <input id="s-nome" type="text" value="${esc(_serv.nome||'')}" placeholder="Ex: Gestão de Social Media, Reels, Identidade Visual..." />
+              </div>
+              <div class="form-group">
+                <label>Categoria</label>
+                <input id="s-categoria" type="text" value="${esc(_serv.categoria||'')}" placeholder="Ex: Social Media, Design, Vídeo..." />
+              </div>
+              <div class="form-group">
+                <label>Valor padrão (R$) <span class="required">*</span></label>
+                <input id="s-valor" type="number" min="0" step="0.01" value="${_serv.valor||''}" placeholder="0,00" />
+              </div>
+              <div class="form-group form-group--full">
+                <label>Descrição <span class="label-hint">(aparece na proposta)</span></label>
+                <textarea id="s-descricao" rows="3" placeholder="Descreva brevemente o que inclui este serviço...">${esc(_serv.descricao||'')}</textarea>
+              </div>
+            </div>
+            <div class="form-nav">
+              <a href="#servicos" class="btn btn--outline">Cancelar</a>
+              <button class="btn btn--primary" onclick="saveServico()">💾 Salvar Serviço</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  `;
+}
+window.saveServico = function() {
+  const nome  = document.getElementById('s-nome')?.value?.trim();
+  const valor = parseFloat(document.getElementById('s-valor')?.value);
+  if (!nome)          { alert('Informe o nome do serviço.'); return; }
+  if (!valor||valor<=0){ alert('Informe um valor válido.'); return; }
+  _serv.nome      = nome;
+  _serv.valor     = valor;
+  _serv.categoria = document.getElementById('s-categoria')?.value?.trim()||'';
+  _serv.descricao = document.getElementById('s-descricao')?.value?.trim()||'';
+  upsertServico(_serv);
+  go('#servicos');
 };
 
 // =================================================================
@@ -205,20 +304,15 @@ window.doDelete = function(id) {
 // =================================================================
 function renderForm(app, id) {
   const existing = id ? getById(id) : null;
-  _form = existing
-    ? JSON.parse(JSON.stringify(existing))
-    : {
-        id: genId(),
-        criadaEm: today(),
-        status: 'rascunho',
-        cliente: {},
-        servico: { entregas: [''] },
-        valores: { itens: [{ desc: '', qtd: 1, unit: 0 }], desconto: 0 },
-      };
+  _form = existing ? JSON.parse(JSON.stringify(existing)) : {
+    id: genId(), criadaEm: today(), status: 'rascunho',
+    cliente: {},
+    servico: { entregas: [''] },
+    valores: { itens: [{ desc:'', qtd:1, unit:0 }], desconto: 0 },
+  };
   _step = 1;
   renderStep(app);
 }
-
 function renderStep(app) {
   const isEdit = !!getById(_form.id);
   app.innerHTML = `
@@ -228,29 +322,26 @@ function renderStep(app) {
         <header class="topbar">
           <div>
             <a href="#dashboard" class="back-link">← Voltar para propostas</a>
-            <h1 class="page-title">${isEdit ? 'Editar Proposta' : 'Nova Proposta'}</h1>
+            <h1 class="page-title">${isEdit?'Editar Proposta':'Nova Proposta'}</h1>
           </div>
         </header>
         <div class="form-shell">
           <div class="stepper">
-            ${[1, 2, 3].map(i => `
-              <div class="stepper__item ${i === _step ? 'active' : ''} ${i < _step ? 'done' : ''}">
-                <div class="stepper__dot">${i < _step ? '✓' : i}</div>
-                <span class="stepper__label">${STEP_TITLES[i - 1]}</span>
+            ${[1,2,3].map(i=>`
+              <div class="stepper__item ${i===_step?'active':''} ${i<_step?'done':''}">
+                <div class="stepper__dot">${i<_step?'✓':i}</div>
+                <span class="stepper__label">${STEP_TITLES[i-1]}</span>
               </div>
-              ${i < 3 ? '<div class="stepper__line"></div>' : ''}
+              ${i<3?'<div class="stepper__line"></div>':''}
             `).join('')}
           </div>
           <div class="form-card">
-            ${_step === 1 ? step1HTML() : _step === 2 ? step2HTML() : step3HTML()}
+            ${_step===1?step1HTML():_step===2?step2HTML():step3HTML()}
             <div class="form-nav">
-              ${_step > 1
-                ? `<button class="btn btn--outline" onclick="prevStep()">← Anterior</button>`
-                : '<span></span>'
-              }
-              ${_step < STEPS
-                ? `<button class="btn btn--primary" onclick="nextStep()">Próximo →</button>`
-                : `<button class="btn btn--primary" onclick="saveForm()">💾 Salvar Proposta</button>`
+              ${_step>1?`<button class="btn btn--outline" onclick="prevStep()">← Anterior</button>`:'<span></span>'}
+              ${_step<STEPS
+                ?`<button class="btn btn--primary" onclick="nextStep()">Próximo →</button>`
+                :`<button class="btn btn--primary" onclick="saveForm()">💾 Salvar Proposta</button>`
               }
             </div>
           </div>
@@ -261,291 +352,252 @@ function renderStep(app) {
   bindItemCalc();
 }
 
-// ── Step 1: Dados do cliente
 function step1HTML() {
-  const c = _form.cliente || {};
+  const c = _form.cliente||{};
   return `
     <h2 class="form-section-title">Dados do Cliente</h2>
     <div class="form-grid">
       <div class="form-group form-group--full">
         <label>Empresa / Nome do cliente <span class="required">*</span></label>
-        <input id="f-empresa" type="text" value="${esc(c.empresa || '')}" placeholder="Ex: Silva & Cia Ltda" />
+        <input id="f-empresa" type="text" value="${esc(c.empresa||'')}" placeholder="Ex: Silva & Cia Ltda" />
       </div>
       <div class="form-group">
         <label>Responsável / Contato <span class="required">*</span></label>
-        <input id="f-responsavel" type="text" value="${esc(c.responsavel || '')}" placeholder="Nome do responsável" />
+        <input id="f-responsavel" type="text" value="${esc(c.responsavel||'')}" placeholder="Nome do responsável" />
       </div>
       <div class="form-group">
         <label>E-mail</label>
-        <input id="f-email" type="email" value="${esc(c.email || '')}" placeholder="email@empresa.com" />
+        <input id="f-email" type="email" value="${esc(c.email||'')}" placeholder="email@empresa.com" />
       </div>
       <div class="form-group">
         <label>Telefone / WhatsApp</label>
-        <input id="f-telefone" type="tel" value="${esc(c.telefone || '')}" placeholder="(47) 99999-9999" />
+        <input id="f-telefone" type="tel" value="${esc(c.telefone||'')}" placeholder="(47) 99999-9999" />
       </div>
       <div class="form-group">
         <label>Cidade / Estado</label>
-        <input id="f-cidade" type="text" value="${esc(c.cidade || '')}" placeholder="Blumenau, SC" />
+        <input id="f-cidade" type="text" value="${esc(c.cidade||'')}" placeholder="Blumenau, SC" />
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
-// ── Step 2: Escopo do serviço
 function step2HTML() {
-  const s = _form.servico || {};
-  const entregas = (s.entregas && s.entregas.length > 0) ? s.entregas : [''];
+  const s = _form.servico||{};
+  const entregas = (s.entregas&&s.entregas.length>0)?s.entregas:[''];
   return `
     <h2 class="form-section-title">Escopo do Serviço</h2>
     <div class="form-grid">
       <div class="form-group form-group--full">
         <label>Título da proposta <span class="required">*</span></label>
-        <input id="f-titulo" type="text" value="${esc(s.titulo || '')}" placeholder="Ex: Social Media, Identidade Visual, Site..." />
+        <input id="f-titulo" type="text" value="${esc(s.titulo||'')}" placeholder="Ex: Social Media, Identidade Visual, Site..." />
       </div>
       <div class="form-group form-group--full">
         <label>Descrição do serviço</label>
-        <textarea id="f-descricao" rows="4" placeholder="Descreva o que será entregue, objetivos, como funciona...">${esc(s.descricao || '')}</textarea>
+        <textarea id="f-descricao" rows="4" placeholder="Descreva o que será entregue, objetivos, como funciona...">${esc(s.descricao||'')}</textarea>
       </div>
       <div class="form-group form-group--full">
         <label>Entregas incluídas <span class="label-hint">(o que o cliente vai receber)</span></label>
         <div id="entregas-list">
-          ${entregas.map((e, i) => entregaRowHTML(e, i)).join('')}
+          ${entregas.map((e,i)=>entregaRowHTML(e,i)).join('')}
         </div>
         <button type="button" class="btn btn--sm btn--outline add-btn" onclick="addEntrega()">+ Adicionar entrega</button>
       </div>
-    </div>
-  `;
+    </div>`;
 }
-
-function entregaRowHTML(val, i) {
+function entregaRowHTML(val,i) {
   return `
     <div class="entrega-row" data-idx="${i}">
-      <input type="text" class="entrega-input" value="${esc(val)}" placeholder="Ex: 12 posts por mês, Relatório mensal, Gestão de perfil..." />
-      <button type="button" class="rm-btn" onclick="removeEntrega(${i})" title="Remover">×</button>
-    </div>
-  `;
+      <input type="text" class="entrega-input" value="${esc(val)}" placeholder="Ex: 12 posts por mês, Relatório mensal..." />
+      <button type="button" class="rm-btn" onclick="removeEntrega(${i})">×</button>
+    </div>`;
 }
 
-// ── Step 3: Valores & Condições
 function step3HTML() {
-  const v = _form.valores || {};
-  const itens = (v.itens && v.itens.length > 0) ? v.itens : [{ desc: '', qtd: 1, unit: 0 }];
+  const v = _form.valores||{};
+  const itens = (v.itens&&v.itens.length>0)?v.itens:[{desc:'',qtd:1,unit:0}];
   const subtotal = calcSubtotal(itens);
-  const desconto = Number(v.desconto) || 0;
+  const desconto = Number(v.desconto)||0;
   const total = subtotal - desconto;
+  const catalogo = getAllServicos();
   return `
     <h2 class="form-section-title">Valores & Condições</h2>
+
+    ${catalogo.length>0?`
+    <div class="catalog-picker">
+      <p class="catalog-picker__label">🛠️ Adicionar do catálogo — clique para incluir na proposta</p>
+      <div class="catalog-picker__chips">
+        ${catalogo.map(s=>`
+          <button type="button" class="catalog-chip" onclick="addFromCatalog('${esc(s.id)}')">
+            <span class="catalog-chip__name">${esc(s.nome)}</span>
+            <span class="catalog-chip__val">${fmtMoney(s.valor)}</span>
+          </button>`).join('')}
+      </div>
+    </div>`:`
+    <div class="catalog-empty-hint">
+      💡 Cadastre seus serviços em <a href="#servicos">Meus Serviços</a> para adicioná-los rapidamente aqui.
+    </div>`}
+
     <div class="form-group form-group--full" style="margin-bottom:1.25rem">
       <label>Itens / Serviços</label>
       <div class="itens-table">
         <div class="itens-header">
-          <span>Descrição</span>
-          <span class="text-center">Qtd</span>
-          <span class="text-right">Valor Unit.</span>
-          <span class="text-right">Subtotal</span>
-          <span></span>
+          <span>Descrição</span><span class="text-center">Qtd</span>
+          <span class="text-right">Valor Unit.</span><span class="text-right">Subtotal</span><span></span>
         </div>
         <div id="itens-list">
-          ${itens.map((it, i) => itemRowHTML(it, i)).join('')}
+          ${itens.map((it,i)=>itemRowHTML(it,i)).join('')}
         </div>
       </div>
-      <button type="button" class="btn btn--sm btn--outline add-btn" onclick="addItem()">+ Adicionar item</button>
+      <button type="button" class="btn btn--sm btn--outline add-btn" onclick="addItem()">+ Adicionar item manualmente</button>
     </div>
+
     <div class="form-grid">
       <div class="form-group">
         <label>Desconto (R$)</label>
-        <input id="f-desconto" type="number" min="0" step="0.01" value="${v.desconto || 0}" placeholder="0,00" />
+        <input id="f-desconto" type="number" min="0" step="0.01" value="${v.desconto||0}" placeholder="0,00" />
       </div>
       <div class="form-group">
         <label>Prazo de execução</label>
-        <input id="f-prazo" type="text" value="${esc(v.prazo || '')}" placeholder="Ex: 8 meses" />
+        <input id="f-prazo" type="text" value="${esc(v.prazo||'')}" placeholder="Ex: 8 meses" />
       </div>
       <div class="form-group">
         <label>Forma de pagamento</label>
-        <input id="f-pagamento" type="text" value="${esc(v.pagamento || '')}" placeholder="Ex: Boleto mensal, PIX" />
+        <input id="f-pagamento" type="text" value="${esc(v.pagamento||'')}" placeholder="Ex: Boleto mensal, PIX" />
       </div>
       <div class="form-group">
         <label>Duração do contrato</label>
-        <input id="f-contrato" type="text" value="${esc(v.contrato || '')}" placeholder="Ex: 8 meses com renovação" />
+        <input id="f-contrato" type="text" value="${esc(v.contrato||'')}" placeholder="Ex: 8 meses com renovação" />
       </div>
       <div class="form-group">
         <label>Validade da proposta</label>
-        <input id="f-validade" type="date" value="${v.validade || ''}" />
+        <input id="f-validade" type="date" value="${v.validade||''}" />
       </div>
       <div class="form-group">
         <label>Status</label>
         <select id="f-status">
-          ${Object.entries(STATUS).map(([k, s]) =>
-            `<option value="${k}" ${_form.status === k ? 'selected' : ''}>${s.label}</option>`
-          ).join('')}
+          ${Object.entries(STATUS).map(([k,s])=>`<option value="${k}" ${_form.status===k?'selected':''}>${s.label}</option>`).join('')}
         </select>
       </div>
       <div class="form-group form-group--full">
         <label>Termos e condições</label>
-        <textarea id="f-termos" rows="4" placeholder="Termos, observações ou condições específicas desta proposta...">${esc(v.termos || '')}</textarea>
+        <textarea id="f-termos" rows="4" placeholder="Termos, observações ou condições específicas desta proposta...">${esc(v.termos||'')}</textarea>
       </div>
     </div>
+
     <div class="total-preview">
-      <div class="total-preview__row">
-        <span>Subtotal</span>
-        <strong id="prev-subtotal">${fmtMoney(subtotal)}</strong>
-      </div>
-      ${desconto > 0 ? `
-      <div class="total-preview__row total-preview__row--discount">
-        <span>Desconto</span>
-        <strong>– ${fmtMoney(desconto)}</strong>
-      </div>` : ''}
-      <div class="total-preview__row total-preview__row--total">
-        <span>Total</span>
-        <strong id="prev-total">${fmtMoney(total)}</strong>
-      </div>
-    </div>
-  `;
+      <div class="total-preview__row"><span>Subtotal</span><strong id="prev-subtotal">${fmtMoney(subtotal)}</strong></div>
+      ${desconto>0?`<div class="total-preview__row total-preview__row--discount"><span>Desconto</span><strong>– ${fmtMoney(desconto)}</strong></div>`:''}
+      <div class="total-preview__row total-preview__row--total"><span>Total</span><strong id="prev-total">${fmtMoney(total)}</strong></div>
+    </div>`;
 }
 
-function itemRowHTML(it, i) {
-  const sub = (Number(it.qtd) || 0) * (Number(it.unit) || 0);
+function itemRowHTML(it,i) {
+  const sub = (Number(it.qtd)||0)*(Number(it.unit)||0);
   return `
     <div class="item-row" data-idx="${i}">
-      <input type="text"   class="item-desc"              value="${esc(it.desc || '')}" placeholder="Descrição do serviço" />
-      <input type="number" class="item-qtd  text-center"  value="${it.qtd || 1}" min="1" />
-      <input type="number" class="item-unit text-right"   value="${it.unit || ''}" min="0" step="0.01" placeholder="0,00" />
+      <input type="text"   class="item-desc"            value="${esc(it.desc||'')}" placeholder="Descrição" />
+      <input type="number" class="item-qtd text-center" value="${it.qtd||1}" min="1" />
+      <input type="number" class="item-unit text-right" value="${it.unit||''}" min="0" step="0.01" placeholder="0,00" />
       <span  class="item-sub text-right">${fmtMoney(sub)}</span>
-      <button type="button" class="rm-btn" onclick="removeItem(${i})" title="Remover">×</button>
-    </div>
-  `;
+      <button type="button" class="rm-btn" onclick="removeItem(${i})">×</button>
+    </div>`;
 }
 
-// ── Live totals
+window.addFromCatalog = function(id) {
+  collectStep3();
+  const s = getServico(id); if (!s) return;
+  _form.valores.itens.push({ desc: s.nome, qtd: 1, unit: s.valor });
+  renderStep(document.getElementById('app'));
+};
+
 function bindItemCalc() {
-  document.addEventListener('input', function onInput(e) {
-    if (e.target.matches('.item-qtd, .item-unit, #f-desconto')) refreshTotals();
+  document.addEventListener('input', function(e) {
+    if (e.target.matches('.item-qtd,.item-unit,#f-desconto')) refreshTotals();
   });
 }
 function refreshTotals() {
   let sub = 0;
   document.querySelectorAll('.item-row').forEach(row => {
-    const qtd  = parseFloat(row.querySelector('.item-qtd')?.value)  || 0;
-    const unit = parseFloat(row.querySelector('.item-unit')?.value) || 0;
-    const s = qtd * unit;
-    sub += s;
+    const q = parseFloat(row.querySelector('.item-qtd')?.value)||0;
+    const u = parseFloat(row.querySelector('.item-unit')?.value)||0;
+    const s = q*u; sub += s;
     const el = row.querySelector('.item-sub');
     if (el) el.textContent = fmtMoney(s);
   });
-  const desc = parseFloat(document.getElementById('f-desconto')?.value) || 0;
-  const el1 = document.getElementById('prev-subtotal');
-  const el2 = document.getElementById('prev-total');
-  if (el1) el1.textContent = fmtMoney(sub);
-  if (el2) el2.textContent = fmtMoney(sub - desc);
+  const d = parseFloat(document.getElementById('f-desconto')?.value)||0;
+  const e1 = document.getElementById('prev-subtotal');
+  const e2 = document.getElementById('prev-total');
+  if (e1) e1.textContent = fmtMoney(sub);
+  if (e2) e2.textContent = fmtMoney(sub-d);
 }
 
-// ── Collect data from current step
-function collectStep1(validate) {
-  const empresa    = document.getElementById('f-empresa')?.value?.trim();
-  const responsavel = document.getElementById('f-responsavel')?.value?.trim();
-  if (validate && !empresa)    { alert('Informe o nome da empresa ou cliente.'); return false; }
-  if (validate && !responsavel){ alert('Informe o nome do responsável.'); return false; }
+function collectStep1(v) {
+  const empresa = document.getElementById('f-empresa')?.value?.trim();
+  const resp    = document.getElementById('f-responsavel')?.value?.trim();
+  if (v&&!empresa){ alert('Informe o nome da empresa ou cliente.'); return false; }
+  if (v&&!resp)   { alert('Informe o nome do responsável.'); return false; }
   _form.cliente = {
-    empresa:     empresa || '',
-    responsavel: responsavel || '',
-    email:       document.getElementById('f-email')?.value?.trim()    || '',
-    telefone:    document.getElementById('f-telefone')?.value?.trim() || '',
-    cidade:      document.getElementById('f-cidade')?.value?.trim()   || '',
+    empresa:     empresa||'',
+    responsavel: resp||'',
+    email:       document.getElementById('f-email')?.value?.trim()||'',
+    telefone:    document.getElementById('f-telefone')?.value?.trim()||'',
+    cidade:      document.getElementById('f-cidade')?.value?.trim()||'',
   };
   return true;
 }
-function collectStep2(validate) {
+function collectStep2(v) {
   const titulo = document.getElementById('f-titulo')?.value?.trim();
-  if (validate && !titulo) { alert('Informe o título da proposta.'); return false; }
-  const entregas = [...document.querySelectorAll('.entrega-input')]
-    .map(el => el.value.trim()).filter(Boolean);
-  _form.servico = {
-    titulo:    titulo || '',
-    descricao: document.getElementById('f-descricao')?.value?.trim() || '',
-    entregas,
-  };
+  if (v&&!titulo){ alert('Informe o título da proposta.'); return false; }
+  const entregas = [...document.querySelectorAll('.entrega-input')].map(el=>el.value.trim()).filter(Boolean);
+  _form.servico = { titulo:titulo||'', descricao:document.getElementById('f-descricao')?.value?.trim()||'', entregas };
   return true;
 }
 function collectStep3() {
   const itens = [...document.querySelectorAll('.item-row')].map(row => ({
-    desc: row.querySelector('.item-desc')?.value?.trim() || '',
-    qtd:  parseFloat(row.querySelector('.item-qtd')?.value)  || 1,
-    unit: parseFloat(row.querySelector('.item-unit')?.value) || 0,
+    desc: row.querySelector('.item-desc')?.value?.trim()||'',
+    qtd:  parseFloat(row.querySelector('.item-qtd')?.value)||1,
+    unit: parseFloat(row.querySelector('.item-unit')?.value)||0,
   }));
   _form.valores = {
     itens,
-    desconto:  parseFloat(document.getElementById('f-desconto')?.value)  || 0,
-    prazo:     document.getElementById('f-prazo')?.value?.trim()    || '',
-    pagamento: document.getElementById('f-pagamento')?.value?.trim() || '',
-    contrato:  document.getElementById('f-contrato')?.value?.trim()  || '',
-    validade:  document.getElementById('f-validade')?.value          || '',
-    termos:    document.getElementById('f-termos')?.value?.trim()    || '',
+    desconto:  parseFloat(document.getElementById('f-desconto')?.value)||0,
+    prazo:     document.getElementById('f-prazo')?.value?.trim()||'',
+    pagamento: document.getElementById('f-pagamento')?.value?.trim()||'',
+    contrato:  document.getElementById('f-contrato')?.value?.trim()||'',
+    validade:  document.getElementById('f-validade')?.value||'',
+    termos:    document.getElementById('f-termos')?.value?.trim()||'',
   };
-  _form.status = document.getElementById('f-status')?.value || 'rascunho';
+  _form.status = document.getElementById('f-status')?.value||'rascunho';
 }
 
-// ── Step navigation
 window.nextStep = function() {
-  const ok = _step === 1 ? collectStep1(true) : _step === 2 ? collectStep2(true) : true;
+  const ok = _step===1?collectStep1(true):_step===2?collectStep2(true):true;
   if (!ok) return;
-  _step++;
-  renderStep(document.getElementById('app'));
-  window.scrollTo(0, 0);
+  _step++; renderStep(document.getElementById('app')); window.scrollTo(0,0);
 };
 window.prevStep = function() {
-  if (_step === 1) collectStep1(false);
-  else if (_step === 2) collectStep2(false);
+  if (_step===1) collectStep1(false);
+  else if (_step===2) collectStep2(false);
   else collectStep3();
-  _step--;
-  renderStep(document.getElementById('app'));
-  window.scrollTo(0, 0);
+  _step--; renderStep(document.getElementById('app')); window.scrollTo(0,0);
 };
-window.saveForm = function() {
-  collectStep3();
-  upsert(_form);
-  go('#ver/' + _form.id);
-};
+window.saveForm = function() { collectStep3(); upsert(_form); go('#ver/'+_form.id); };
 
-// ── Dynamic rows
-window.addEntrega = function() {
-  collectStep2(false);
-  _form.servico.entregas = _form.servico.entregas || [];
-  _form.servico.entregas.push('');
-  renderStep(document.getElementById('app'));
-};
-window.removeEntrega = function(i) {
-  collectStep2(false);
-  const list = _form.servico.entregas || [];
-  if (list.length > 1) list.splice(i, 1);
-  else _form.servico.entregas = [''];
-  renderStep(document.getElementById('app'));
-};
-window.addItem = function() {
-  collectStep3();
-  _form.valores.itens.push({ desc: '', qtd: 1, unit: 0 });
-  renderStep(document.getElementById('app'));
-};
-window.removeItem = function(i) {
-  collectStep3();
-  if (_form.valores.itens.length <= 1) return;
-  _form.valores.itens.splice(i, 1);
-  renderStep(document.getElementById('app'));
-};
+window.addEntrega   = function() { collectStep2(false); (_form.servico.entregas=_form.servico.entregas||[]).push(''); renderStep(document.getElementById('app')); };
+window.removeEntrega = function(i) { collectStep2(false); const l=_form.servico.entregas||[]; if(l.length>1)l.splice(i,1); else _form.servico.entregas=['']; renderStep(document.getElementById('app')); };
+window.addItem    = function() { collectStep3(); _form.valores.itens.push({desc:'',qtd:1,unit:0}); renderStep(document.getElementById('app')); };
+window.removeItem = function(i) { collectStep3(); if(_form.valores.itens.length<=1)return; _form.valores.itens.splice(i,1); renderStep(document.getElementById('app')); };
 
 // =================================================================
 //  PROPOSAL VIEW
 // =================================================================
 function renderView(app, id) {
-  const p = getById(id);
-  if (!p) { go('#dashboard'); return; }
+  const p = getById(id); if (!p){ go('#dashboard'); return; }
   app.innerHTML = `
     <div class="layout">
       ${sidebarHTML()}
       <main class="main">
         <header class="topbar no-print">
-          <div>
-            <a href="#dashboard" class="back-link">← Voltar para propostas</a>
-          </div>
+          <div><a href="#dashboard" class="back-link">← Voltar para propostas</a></div>
           <div class="topbar__actions">
             <a href="#editar/${esc(p.id)}" class="btn btn--outline">✏️ Editar</a>
             <button class="btn btn--primary" onclick="window.print()">🖨️ Imprimir / PDF</button>
@@ -558,116 +610,83 @@ function renderView(app, id) {
 }
 
 function proposalDocHTML(p) {
-  const c = p.cliente || {};
-  const s = p.servico || {};
-  const v = p.valores || {};
-  const itens = v.itens || [];
-  const subtotal = calcSubtotal(itens);
-  const desconto = Number(v.desconto) || 0;
-  const total = subtotal - desconto;
-
+  const c=p.cliente||{}, s=p.servico||{}, v=p.valores||{};
+  const itens=v.itens||[], subtotal=calcSubtotal(itens);
+  const desconto=Number(v.desconto)||0, total=subtotal-desconto;
   return `
     <div class="proposta-doc">
-
-      <!-- Capa -->
       <div class="doc-capa">
         <div class="doc-capa__brand">
-          <svg viewBox="0 0 200 210" fill="none" xmlns="http://www.w3.org/2000/svg" width="72" height="76">
-            <line x1="24"  y1="16"  x2="24"  y2="150" stroke="#E8175D" stroke-width="30" stroke-linecap="round"/>
-            <line x1="82"  y1="16"  x2="82"  y2="150" stroke="#E8175D" stroke-width="30" stroke-linecap="round"/>
-            <line x1="82"  y1="82"  x2="164" y2="16"  stroke="#E8175D" stroke-width="30" stroke-linecap="round"/>
-            <line x1="82"  y1="82"  x2="150" y2="134" stroke="#E8175D" stroke-width="30" stroke-linecap="round"/>
-            <circle cx="166" cy="163" r="20" fill="#E8175D"/>
-          </svg>
-          <div>
+          <img src="logo.png" alt="LK Comunicação Digital" class="doc-logo-img"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+          <div class="doc-logo-fallback" style="display:none">
             <div class="doc-brand-name">LK</div>
             <div class="doc-brand-sub">Comunicação Digital</div>
           </div>
         </div>
         <div class="doc-capa__right">
           <p class="doc-label">Proposta de serviço</p>
-          <h1 class="doc-title">${esc(s.titulo || 'Proposta Comercial')}</h1>
-          <p class="doc-for">Preparada para <strong>${esc(c.empresa || c.responsavel || 'Cliente')}</strong></p>
+          <h1 class="doc-title">${esc(s.titulo||'Proposta Comercial')}</h1>
+          <p class="doc-for">Preparada para <strong>${esc(c.empresa||c.responsavel||'Cliente')}</strong></p>
           <div class="doc-meta">
-            ${c.responsavel ? `<span>👤 ${esc(c.responsavel)}</span>` : ''}
-            ${c.email       ? `<span>✉️ ${esc(c.email)}</span>`       : ''}
-            ${c.telefone    ? `<span>📱 ${esc(c.telefone)}</span>`    : ''}
-            ${c.cidade      ? `<span>📍 ${esc(c.cidade)}</span>`      : ''}
+            ${c.responsavel?`<span>👤 ${esc(c.responsavel)}</span>`:''}
+            ${c.email?`<span>✉️ ${esc(c.email)}</span>`:''}
+            ${c.telefone?`<span>📱 ${esc(c.telefone)}</span>`:''}
+            ${c.cidade?`<span>📍 ${esc(c.cidade)}</span>`:''}
           </div>
-          <p class="doc-date">
-            Data: ${fmtDate(p.criadaEm)}
-            ${v.validade ? ` &nbsp;·&nbsp; Válida até: ${fmtDate(v.validade)}` : ''}
-          </p>
+          <p class="doc-date">Data: ${fmtDate(p.criadaEm)}${v.validade?` &nbsp;·&nbsp; Válida até: ${fmtDate(v.validade)}`:''}</p>
         </div>
       </div>
 
-      <!-- Escopo -->
-      ${(s.descricao || (s.entregas && s.entregas.length > 0)) ? `
+      ${(s.descricao||(s.entregas&&s.entregas.length>0))?`
       <div class="doc-section">
         <h2 class="doc-section-title">📋 Escopo do Serviço</h2>
-        ${s.descricao ? `<p class="doc-text">${esc(s.descricao)}</p>` : ''}
-        ${s.entregas && s.entregas.length > 0 ? `
+        ${s.descricao?`<p class="doc-text">${esc(s.descricao)}</p>`:''}
+        ${s.entregas&&s.entregas.length>0?`
           <h3 class="doc-sub-title">O que está incluso:</h3>
-          <ul class="doc-list">
-            ${s.entregas.map(e => `<li>${esc(e)}</li>`).join('')}
-          </ul>
-        ` : ''}
-      </div>` : ''}
+          <ul class="doc-list">${s.entregas.map(e=>`<li>${esc(e)}</li>`).join('')}</ul>`:''}
+      </div>`:''}
 
-      <!-- Investimento -->
       <div class="doc-section">
         <h2 class="doc-section-title">💰 Investimento</h2>
         <table class="doc-table">
-          <thead>
+          <thead><tr>
+            <th>Serviço / Item</th><th class="text-center">Qtd</th>
+            <th class="text-right">Valor Unit.</th><th class="text-right">Subtotal</th>
+          </tr></thead>
+          <tbody>${itens.map(it=>`
             <tr>
-              <th>Serviço / Item</th>
-              <th class="text-center">Qtd</th>
-              <th class="text-right">Valor Unit.</th>
-              <th class="text-right">Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itens.map(it => `
-            <tr>
-              <td>${esc(it.desc || '—')}</td>
-              <td class="text-center">${it.qtd || 1}</td>
+              <td>${esc(it.desc||'—')}</td>
+              <td class="text-center">${it.qtd||1}</td>
               <td class="text-right">${fmtMoney(it.unit)}</td>
               <td class="text-right">${fmtMoney((Number(it.qtd)||0)*(Number(it.unit)||0))}</td>
-            </tr>`).join('')}
-          </tbody>
+            </tr>`).join('')}</tbody>
           <tfoot>
-            ${desconto > 0 ? `
+            ${desconto>0?`
             <tr class="tfoot-sub"><td colspan="3">Subtotal</td><td class="text-right">${fmtMoney(subtotal)}</td></tr>
-            <tr class="tfoot-disc"><td colspan="3">Desconto</td><td class="text-right">– ${fmtMoney(desconto)}</td></tr>
-            ` : ''}
-            <tr class="tfoot-total">
-              <td colspan="3"><strong>Total</strong></td>
-              <td class="text-right"><strong>${fmtMoney(total)}</strong></td>
-            </tr>
+            <tr class="tfoot-disc"><td colspan="3">Desconto</td><td class="text-right">– ${fmtMoney(desconto)}</td></tr>`:''}
+            <tr class="tfoot-total"><td colspan="3"><strong>Total</strong></td><td class="text-right"><strong>${fmtMoney(total)}</strong></td></tr>
           </tfoot>
         </table>
       </div>
 
-      <!-- Condições -->
-      ${(v.prazo || v.pagamento || v.contrato || v.validade) ? `
+      ${(v.prazo||v.pagamento||v.contrato||v.validade)?`
       <div class="doc-section">
         <h2 class="doc-section-title">📄 Condições Comerciais</h2>
         <div class="doc-conditions">
-          ${v.prazo     ? `<div class="doc-condition"><strong>Prazo</strong><span>${esc(v.prazo)}</span></div>`         : ''}
-          ${v.pagamento ? `<div class="doc-condition"><strong>Pagamento</strong><span>${esc(v.pagamento)}</span></div>` : ''}
-          ${v.contrato  ? `<div class="doc-condition"><strong>Contrato</strong><span>${esc(v.contrato)}</span></div>`   : ''}
-          ${v.validade  ? `<div class="doc-condition"><strong>Validade</strong><span>${fmtDate(v.validade)}</span></div>` : ''}
+          ${v.prazo?`<div class="doc-condition"><strong>Prazo</strong><span>${esc(v.prazo)}</span></div>`:''}
+          ${v.pagamento?`<div class="doc-condition"><strong>Pagamento</strong><span>${esc(v.pagamento)}</span></div>`:''}
+          ${v.contrato?`<div class="doc-condition"><strong>Contrato</strong><span>${esc(v.contrato)}</span></div>`:''}
+          ${v.validade?`<div class="doc-condition"><strong>Validade</strong><span>${fmtDate(v.validade)}</span></div>`:''}
         </div>
-      </div>` : ''}
+      </div>`:''}
 
-      <!-- Termos -->
-      ${v.termos ? `
+      ${v.termos?`
       <div class="doc-section">
         <h2 class="doc-section-title">📜 Termos e Condições</h2>
-        <p class="doc-text doc-text--muted">${esc(v.termos).replace(/\n/g, '<br/>')}</p>
-      </div>` : ''}
+        <p class="doc-text doc-text--muted">${esc(v.termos).replace(/\n/g,'<br/>')}</p>
+      </div>`:''}
 
-      <!-- Rodapé -->
       <div class="doc-footer">
         <div class="doc-footer__left">
           <p class="doc-footer__brand">LK Comunicação Digital</p>
@@ -677,12 +696,10 @@ function proposalDocHTML(p) {
         <div class="doc-footer__right">
           <p>Aceite desta proposta:</p>
           <div class="doc-sign-line"></div>
-          <p class="doc-sign-label">${esc(c.responsavel || 'Responsável')}</p>
+          <p class="doc-sign-label">${esc(c.responsavel||'Responsável')}</p>
           <div class="doc-sign-line" style="margin-top:1.5rem"></div>
           <p class="doc-sign-label">Data</p>
         </div>
       </div>
-
-    </div>
-  `;
+    </div>`;
 }
