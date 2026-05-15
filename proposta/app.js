@@ -47,11 +47,14 @@ function esc(str) {
 }
 
 const STATUS = {
-  rascunho: { label: 'Rascunho', cls: 'status--draft' },
-  enviada:  { label: 'Enviada',  cls: 'status--sent'  },
-  aprovada: { label: 'Aprovada', cls: 'status--ok'    },
-  recusada: { label: 'Recusada', cls: 'status--no'    },
+  rascunho:    { label: 'Rascunho',    cls: 'status--draft'   },
+  enviada:     { label: 'Enviada',     cls: 'status--sent'    },
+  sem_retorno: { label: 'Sem Retorno', cls: 'status--pending' },
+  aprovada:    { label: 'Aprovada',    cls: 'status--ok'      },
+  reprovada:   { label: 'Reprovada',   cls: 'status--no'      },
 };
+
+const KANBAN_COLS = ['enviada', 'sem_retorno', 'aprovada', 'reprovada'];
 
 function calcSubtotal(itens) {
   return (itens||[]).reduce((s,it) => s+(Number(it.qtd)||0)*(Number(it.unit)||0), 0);
@@ -125,7 +128,7 @@ function sidebarHTML() {
 }
 
 // =================================================================
-//  DASHBOARD
+//  DASHBOARD – KANBAN
 // =================================================================
 function renderDashboard(app) {
   const list = getAll();
@@ -140,10 +143,11 @@ function renderDashboard(app) {
           </div>
           <a href="#nova" class="btn btn--primary">+ Nova Proposta</a>
         </header>
-        ${list.length===0 ? emptyStateHTML() : gridHTML(list)}
+        ${list.length===0 ? emptyStateHTML() : kanbanHTML(list)}
       </main>
     </div>`;
 }
+
 function emptyStateHTML() {
   return `<div class="empty">
     <div class="empty__icon">📋</div>
@@ -152,30 +156,83 @@ function emptyStateHTML() {
     <a href="#nova" class="btn btn--primary">Criar primeira proposta</a>
   </div>`;
 }
-function gridHTML(list) {
-  return `<div class="card-grid">${list.map(cardHTML).join('')}</div>`;
-}
-function cardHTML(p) {
-  const st = STATUS[p.status]||STATUS.rascunho;
-  const total = calcTotal(p.valores);
-  const empresa = (p.cliente&&(p.cliente.empresa||p.cliente.responsavel))||'—';
-  const titulo = (p.servico&&p.servico.titulo)||'Sem título';
+
+function kanbanHTML(list) {
+  const drafts = list.filter(p => !KANBAN_COLS.includes(p.status));
   return `
-    <div class="prop-card">
-      <div class="prop-card__top">
-        <span class="status-badge ${st.cls}">${st.label}</span>
-        <span class="prop-card__date">${fmtDate(p.criadaEm)}</span>
+    ${drafts.length > 0 ? `
+      <div class="kanban-drafts">
+        <p class="kanban-drafts__label">Rascunhos (${drafts.length})</p>
+        <div class="kanban-drafts__row">${drafts.map(p => kanbanCardHTML(p, false)).join('')}</div>
+      </div>` : ''}
+    <div class="kanban-board">
+      ${KANBAN_COLS.map(s => kanbanColHTML(s, list.filter(p => p.status === s))).join('')}
+    </div>`;
+}
+
+function kanbanColHTML(status, cards) {
+  const st = STATUS[status];
+  const slug = status.replace('_', '-');
+  return `
+    <div class="kanban-col kanban-col--${slug}" data-status="${status}"
+         ondragover="event.preventDefault();this.classList.add('kanban-col--over')"
+         ondragleave="this.classList.remove('kanban-col--over')"
+         ondrop="onKanbanDrop(event,'${status}')">
+      <div class="kanban-col__header">
+        <span class="kanban-col__title">${st.label}</span>
+        <span class="kanban-col__badge">${cards.length}</span>
       </div>
-      <h3 class="prop-card__title">${esc(titulo)}</h3>
-      <p class="prop-card__client"><span>👤</span> ${esc(empresa)}</p>
-      <p class="prop-card__total">${fmtMoney(total)}<span>/mês</span></p>
-      <div class="prop-card__actions">
-        <a href="#ver/${esc(p.id)}" class="btn btn--sm btn--outline">Ver</a>
-        <a href="#editar/${esc(p.id)}" class="btn btn--sm btn--outline">Editar</a>
-        <button class="btn btn--sm btn--danger" onclick="doDelete('${esc(p.id)}')">Excluir</button>
+      <div class="kanban-col__body">
+        ${cards.length === 0
+          ? `<div class="kanban-empty">Arraste uma proposta aqui</div>`
+          : cards.map(p => kanbanCardHTML(p, true)).join('')}
       </div>
     </div>`;
 }
+
+function kanbanCardHTML(p, draggable) {
+  const total   = calcTotal(p.valores);
+  const empresa = (p.cliente && (p.cliente.empresa || p.cliente.responsavel)) || '—';
+  const titulo  = (p.servico && p.servico.titulo) || 'Sem título';
+  const st      = STATUS[p.status] || STATUS.rascunho;
+  return `
+    <div class="kanban-card"
+         ${draggable
+           ? `draggable="true" ondragstart="onKanbanDragStart(event,'${esc(p.id)}')" ondragend="this.style.opacity='1'"`
+           : ''}>
+      <div class="kanban-card__top">
+        <span class="kanban-card__date">${fmtDate(p.criadaEm)}</span>
+        ${!draggable ? `<span class="status-badge ${st.cls}">${st.label}</span>` : ''}
+      </div>
+      <h3 class="kanban-card__title">${esc(titulo)}</h3>
+      <p class="kanban-card__client">👤 ${esc(empresa)}</p>
+      <strong class="kanban-card__total">${fmtMoney(total)}</strong>
+      <div class="kanban-card__actions">
+        <a href="#ver/${esc(p.id)}"    class="btn btn--sm btn--outline">Ver</a>
+        <a href="#editar/${esc(p.id)}" class="btn btn--sm btn--outline">Editar</a>
+        <button class="btn btn--sm btn--danger" onclick="doDelete('${esc(p.id)}')">×</button>
+      </div>
+    </div>`;
+}
+
+window.onKanbanDragStart = function(e, id) {
+  e.dataTransfer.setData('proposta_id', id);
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => { if (e.target) e.target.style.opacity = '.35'; }, 0);
+};
+
+window.onKanbanDrop = function(e, newStatus) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('kanban-col--over');
+  const id = e.dataTransfer.getData('proposta_id');
+  if (!id) return;
+  const p = getById(id);
+  if (!p) return;
+  p.status = newStatus;
+  upsert(p);
+  renderDashboard(document.getElementById('app'));
+};
+
 window.doDelete = function(id) {
   if (!confirm('Excluir esta proposta?')) return;
   deleteById(id);
@@ -258,7 +315,7 @@ function renderServicoForm(app, id) {
               </div>
               <div class="form-group">
                 <label>Valor padrão (R$) <span class="required">*</span></label>
-                <input id="s-valor" type="number" min="0" step="0.01" value="${_serv.valor||''}" placeholder="0,00" />
+                <input id="s-valor" type="number" min="0" step="0.01" value="${_serv.valor||\'\'}" placeholder="0,00" />
               </div>
               <div class="form-group form-group--full">
                 <label>Descrição <span class="label-hint">(aparece na proposta)</span></label>
@@ -460,7 +517,7 @@ function step3HTML() {
       </div>
       <div class="form-group">
         <label>Validade da proposta</label>
-        <input id="f-validade" type="date" value="${v.validade||''}" />
+        <input id="f-validade" type="date" value="${v.validade||\'\'}" />
       </div>
       <div class="form-group">
         <label>Status</label>
@@ -512,8 +569,8 @@ window.onServSelect = function() {
 
 window.addServiceFromSelect = function() {
   collectStep3();
-  const sel   = document.getElementById('sel-servico');
-  const qtd   = Math.max(1, parseInt(document.getElementById('sel-qtd')?.value)||1);
+  const sel = document.getElementById('sel-servico');
+  const qtd = Math.max(1, parseInt(document.getElementById('sel-qtd')?.value)||1);
   if (!sel.value) { alert('Selecione um serviço.'); return; }
 
   if (sel.value === '__custom') {
@@ -601,7 +658,7 @@ window.prevStep = function() {
 window.saveForm = function() { collectStep3(); upsert(_form); go('#ver/'+_form.id); };
 
 window.addEntrega    = function() { collectStep2(false); (_form.servico.entregas=_form.servico.entregas||[]).push(''); renderStep(document.getElementById('app')); };
-window.removeEntrega = function(i) { collectStep2(false); const l=_form.servico.entregas||[]; if(l.length>1)l.splice(i,1); else _form.servico.entregas=['']; renderStep(document.getElementById('app')); };
+window.removeEntrega = function(i) { collectStep2(false); const l=_form.servico.entregas||[]; if(l.length>1)l.splice(i,1); else _form.servico.entregas=['\'']; renderStep(document.getElementById('app')); };
 
 // =================================================================
 //  PROPOSAL VIEW

@@ -74,7 +74,9 @@ input[type="number"]::-webkit-outer-spin-button{opacity:0}
 
 .layout{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
 
-/* Sidebar */
+/* =================================================================
+   SIDEBAR
+   ================================================================= */
 .sidebar{
   background:var(--dark);
   position:sticky;top:0;height:100vh;overflow-y:auto;
@@ -98,7 +100,7 @@ input[type="number"]::-webkit-outer-spin-button{opacity:0}
 .sidebar__link.active{background:rgba(232,23,93,.15);color:#ff8fab}
 .sidebar__footer{border-top:1px solid rgba(255,255,255,.06);padding-top:1rem}
 
-.main{padding:2rem 2.5rem;min-height:100vh}
+.main{padding:2rem 2.5rem;min-height:100vh;overflow-x:hidden}
 
 .topbar{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2rem;gap:1rem;flex-wrap:wrap}
 .topbar__actions{display:flex;gap:.75rem;flex-wrap:wrap}
@@ -107,12 +109,166 @@ input[type="number"]::-webkit-outer-spin-button{opacity:0}
 .back-link{font-size:.82rem;color:var(--gray-400);display:inline-block;margin-bottom:.35rem;transition:color var(--transition)}
 .back-link:hover{color:var(--pink)}
 
+/* Status badges */
 .status-badge{display:inline-block;padding:.2rem .7rem;border-radius:100px;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .status--draft{background:var(--gray-100);color:var(--gray-600)}
 .status--sent{background:#DBEAFE;color:#1D4ED8}
+.status--pending{background:#FEF3C7;color:#92400E}
 .status--ok{background:#D1FAE5;color:#065F46}
 .status--no{background:#FEE2E2;color:#991B1B}
 
+/* =================================================================
+   KANBAN BOARD
+   ================================================================= */
+.kanban-drafts{
+  margin-bottom:1.75rem;
+}
+.kanban-drafts__label{
+  font-size:.78rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--gray-400);margin-bottom:.75rem;
+}
+.kanban-drafts__row{
+  display:flex;gap:.75rem;flex-wrap:wrap;
+}
+.kanban-drafts__row .kanban-card{
+  width:260px;cursor:default;
+}
+
+.kanban-board{
+  display:flex;
+  gap:1rem;
+  overflow-x:auto;
+  padding-bottom:1.5rem;
+  scroll-snap-type:x proximity;
+  /* ensure board can scroll past sidebar */
+  min-width:0;
+}
+.kanban-board::-webkit-scrollbar{height:6px}
+.kanban-board::-webkit-scrollbar-track{background:var(--gray-100);border-radius:100px}
+.kanban-board::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:100px}
+.kanban-board::-webkit-scrollbar-thumb:hover{background:var(--pink)}
+
+.kanban-col{
+  flex:0 0 268px;
+  scroll-snap-align:start;
+  background:var(--gray-100);
+  border-radius:var(--radius-lg);
+  display:flex;
+  flex-direction:column;
+  max-height:calc(100vh - 180px);
+  border:2px solid transparent;
+  transition:border-color var(--transition),background var(--transition);
+}
+.kanban-col--over{
+  border-color:var(--pink);
+  background:var(--pink-xlight);
+}
+
+/* Column accent colours */
+.kanban-col__header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.9rem 1.1rem;
+  border-bottom:2px solid rgba(0,0,0,.06);
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+  position:sticky;top:0;background:inherit;
+}
+.kanban-col__title{
+  font-size:.88rem;font-weight:700;
+}
+.kanban-col__badge{
+  font-size:.72rem;font-weight:800;
+  padding:.15rem .6rem;
+  border-radius:100px;
+  min-width:22px;text-align:center;
+}
+
+/* Per-column theming */
+.kanban-col--enviada     .kanban-col__title{color:#1D4ED8}
+.kanban-col--enviada     .kanban-col__badge{background:#DBEAFE;color:#1D4ED8}
+.kanban-col--enviada     .kanban-col__header{border-top:3px solid #3B82F6}
+.kanban-col--sem-retorno .kanban-col__title{color:#92400E}
+.kanban-col--sem-retorno .kanban-col__badge{background:#FEF3C7;color:#92400E}
+.kanban-col--sem-retorno .kanban-col__header{border-top:3px solid #F59E0B}
+.kanban-col--aprovada    .kanban-col__title{color:#065F46}
+.kanban-col--aprovada    .kanban-col__badge{background:#D1FAE5;color:#065F46}
+.kanban-col--aprovada    .kanban-col__header{border-top:3px solid #10B981}
+.kanban-col--reprovada   .kanban-col__title{color:#991B1B}
+.kanban-col--reprovada   .kanban-col__badge{background:#FEE2E2;color:#991B1B}
+.kanban-col--reprovada   .kanban-col__header{border-top:3px solid #EF4444}
+
+.kanban-col__body{
+  flex:1;
+  overflow-y:auto;
+  padding:.65rem;
+  display:flex;
+  flex-direction:column;
+  gap:.5rem;
+}
+.kanban-col__body::-webkit-scrollbar{width:4px}
+.kanban-col__body::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:100px}
+
+.kanban-empty{
+  text-align:center;
+  padding:2rem 1rem;
+  color:var(--gray-400);
+  font-size:.82rem;
+  border:1.5px dashed var(--gray-200);
+  border-radius:var(--radius-md);
+  margin:.25rem;
+}
+.kanban-col--over .kanban-empty{
+  border-color:var(--pink);
+  color:var(--pink);
+}
+
+.kanban-card{
+  background:var(--white);
+  border:1.5px solid var(--gray-200);
+  border-radius:var(--radius-md);
+  padding:.9rem 1rem;
+  cursor:grab;
+  transition:border-color var(--transition),box-shadow var(--transition),transform var(--transition);
+  display:flex;
+  flex-direction:column;
+  gap:.45rem;
+  user-select:none;
+}
+.kanban-card:hover{
+  border-color:var(--pink);
+  box-shadow:var(--shadow-md);
+  transform:translateY(-2px);
+}
+.kanban-card:active{cursor:grabbing;transform:scale(.98)}
+
+.kanban-card__top{
+  display:flex;align-items:center;justify-content:space-between;
+}
+.kanban-card__date{
+  font-size:.7rem;color:var(--gray-400);
+}
+.kanban-card__title{
+  font-size:.92rem;font-weight:700;color:var(--text-dark);
+  line-height:1.3;
+}
+.kanban-card__client{
+  font-size:.8rem;color:var(--text-mid);
+  display:flex;align-items:center;gap:.3rem;
+}
+.kanban-card__total{
+  font-size:1.05rem;font-weight:900;
+  background:var(--grad);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.kanban-card__actions{
+  display:flex;gap:.35rem;flex-wrap:wrap;
+  padding-top:.5rem;
+  border-top:1px solid var(--gray-100);
+  margin-top:.1rem;
+}
+
+/* =================================================================
+   SERVICE CATALOG GRID (Meus Serviços page)
+   ================================================================= */
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem}
 .prop-card{
   background:var(--white);border:1.5px solid var(--gray-200);
@@ -140,6 +296,9 @@ input[type="number"]::-webkit-outer-spin-button{opacity:0}
 .empty h3{font-size:1.25rem;font-weight:700;margin-bottom:.5rem}
 .empty p{color:var(--gray-400);margin-bottom:1.5rem;line-height:1.65}
 
+/* =================================================================
+   FORM
+   ================================================================= */
 .form-shell{max-width:780px}
 
 .stepper{display:flex;align-items:center;margin-bottom:2rem}
@@ -324,6 +483,9 @@ input[type="number"]::-webkit-outer-spin-button{opacity:0}
 
 .loading-screen{min-height:100vh;display:grid;place-items:center}
 
+/* =================================================================
+   PRINT
+   ================================================================= */
 @media print{
   body{background:white}
   .layout{display:block}
@@ -334,10 +496,14 @@ input[type="number"]::-webkit-outer-spin-button{opacity:0}
   .doc-capa,.doc-footer,.doc-table th,.doc-condition{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 
+/* =================================================================
+   RESPONSIVE
+   ================================================================= */
 @media(max-width:1024px){
   :root{--sidebar-w:200px}
   .main{padding:1.75rem 2rem}
   .doc-capa{padding:2.5rem;gap:2rem}
+  .kanban-col{flex:0 0 240px}
 }
 @media(max-width:768px){
   :root{--sidebar-w:60px}
@@ -359,10 +525,13 @@ input[type="number"]::-webkit-outer-spin-button{opacity:0}
   .service-selector{flex-direction:column;align-items:stretch}
   .service-selector__qtd{width:100%}
   .selected-item{grid-template-columns:1fr auto auto auto;gap:.5rem}
+  .kanban-col{flex:0 0 230px}
+  .kanban-board{gap:.65rem}
 }
 @media(max-width:480px){
   .doc-title{font-size:2rem}
   .form-card{padding:1.5rem}
   .selected-item{grid-template-columns:1fr auto}
   .selected-item__unit,.selected-item__total{display:none}
+  .kanban-col{flex:0 0 210px}
 }
