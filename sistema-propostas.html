@@ -899,6 +899,7 @@
 
                     <!-- STEP 1 -->
                     <div class="wizard-content active" id="step-1">
+                        <input type="hidden" id="proposal-id-hidden">
                         <div class="form-section">
                             <h3>Dados do Cliente</h3>
                             <div class="form-row">
@@ -1273,25 +1274,45 @@
                 return;
             }
 
+            // Adicionar descrição aos serviços selecionados
+            const servicesWithDescriptions = selectedServices.map(s => ({
+                ...s,
+                description: s.description || 'Conforme especificações comerciais'
+            }));
+
+            const proposalId = document.getElementById('proposal-id-hidden')?.value;
+
             const proposal = {
-                id: Date.now(),
+                id: proposalId ? parseInt(proposalId) : Date.now(),
                 clientName: document.getElementById('client-name').value,
                 clientEmail: document.getElementById('client-email').value,
                 projectName: document.getElementById('project-name').value,
-                services: selectedServices,
+                services: servicesWithDescriptions,
                 value: parseInt(document.getElementById('proposal-value').value),
                 deadline: parseInt(document.getElementById('proposal-deadline').value),
                 urgency: document.getElementById('proposal-urgency').value,
                 payment: document.getElementById('payment-conditions').value,
                 status: 'enviada',
-                date: new Date().toLocaleDateString('pt-BR')
+                date: new Date().toLocaleDateString('pt-BR'),
+                updatedAt: new Date().toLocaleDateString('pt-BR')
             };
 
-            proposals.push(proposal);
-            localStorage.setItem('proposals', JSON.stringify(proposals));
+            if (proposalId) {
+                // Editar proposta existente
+                const index = proposals.findIndex(p => p.id === parseInt(proposalId));
+                if (index > -1) {
+                    proposals[index] = { ...proposals[index], ...proposal };
+                }
+                alert('✅ Proposta atualizada com sucesso!');
+            } else {
+                // Nova proposta
+                proposals.push(proposal);
+                alert('✅ Proposta salva com sucesso!');
+            }
 
-            alert('✅ Proposta salva com sucesso!');
+            localStorage.setItem('proposals', JSON.stringify(proposals));
             resetForm();
+            renderKanbanBoard();
             showPage('dashboard');
         }
 
@@ -1654,6 +1675,7 @@
         }
 
         function resetForm() {
+            document.getElementById('proposal-id-hidden').value = '';
             document.getElementById('client-name').value = '';
             document.getElementById('client-email').value = '';
             document.getElementById('project-name').value = '';
@@ -1703,7 +1725,7 @@
                 });
 
                 column.innerHTML = proposalsByStatus.map(p => `
-                    <div class="kanban-card" draggable="true" data-proposal-id="${p.id}" data-status="${status}">
+                    <div class="kanban-card" draggable="true" data-proposal-id="${p.id}" data-status="${status}" style="cursor: pointer;" onclick="editProposal(${p.id})">
                         <div class="kanban-card-title">${p.projectName}</div>
                         <div class="kanban-card-client">${p.clientName}</div>
                         <div class="kanban-card-value">R$ ${p.value.toLocaleString('pt-BR')}</div>
@@ -1712,6 +1734,40 @@
             });
 
             setupDragAndDrop();
+        }
+
+        function editProposal(proposalId) {
+            const proposal = proposals.find(p => p.id === proposalId);
+            if (!proposal) return;
+
+            // Preencher formulário com dados da proposta
+            document.getElementById('proposal-id-hidden').value = proposalId;
+            document.getElementById('client-name').value = proposal.clientName;
+            document.getElementById('client-email').value = proposal.clientEmail;
+            document.getElementById('project-name').value = proposal.projectName;
+            document.getElementById('project-objective').value = '';
+
+            // Restaurar serviços selecionados
+            selectedServices = proposal.services || [];
+
+            // Preencher campos de precificação
+            document.getElementById('proposal-deadline').value = proposal.deadline;
+            document.getElementById('proposal-urgency').value = proposal.urgency;
+            document.getElementById('payment-conditions').value = proposal.payment;
+            document.getElementById('proposal-value').value = proposal.value;
+
+            // Renderizar serviços
+            renderServicesGrid();
+
+            // Ir para step 1
+            currentStep = 1;
+            goToStep(1);
+
+            // Mudar para página de nova proposta
+            showPage('nova-proposta');
+
+            // Feedback visual
+            alert('✏️ Editando proposta: ' + proposal.projectName);
         }
 
         function renderProposalsTable() {
