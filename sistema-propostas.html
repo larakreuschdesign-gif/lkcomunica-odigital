@@ -1668,16 +1668,23 @@
 
             const element = document.createElement('div');
             element.innerHTML = html;
+            document.body.appendChild(element);
 
             const opt = {
-                margin: 10,
+                margin: [10, 10, 10, 10],
                 filename: `Proposta_${proposal.projectName.replace(/\\s+/g, '_')}_${proposal.date.replace(/\\//g, '-')}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, logging: false },
+                html2canvas: { scale: 2, logging: false, useCORS: true },
                 jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
             };
 
-            html2pdf().set(opt).from(element).save();
+            html2pdf().set(opt).from(element).save().then(() => {
+                document.body.removeChild(element);
+            }).catch(err => {
+                document.body.removeChild(element);
+                alert('Erro ao gerar PDF. Tente novamente.');
+                console.error(err);
+            });
         }
 
         function downloadPDF() {
