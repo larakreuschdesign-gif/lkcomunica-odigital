@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LK Proposals - Sistema de Propostas</title>
+    <title>LK Comunicação Digital - Sistema de Propostas</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f5f5f5;
+            background: #f8f8f8;
             color: #333;
         }
 
@@ -24,10 +24,10 @@
 
         /* HEADER */
         header {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%);
             color: white;
-            padding: 20px 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(233, 30, 99, 0.15);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -41,8 +41,30 @@
             margin: 0 auto;
         }
 
+        header .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: -0.5px;
+        }
+
+        header .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: #E91E63;
+            font-size: 20px;
+        }
+
         header h1 {
-            font-size: 24px;
+            font-size: 16px;
             font-weight: 700;
         }
 
@@ -65,7 +87,7 @@
 
         header nav button.active {
             background: white;
-            color: #2563eb;
+            color: #E91E63;
         }
 
         /* PÁGINAS */
@@ -200,12 +222,12 @@
         }
 
         .btn-primary {
-            background: #2563eb;
+            background: #E91E63;
             color: white;
         }
 
         .btn-primary:hover {
-            background: #1d4ed8;
+            background: #C2185B;
         }
 
         .btn-secondary {
@@ -265,8 +287,8 @@
 
         input:focus, textarea:focus, select:focus {
             outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            border-color: #E91E63;
+            box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
         }
 
         .form-row {
@@ -307,7 +329,7 @@
         }
 
         .wizard-step.active::before {
-            background: #2563eb;
+            background: #E91E63;
         }
 
         .step-number {
@@ -326,7 +348,7 @@
         }
 
         .wizard-step.active .step-number {
-            background: #2563eb;
+            background: #E91E63;
             color: white;
         }
 
@@ -337,7 +359,7 @@
         }
 
         .wizard-step.active .step-name {
-            color: #2563eb;
+            color: #E91E63;
         }
 
         .wizard-content {
@@ -366,8 +388,8 @@
         }
 
         .price-card.recommended {
-            border-color: #2563eb;
-            background: rgba(37, 99, 235, 0.05);
+            border-color: #E91E63;
+            background: rgba(233, 30, 99, 0.05);
             transform: scale(1.05);
         }
 
@@ -385,7 +407,7 @@
         }
 
         .price-card.recommended .price {
-            color: #2563eb;
+            color: #E91E63;
         }
 
         /* SERVIÇOS */
@@ -406,13 +428,13 @@
         }
 
         .service-item:hover {
-            border-color: #2563eb;
-            background: rgba(37, 99, 235, 0.05);
+            border-color: #E91E63;
+            background: rgba(233, 30, 99, 0.05);
         }
 
         .service-item.selected {
-            border-color: #2563eb;
-            background: rgba(37, 99, 235, 0.1);
+            border-color: #E91E63;
+            background: rgba(233, 30, 99, 0.1);
         }
 
         .service-item input {
@@ -471,6 +493,123 @@
             font-size: 18px;
             margin-bottom: 10px;
             color: #030712;
+        }
+
+        /* KANBAN BOARD */
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .kanban-column {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .kanban-column-header {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+            color: #030712;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kanban-column.enviada .kanban-column-header {
+            border-bottom-color: #3b82f6;
+            color: #1e40af;
+        }
+
+        .kanban-column.sem-retorno .kanban-column-header {
+            border-bottom-color: #f59e0b;
+            color: #b45309;
+        }
+
+        .kanban-column.aprovada .kanban-column-header {
+            border-bottom-color: #10b981;
+            color: #065f46;
+        }
+
+        .kanban-column.reprovada .kanban-column-header {
+            border-bottom-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .kanban-cards {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .kanban-card {
+            background: white;
+            border-radius: 6px;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            cursor: grab;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .kanban-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .kanban-card.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .kanban-card-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #030712;
+            margin-bottom: 6px;
+        }
+
+        .kanban-card-client {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .kanban-card-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: #E91E63;
+        }
+
+        .kanban-card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .kanban-card-actions button {
+            flex: 1;
+            padding: 4px 8px;
+            font-size: 11px;
+            border: none;
+            border-radius: 4px;
+            background: #f3f4f6;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .kanban-card-actions button:hover {
+            background: #e5e7eb;
         }
 
         /* FOOTER */
@@ -592,7 +731,10 @@
 <body>
     <header>
         <div class="content">
-            <h1>✨ LK Proposals - Sistema de Propostas</h1>
+            <div class="logo">
+                <div class="logo-icon">4K</div>
+                <span>LK Comunicação Digital</span>
+            </div>
             <nav>
                 <button class="nav-btn active" onclick="showPage('dashboard')">📊 Dashboard</button>
                 <button class="nav-btn" onclick="showPage('nova-proposta')">➕ Nova Proposta</button>
@@ -796,13 +938,37 @@
             </div>
         </div>
 
-        <!-- PROPOSTAS -->
+        <!-- PROPOSTAS - KANBAN -->
         <div id="propostas" class="page">
             <div style="padding: 30px;">
                 <h2>Propostas Comerciais</h2>
-                <p style="color: #6b7280; margin-bottom: 30px;">Gerencie todas as suas propostas</p>
+                <p style="color: #6b7280; margin-bottom: 30px;">Arraste as propostas entre os estágios</p>
 
-                <div id="proposals-table-container"></div>
+                <div class="kanban-board" id="kanban-board">
+                    <!-- Enviada -->
+                    <div class="kanban-column enviada">
+                        <div class="kanban-column-header">📤 Enviada</div>
+                        <div class="kanban-cards" data-status="enviada"></div>
+                    </div>
+
+                    <!-- Sem Retorno -->
+                    <div class="kanban-column sem-retorno">
+                        <div class="kanban-column-header">⏳ Sem Retorno</div>
+                        <div class="kanban-cards" data-status="sem-retorno"></div>
+                    </div>
+
+                    <!-- Aprovada -->
+                    <div class="kanban-column aprovada">
+                        <div class="kanban-column-header">✅ Aprovada</div>
+                        <div class="kanban-cards" data-status="aprovada"></div>
+                    </div>
+
+                    <!-- Reprovada -->
+                    <div class="kanban-column reprovada">
+                        <div class="kanban-column-header">❌ Reprovada</div>
+                        <div class="kanban-cards" data-status="reprovada"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -983,7 +1149,7 @@
                 deadline: parseInt(document.getElementById('proposal-deadline').value),
                 urgency: document.getElementById('proposal-urgency').value,
                 payment: document.getElementById('payment-conditions').value,
-                status: 'rascunho',
+                status: 'enviada',
                 date: new Date().toLocaleDateString('pt-BR')
             };
 
@@ -1010,11 +1176,11 @@
                         <title>Proposta</title>
                         <style>
                             body { font-family: Arial; padding: 40px; }
-                            h1 { color: #2563eb; }
+                            h1 { color: #E91E63; }
                             table { width: 100%; border-collapse: collapse; margin: 20px 0; }
                             th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
                             th { background: #f3f4f6; }
-                            .total { font-size: 20px; font-weight: bold; color: #2563eb; }
+                            .total { font-size: 20px; font-weight: bold; color: #E91E63; }
                         </style>
                     </head>
                     <body>
@@ -1072,37 +1238,88 @@
             renderServicesGrid();
         }
 
-        function renderProposalsTable() {
+        function renderKanbanBoard() {
             if (proposals.length === 0) {
-                document.getElementById('proposals-table-container').innerHTML = '<div class="empty-state"><h3>Nenhuma proposta criada</h3><p>Crie sua primeira proposta clicando em "+ Nova Proposta"</p></div>';
+                document.querySelectorAll('.kanban-cards').forEach(col => col.innerHTML = '');
                 return;
             }
 
-            const html = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Projeto</th>
-                            <th>Valor</th>
-                            <th>Status</th>
-                            <th>Data</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${proposals.map(p => `
-                            <tr>
-                                <td>${p.clientName}</td>
-                                <td>${p.projectName}</td>
-                                <td>R$ ${p.value.toLocaleString('pt-BR')}</td>
-                                <td><span class="status ${p.status}">${p.status}</span></td>
-                                <td>${p.date}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            document.getElementById('proposals-table-container').innerHTML = html;
+            const statuses = ['enviada', 'sem-retorno', 'aprovada', 'reprovada'];
+            statuses.forEach(status => {
+                const column = document.querySelector(`[data-status="${status}"]`);
+                const proposalsByStatus = proposals.filter(p => {
+                    if (status === 'enviada') return p.status === 'rascunho' || p.status === 'enviada';
+                    return p.status === status;
+                });
+
+                column.innerHTML = proposalsByStatus.map(p => `
+                    <div class="kanban-card" draggable="true" data-proposal-id="${p.id}" data-status="${status}">
+                        <div class="kanban-card-title">${p.projectName}</div>
+                        <div class="kanban-card-client">${p.clientName}</div>
+                        <div class="kanban-card-value">R$ ${p.value.toLocaleString('pt-BR')}</div>
+                    </div>
+                `).join('');
+            });
+
+            setupDragAndDrop();
+        }
+
+        function renderProposalsTable() {
+            renderKanbanBoard();
+        }
+
+        function setupDragAndDrop() {
+            const cards = document.querySelectorAll('.kanban-card');
+            const columns = document.querySelectorAll('.kanban-cards');
+
+            cards.forEach(card => {
+                card.addEventListener('dragstart', (e) => {
+                    card.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                card.addEventListener('dragend', (e) => {
+                    card.classList.remove('dragging');
+                });
+            });
+
+            columns.forEach(column => {
+                column.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    column.style.background = 'rgba(233, 30, 99, 0.05)';
+                });
+
+                column.addEventListener('dragleave', (e) => {
+                    column.style.background = '';
+                });
+
+                column.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    column.style.background = '';
+
+                    const draggedCard = document.querySelector('.kanban-card.dragging');
+                    if (draggedCard) {
+                        const proposalId = parseInt(draggedCard.getAttribute('data-proposal-id'));
+                        const newStatus = column.getAttribute('data-status');
+
+                        // Map kanban status to proposal status
+                        const statusMap = {
+                            'enviada': 'enviada',
+                            'sem-retorno': 'sem-retorno',
+                            'aprovada': 'aprovada',
+                            'reprovada': 'reprovada'
+                        };
+
+                        const proposal = proposals.find(p => p.id === proposalId);
+                        if (proposal) {
+                            proposal.status = statusMap[newStatus];
+                            localStorage.setItem('proposals', JSON.stringify(proposals));
+                            renderKanbanBoard();
+                        }
+                    }
+                });
+            });
         }
 
         function updateDashboard() {
