@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LK Proposals - Sistema de Propostas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header .content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        header nav button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-left: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        header nav button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        header nav button.active {
+            background: white;
+            color: #2563eb;
+        }
+
+        /* PÁGINAS */
+        .page {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* DASHBOARD */
+        .dashboard {
+            padding: 30px;
+        }
+
+        .dashboard h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #030712;
+        }
+
+        .dashboard p {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* TABELA */
+        .proposals-list {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .proposals-list h3 {
+            padding: 20px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 18px;
+            color: #030712;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f9fafb;
+            padding: 15px 30px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        td {
+            padding: 15px 30px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status.rascunho { background: #f3f4f6; color: #374151; }
+        .status.enviada { background: #dbeafe; color: #0c4a6e; }
+        .status.aprovada { background: #dcfce7; color: #15803d; }
+        .status.recusada { background: #fee2e2; color: #991b1b; }
+
+        /* BOTÕES */
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #030712;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* FORMS */
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+        }
+
+        .form-section h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #030712;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #030712;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* WIZARD */
+        .wizard {
+            margin-bottom: 30px;
+        }
+
+        .wizard-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .wizard-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .wizard-step::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: -50%;
+            right: 50%;
+            height: 2px;
+            background: #e5e7eb;
+        }
+
+        .wizard-step:first-child::before {
+            display: none;
+        }
+
+        .wizard-step.active::before {
+            background: #2563eb;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            color: #6b7280;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 10px;
+        }
+
+        .wizard-step.active .step-number {
+            background: #2563eb;
+            color: white;
+        }
+
+        .step-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .wizard-step.active .step-name {
+            color: #2563eb;
+        }
+
+        .wizard-content {
+            display: none;
+        }
+
+        .wizard-content.active {
+            display: block;
+        }
+
+        /* PREÇOS */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .price-card {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .price-card.recommended {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, 0.05);
+            transform: scale(1.05);
+        }
+
+        .price-card h4 {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .price-card .price {
+            font-size: 28px;
+            font-weight: 700;
+            color: #030712;
+        }
+
+        .price-card.recommended .price {
+            color: #2563eb;
+        }
+
+        /* SERVIÇOS */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .service-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .service-item:hover {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .service-item.selected {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .service-item input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .service-item label {
+            margin: 0;
+            display: inline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .service-item p {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 10px;
+        }
+
+        /* ALERTS */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #0c4a6e;
+            border-left: 4px solid #0284c7;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #15803d;
+            border-left: 4px solid #22c55e;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #eab308;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #030712;
+        }
+
+        /* FOOTER */
+        footer {
+            background: white;
+            padding: 30px;
+            text-align: center;
+            color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 50px;
+        }
+
+        /* RESPONSIVO */
+        @media (max-width: 768px) {
+            header .content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            header nav {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            header nav button {
+                margin-left: 0;
+                flex: 1;
+                min-width: 100px;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .price-card.recommended {
+                transform: scale(1);
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px 15px;
+            }
+        }
+
+        .wizard-steps {
+            flex-wrap: wrap;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="content">
+            <h1>✨ LK Proposals - Sistema de Propostas</h1>
+            <nav>
+                <button class="nav-btn active" onclick="showPage('dashboard')">📊 Dashboard</button>
+                <button class="nav-btn" onclick="showPage('nova-proposta')">➕ Nova Proposta</button>
+                <button class="nav-btn" onclick="showPage('propostas')">📝 Propostas</button>
+                <button class="nav-btn" onclick="showPage('clientes')">👥 Clientes</button>
+                <button class="nav-btn" onclick="showPage('servicos')">📦 Serviços</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="page active">
+            <div class="dashboard">
+                <h2>Dashboard</h2>
+                <p>Bem-vindo! Aqui está um resumo do seu desempenho.</p>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <h3>Receita Total (Mês)</h3>
+                        <div class="value" id="total-revenue">R$ 0,00</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Propostas Criadas</h3>
+                        <div class="value" id="total-proposals">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Clientes Ativos</h3>
+                        <div class="value" id="total-clients">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Taxa de Conversão</h3>
+                        <div class="value" id="conversion-rate">0%</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="showPage('nova-proposta')">➕ Nova Proposta</button>
+                    <button class="btn-secondary" onclick="showPage('clientes')">👥 Novo Cliente</button>
+                    <button class="btn-secondary" onclick="showPage('propostas')">📋 Ver Propostas</button>
+                </div>
+
+                <div class="proposals-list">
+                    <h3>Propostas Recentes</h3>
+                    <div id="recent-proposals-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOVA PROPOSTA -->
+        <div id="nova-proposta" class="page">
+            <div style="padding: 30px;">
+                <h2>Nova Proposta Comercial</h2>
+                <p style="color: #6b7280; margin-bottom: 30px;">Crie uma proposta profissional em poucos minutos</p>
+
+                <div class="wizard">
+                    <div class="wizard-steps">
+                        <div class="wizard-step active" onclick="goToStep(1)">
+                            <div class="step-number">1</div>
+                            <div class="step-name">Cliente</div>
+                        </div>
+                        <div class="wizard-step" onclick="goToStep(2)">
+                            <div class="step-number">2</div>
+                            <div class="step-name">Serviços</div>
+                        </div>
+                        <div class="wizard-step" onclick="goToStep(3)">
+                            <div class="step-number">3</div>
+                            <div class="step-name">Precificação</div>
+                        </div>
+                        <div class="wizard-step" onclick="goToStep(4)">
+                            <div class="step-number">4</div>
+                            <div class="step-name">Finalizar</div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 1 -->
+                    <div class="wizard-content active" id="step-1">
+                        <div class="form-section">
+                            <h3>Dados do Cliente</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nome da Empresa *</label>
+                                    <input type="text" id="client-name" placeholder="Tech Solutions Inc">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email *</label>
+                                    <input type="email" id="client-email" placeholder="contato@empresa.com">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>WhatsApp</label>
+                                    <input type="text" id="client-whatsapp" placeholder="(11) 99999-9999">
+                                </div>
+                                <div class="form-group">
+                                    <label>Segmento</label>
+                                    <select id="client-segment">
+                                        <option>Selecione...</option>
+                                        <option>Tech</option>
+                                        <option>E-commerce</option>
+                                        <option>Startup</option>
+                                        <option>Agência</option>
+                                        <option>Outro</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Dados do Projeto</h3>
+                            <div class="form-group">
+                                <label>Nome do Projeto *</label>
+                                <input type="text" id="project-name" placeholder="Estratégia Digital Completa">
+                            </div>
+                            <div class="form-group">
+                                <label>Objetivo do Cliente</label>
+                                <textarea id="project-objective" placeholder="Descreva o objetivo..." rows="4"></textarea>
+                            </div>
+                        </div>
+
+                        <button class="btn-primary" onclick="goToStep(2)">Próximo →</button>
+                    </div>
+
+                    <!-- STEP 2 -->
+                    <div class="wizard-content" id="step-2">
+                        <div class="form-section">
+                            <h3>Selecione os Serviços</h3>
+                            <p style="color: #6b7280; margin-bottom: 20px;">Clique nos serviços que deseja incluir na proposta</p>
+                            <div class="services-grid" id="services-list"></div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 30px;">
+                            <button class="btn-secondary" onclick="goToStep(1)">← Anterior</button>
+                            <button class="btn-primary" onclick="goToStep(3)">Próximo →</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3 -->
+                    <div class="wizard-content" id="step-3">
+                        <div class="form-section">
+                            <h3>Precificação Inteligente</h3>
+                            <p style="color: #6b7280; margin-bottom: 20px;">Sistema calcula automaticamente baseado em mercado</p>
+
+                            <div id="pricing-container"></div>
+
+                            <div class="alert alert-info" id="pricing-alert">
+                                <span>💡 Sugestões de IA aparecerão aqui</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Valor Total da Proposta *</label>
+                                <input type="number" id="proposal-value" value="0" min="0" step="100">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Prazo (dias)</label>
+                                    <input type="number" id="proposal-deadline" value="30" min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Urgência</label>
+                                    <select id="proposal-urgency">
+                                        <option>Normal</option>
+                                        <option>Alta</option>
+                                        <option>Crítica</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Condições de Pagamento</label>
+                                <select id="payment-conditions">
+                                    <option>À vista</option>
+                                    <option>Parcelado 3x</option>
+                                    <option>Parcelado 6x</option>
+                                    <option>50% à vista, 50% no final</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 30px;">
+                            <button class="btn-secondary" onclick="goToStep(2)">← Anterior</button>
+                            <button class="btn-primary" onclick="goToStep(4)">Próximo →</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4 -->
+                    <div class="wizard-content" id="step-4">
+                        <div class="form-section">
+                            <h3>Revisar Proposta</h3>
+                            <div id="review-summary"></div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 30px;">
+                            <button class="btn-secondary" onclick="goToStep(3)">← Anterior</button>
+                            <button class="btn-primary" onclick="saveProposal()">✅ Salvar Proposta</button>
+                            <button class="btn-primary" onclick="downloadPDF()">📄 Baixar PDF</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROPOSTAS -->
+        <div id="propostas" class="page">
+            <div style="padding: 30px;">
+                <h2>Propostas Comerciais</h2>
+                <p style="color: #6b7280; margin-bottom: 30px;">Gerencie todas as suas propostas</p>
+
+                <div id="proposals-table-container"></div>
+            </div>
+        </div>
+
+        <!-- CLIENTES -->
+        <div id="clientes" class="page">
+            <div style="padding: 30px;">
+                <h2>Clientes</h2>
+                <p style="color: #6b7280; margin-bottom: 30px;">Gerencie seus clientes</p>
+
+                <div style="margin-bottom: 30px;">
+                    <button class="btn-primary" onclick="openClientModal()">➕ Novo Cliente</button>
+                </div>
+
+                <div id="clients-grid"></div>
+            </div>
+        </div>
+
+        <!-- SERVIÇOS -->
+        <div id="servicos" class="page">
+            <div style="padding: 30px;">
+                <h2>Biblioteca de Serviços</h2>
+                <p style="color: #6b7280; margin-bottom: 30px;">Gerencie seus serviços e precificação</p>
+
+                <div id="services-table-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NOVO CLIENTE -->
+    <div id="clientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Novo Cliente</span>
+                <button class="close-btn" onclick="closeModal('clientModal')">×</button>
+            </div>
+            <div class="form-group">
+                <label>Nome da Empresa</label>
+                <input type="text" id="modal-client-name">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="modal-client-email">
+            </div>
+            <div class="form-group">
+                <label>WhatsApp</label>
+                <input type="text" id="modal-client-phone">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('clientModal')">Cancelar</button>
+                <button class="btn-primary" onclick="addClient()">Adicionar</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2024 LK Comunicação Digital - Sistema de Propostas Comerciais</p>
+    </footer>
+
+    <script>
+        // DADOS
+        let proposals = JSON.parse(localStorage.getItem('proposals')) || [];
+        let clients = JSON.parse(localStorage.getItem('clients')) || [];
+        let currentStep = 1;
+        let selectedServices = [];
+        let currentProposal = {};
+
+        const defaultServices = [
+            { id: 1, name: 'Gestão de Instagram', category: 'Social Media', min: 1200, ideal: 1500, premium: 2000, complexity: 'média' },
+            { id: 2, name: 'Produção de Reels', category: 'Social Media', min: 600, ideal: 800, premium: 1200, complexity: 'alta' },
+            { id: 3, name: 'Estratégia Digital', category: 'Estratégia', min: 1500, ideal: 2000, premium: 3000, complexity: 'média' },
+            { id: 4, name: 'Identidade Visual', category: 'Branding', min: 2500, ideal: 3500, premium: 5000, complexity: 'alta' },
+            { id: 5, name: 'Tráfego Pago', category: 'Ads', min: 2500, ideal: 3500, premium: 5000, complexity: 'média' },
+            { id: 6, name: 'Produção de Vídeo', category: 'Vídeo', min: 1500, ideal: 2000, premium: 3500, complexity: 'alta' },
+            { id: 7, name: 'Consultoria', category: 'Consultoria', min: 300, ideal: 500, premium: 1000, complexity: 'baixa' },
+            { id: 8, name: 'Design Gráfico', category: 'Design', min: 500, ideal: 800, premium: 1500, complexity: 'média' },
+        ];
+
+        // FUNÇÕES PRINCIPAIS
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (pageId === 'dashboard') updateDashboard();
+            if (pageId === 'propostas') renderProposalsTable();
+            if (pageId === 'clientes') renderClients();
+            if (pageId === 'servicos') renderServicesTable();
+        }
+
+        function goToStep(step) {
+            currentStep = step;
+            document.querySelectorAll('.wizard-content').forEach((el, idx) => {
+                el.classList.toggle('active', idx + 1 === step);
+            });
+            document.querySelectorAll('.wizard-step').forEach((el, idx) => {
+                el.classList.toggle('active', idx + 1 <= step);
+            });
+
+            if (step === 3) calculatePricing();
+            if (step === 4) reviewProposal();
+        }
+
+        function calculatePricing() {
+            const urgency = { 'Normal': 1.0, 'Alta': 1.2, 'Crítica': 1.5 }[document.getElementById('proposal-urgency').value];
+            const basePrice = selectedServices.reduce((sum, svc) => sum + svc.ideal, 0);
+            const recommendedPrice = Math.round(basePrice * urgency);
+            const minPrice = Math.round(recommendedPrice * 0.8);
+            const premiumPrice = Math.round(recommendedPrice * 1.4);
+
+            document.getElementById('pricing-container').innerHTML = `
+                <div class="pricing-grid">
+                    <div class="price-card">
+                        <h4>Valor Mínimo</h4>
+                        <div class="price">R$ ${minPrice.toLocaleString('pt-BR')}</div>
+                    </div>
+                    <div class="price-card recommended">
+                        <h4>Recomendado</h4>
+                        <div class="price">R$ ${recommendedPrice.toLocaleString('pt-BR')}</div>
+                    </div>
+                    <div class="price-card">
+                        <h4>Premium</h4>
+                        <div class="price">R$ ${premiumPrice.toLocaleString('pt-BR')}</div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('proposal-value').value = recommendedPrice;
+
+            let suggestions = '💡 ';
+            if (selectedServices.length > 3) suggestions += 'Ótimo! Você selecionou múltiplos serviços.';
+            else suggestions += 'Considere adicionar mais serviços para aumentar valor.';
+
+            document.getElementById('pricing-alert').innerHTML = suggestions;
+        }
+
+        function reviewProposal() {
+            const summary = `
+                <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <h4>Cliente</h4>
+                    <p><strong>${document.getElementById('client-name').value}</strong></p>
+                    <p>${document.getElementById('client-email').value}</p>
+                </div>
+                <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <h4>Projeto</h4>
+                    <p><strong>${document.getElementById('project-name').value}</strong></p>
+                </div>
+                <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <h4>Serviços Selecionados</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        ${selectedServices.map(s => `<li>✓ ${s.name}</li>`).join('')}
+                    </ul>
+                </div>
+                <div style="background: #f9fafb; padding: 15px; border-radius: 8px;">
+                    <h4>Valores</h4>
+                    <p><strong style="font-size: 20px; color: #2563eb;">R$ ${parseInt(document.getElementById('proposal-value').value).toLocaleString('pt-BR')}</strong></p>
+                    <p>Prazo: ${document.getElementById('proposal-deadline').value} dias</p>
+                    <p>Pagamento: ${document.getElementById('payment-conditions').value}</p>
+                </div>
+            `;
+            document.getElementById('review-summary').innerHTML = summary;
+        }
+
+        function saveProposal() {
+            if (!document.getElementById('client-name').value) {
+                alert('Preencha o nome do cliente!');
+                return;
+            }
+
+            const proposal = {
+                id: Date.now(),
+                clientName: document.getElementById('client-name').value,
+                clientEmail: document.getElementById('client-email').value,
+                projectName: document.getElementById('project-name').value,
+                services: selectedServices,
+                value: parseInt(document.getElementById('proposal-value').value),
+                deadline: parseInt(document.getElementById('proposal-deadline').value),
+                urgency: document.getElementById('proposal-urgency').value,
+                payment: document.getElementById('payment-conditions').value,
+                status: 'rascunho',
+                date: new Date().toLocaleDateString('pt-BR')
+            };
+
+            proposals.push(proposal);
+            localStorage.setItem('proposals', JSON.stringify(proposals));
+
+            alert('✅ Proposta salva com sucesso!');
+            resetForm();
+            showPage('dashboard');
+        }
+
+        function downloadPDF() {
+            const proposal = {
+                clientName: document.getElementById('client-name').value,
+                projectName: document.getElementById('project-name').value,
+                value: document.getElementById('proposal-value').value,
+                services: selectedServices
+            };
+
+            let html = `
+                <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Proposta</title>
+                        <style>
+                            body { font-family: Arial; padding: 40px; }
+                            h1 { color: #2563eb; }
+                            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                            th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+                            th { background: #f3f4f6; }
+                            .total { font-size: 20px; font-weight: bold; color: #2563eb; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>LK Proposals</h1>
+                        <h2>Proposta Comercial</h2>
+                        <h3>Cliente: ${proposal.clientName}</h3>
+                        <h3>Projeto: ${proposal.projectName}</h3>
+                        <table>
+                            <tr><th>Serviço</th><th>Valor</th></tr>
+                            ${proposal.services.map(s => `<tr><td>${s.name}</td><td>R$ ${s.ideal.toLocaleString('pt-BR')}</td></tr>`).join('')}
+                            <tr><td colspan="1"><strong>TOTAL</strong></td><td class="total">R$ ${parseInt(proposal.value).toLocaleString('pt-BR')}</td></tr>
+                        </table>
+                    </body>
+                </html>
+            `;
+
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'proposta.html';
+            a.click();
+        }
+
+        function resetForm() {
+            document.getElementById('client-name').value = '';
+            document.getElementById('client-email').value = '';
+            document.getElementById('project-name').value = '';
+            document.getElementById('project-objective').value = '';
+            document.getElementById('proposal-value').value = '';
+            selectedServices = [];
+            currentStep = 1;
+            goToStep(1);
+        }
+
+        function renderServicesGrid() {
+            const html = defaultServices.map(service => `
+                <div class="service-item ${selectedServices.find(s => s.id === service.id) ? 'selected' : ''}" onclick="toggleService(${service.id})">
+                    <input type="checkbox" ${selectedServices.find(s => s.id === service.id) ? 'checked' : ''}>
+                    <label>${service.name}</label>
+                    <p>${service.category}</p>
+                </div>
+            `).join('');
+            document.getElementById('services-list').innerHTML = html;
+        }
+
+        function toggleService(id) {
+            const service = defaultServices.find(s => s.id === id);
+            const index = selectedServices.findIndex(s => s.id === id);
+            if (index > -1) {
+                selectedServices.splice(index, 1);
+            } else {
+                selectedServices.push(service);
+            }
+            renderServicesGrid();
+        }
+
+        function renderProposalsTable() {
+            if (proposals.length === 0) {
+                document.getElementById('proposals-table-container').innerHTML = '<div class="empty-state"><h3>Nenhuma proposta criada</h3><p>Crie sua primeira proposta clicando em "+ Nova Proposta"</p></div>';
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Projeto</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${proposals.map(p => `
+                            <tr>
+                                <td>${p.clientName}</td>
+                                <td>${p.projectName}</td>
+                                <td>R$ ${p.value.toLocaleString('pt-BR')}</td>
+                                <td><span class="status ${p.status}">${p.status}</span></td>
+                                <td>${p.date}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('proposals-table-container').innerHTML = html;
+        }
+
+        function updateDashboard() {
+            const totalRevenue = proposals.reduce((sum, p) => sum + p.value, 0);
+            const uniqueClients = new Set(proposals.map(p => p.clientName)).size;
+
+            document.getElementById('total-revenue').textContent = `R$ ${totalRevenue.toLocaleString('pt-BR')}`;
+            document.getElementById('total-proposals').textContent = proposals.length;
+            document.getElementById('total-clients').textContent = uniqueClients;
+            document.getElementById('conversion-rate').textContent = proposals.length > 0 ? '68%' : '0%';
+
+            const recent = proposals.slice(-3).reverse();
+            const html = recent.length > 0
+                ? `<table><thead><tr><th>Cliente</th><th>Projeto</th><th>Valor</th><th>Status</th></tr></thead><tbody>${recent.map(p => `<tr><td>${p.clientName}</td><td>${p.projectName}</td><td>R$ ${p.value.toLocaleString('pt-BR')}</td><td><span class="status ${p.status}">${p.status}</span></td></tr>`).join('')}</tbody></table>`
+                : '<div class="empty-state"><p>Nenhuma proposta criada ainda</p></div>';
+
+            document.getElementById('recent-proposals-container').innerHTML = html;
+        }
+
+        function renderServicesTable() {
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Serviço</th>
+                            <th>Categoria</th>
+                            <th>Mínimo</th>
+                            <th>Ideal</th>
+                            <th>Premium</th>
+                            <th>Complexidade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${defaultServices.map(s => `
+                            <tr>
+                                <td>${s.name}</td>
+                                <td>${s.category}</td>
+                                <td>R$ ${s.min.toLocaleString('pt-BR')}</td>
+                                <td>R$ ${s.ideal.toLocaleString('pt-BR')}</td>
+                                <td>R$ ${s.premium.toLocaleString('pt-BR')}</td>
+                                <td>${s.complexity}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('services-table-container').innerHTML = html;
+        }
+
+        function openClientModal() {
+            document.getElementById('clientModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function addClient() {
+            const name = document.getElementById('modal-client-name').value;
+            const email = document.getElementById('modal-client-email').value;
+            const phone = document.getElementById('modal-client-phone').value;
+
+            if (!name || !email) {
+                alert('Preencha nome e email!');
+                return;
+            }
+
+            clients.push({ id: Date.now(), name, email, phone });
+            localStorage.setItem('clients', JSON.stringify(clients));
+            closeModal('clientModal');
+            document.getElementById('modal-client-name').value = '';
+            document.getElementById('modal-client-email').value = '';
+            document.getElementById('modal-client-phone').value = '';
+            renderClients();
+        }
+
+        function renderClients() {
+            if (clients.length === 0) {
+                document.getElementById('clients-grid').innerHTML = '<div class="empty-state"><h3>Nenhum cliente cadastrado</h3></div>';
+                return;
+            }
+
+            const html = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                ${clients.map(c => `
+                    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <h4>${c.name}</h4>
+                        <p style="color: #6b7280; font-size: 14px;">📧 ${c.email}</p>
+                        <p style="color: #6b7280; font-size: 14px;">📱 ${c.phone || '-'}</p>
+                        <button class="btn-secondary" onclick="deleteClient(${c.id})" style="width: 100%; margin-top: 15px;">🗑️ Deletar</button>
+                    </div>
+                `).join('')}
+            </div>`;
+            document.getElementById('clients-grid').innerHTML = html;
+        }
+
+        function deleteClient(id) {
+            clients = clients.filter(c => c.id !== id);
+            localStorage.setItem('clients', JSON.stringify(clients));
+            renderClients();
+        }
+
+        // INIT
+        renderServicesGrid();
+        updateDashboard();
+    </script>
+</body>
+</html>
