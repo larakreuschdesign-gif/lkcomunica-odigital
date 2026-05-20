@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LK Comunicação Digital - Sistema de Propostas</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -1319,7 +1320,13 @@
 
         function downloadProposalPDF(proposalId) {
             const proposal = proposals.find(p => p.id === proposalId);
-            if (!proposal) return;
+            if (!proposal) {
+                alert('Proposta não encontrada!');
+                return;
+            }
+
+            // Mostrar loading
+            alert('Gerando PDF... Aguarde alguns segundos.');
 
             const html = `
                 <!DOCTYPE html>
@@ -1668,23 +1675,59 @@
 
             const element = document.createElement('div');
             element.innerHTML = html;
+            element.style.width = '210mm';
+            element.style.height = 'auto';
+            element.style.padding = '0';
+            element.style.margin = '0';
+            element.style.position = 'absolute';
+            element.style.left = '-9999px';
             document.body.appendChild(element);
 
-            const opt = {
-                margin: [10, 10, 10, 10],
-                filename: `Proposta_${proposal.projectName.replace(/\\s+/g, '_')}_${proposal.date.replace(/\\//g, '-')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, logging: false, useCORS: true },
-                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-            };
+            // Aguardar que as imagens carreguem
+            setTimeout(async () => {
+                try {
+                    const canvas = await html2canvas(element, {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff',
+                        windowHeight: element.scrollHeight
+                    });
 
-            html2pdf().set(opt).from(element).save().then(() => {
-                document.body.removeChild(element);
-            }).catch(err => {
-                document.body.removeChild(element);
-                alert('Erro ao gerar PDF. Tente novamente.');
-                console.error(err);
-            });
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+
+                    const imgWidth = 210;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 0;
+
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= 297;
+
+                    while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= 297;
+                    }
+
+                    const filename = `Proposta_${proposal.projectName.replace(/\\s+/g, '_')}_${proposal.date.replace(/\\//g, '-')}.pdf`;
+                    pdf.save(filename);
+
+                    document.body.removeChild(element);
+                    alert('✅ PDF gerado e baixado com sucesso!');
+                } catch (err) {
+                    document.body.removeChild(element);
+                    alert('❌ Erro ao gerar PDF. Tente novamente.');
+                    console.error(err);
+                }
+            }, 500);
         }
 
         function downloadPDF() {
