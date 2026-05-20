@@ -1081,7 +1081,7 @@
                 <h2>Meus Serviços</h2>
                 <p style="color: #6b7280; margin-bottom: 30px;">Customize seus serviços e precificação</p>
 
-                <button class="btn-primary" onclick="openServiceModal()" style="margin-bottom: 30px;">➕ Adicionar Serviço</button>
+                <button class="btn-primary" onclick="openAddServiceModal()" style="margin-bottom: 30px;">➕ Adicionar Serviço</button>
 
                 <div id="my-services-container" style="display: grid; gap: 20px;"></div>
             </div>
@@ -1118,9 +1118,11 @@
     <div id="serviceModal" class="modal">
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
-                <span>Adicionar Serviço</span>
+                <span id="modal-service-title">Adicionar Serviço</span>
                 <button class="close-btn" onclick="closeModal('serviceModal')">×</button>
             </div>
+
+            <input type="hidden" id="modal-service-id">
 
             <div class="form-group">
                 <label>Categoria do Serviço</label>
@@ -1143,7 +1145,7 @@
 
             <div class="form-group">
                 <label>Descrição (opcional)</label>
-                <textarea id="modal-service-description" placeholder="Descreva o que está incluído neste pacote" style="height: 80px;"></textarea>
+                <textarea id="modal-service-description" placeholder="Descreva o que está incluído neste pacote" style="height: 120px;"></textarea>
             </div>
 
             <div class="form-group">
@@ -1153,7 +1155,7 @@
 
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeModal('serviceModal')">Cancelar</button>
-                <button class="btn-primary" onclick="addCustomService()">Adicionar Serviço</button>
+                <button class="btn-primary" id="modal-service-btn" onclick="saveService()">Adicionar Serviço</button>
             </div>
         </div>
     </div>
@@ -2351,7 +2353,33 @@
             document.getElementById('modal-service-price').value = '';
         }
 
-        function addCustomService() {
+        function openAddServiceModal() {
+            document.getElementById('modal-service-id').value = '';
+            document.getElementById('modal-service-title').textContent = 'Adicionar Serviço';
+            document.getElementById('modal-service-btn').textContent = 'Adicionar Serviço';
+            document.getElementById('modal-service-category').value = '';
+            document.getElementById('modal-service-name').value = '';
+            document.getElementById('modal-service-description').value = '';
+            document.getElementById('modal-service-price').value = '';
+            openModal('serviceModal');
+        }
+
+        function openEditServiceModal(id) {
+            const service = myServices.find(s => s.id === id);
+            if (!service) return;
+
+            document.getElementById('modal-service-id').value = id;
+            document.getElementById('modal-service-title').textContent = 'Editar Serviço';
+            document.getElementById('modal-service-btn').textContent = 'Salvar Alterações';
+            document.getElementById('modal-service-category').value = service.category;
+            document.getElementById('modal-service-name').value = service.name;
+            document.getElementById('modal-service-description').value = service.description || '';
+            document.getElementById('modal-service-price').value = service.price;
+            openModal('serviceModal');
+        }
+
+        function saveService() {
+            const id = document.getElementById('modal-service-id').value;
             const category = document.getElementById('modal-service-category').value;
             const name = document.getElementById('modal-service-name').value;
             const description = document.getElementById('modal-service-description').value;
@@ -2362,18 +2390,37 @@
                 return;
             }
 
-            myServices.push({
-                id: Date.now(),
-                category,
-                name,
-                description,
-                price,
-                createdAt: new Date().toLocaleDateString('pt-BR')
-            });
+            if (id) {
+                // Editar serviço existente
+                const index = myServices.findIndex(s => s.id === parseInt(id));
+                if (index > -1) {
+                    myServices[index] = {
+                        ...myServices[index],
+                        category,
+                        name,
+                        description,
+                        price
+                    };
+                }
+            } else {
+                // Adicionar novo serviço
+                myServices.push({
+                    id: Date.now(),
+                    category,
+                    name,
+                    description,
+                    price,
+                    createdAt: new Date().toLocaleDateString('pt-BR')
+                });
+            }
 
             localStorage.setItem('myServices', JSON.stringify(myServices));
             closeModal('serviceModal');
             renderMyServices();
+        }
+
+        function addCustomService() {
+            openAddServiceModal();
         }
 
         function deleteService(id) {
@@ -2412,9 +2459,12 @@
                             ${grouped[category].map(service => `
                                 <div class="service-package">
                                     <div class="service-package-title">${service.name}</div>
-                                    ${service.description ? `<p style="font-size: 12px; color: #6b7280; margin: 6px 0;">${service.description}</p>` : ''}
+                                    ${service.description ? `<p style="font-size: 12px; color: #6b7280; margin: 6px 0; white-space: pre-wrap;">${service.description}</p>` : ''}
                                     <div class="service-package-price">R$ ${service.price.toLocaleString('pt-BR')}</div>
-                                    <button class="btn-secondary" style="width: 100%; margin-top: 8px; padding: 6px; font-size: 12px;" onclick="deleteService(${service.id})">🗑️ Deletar</button>
+                                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                        <button class="btn-primary" style="flex: 1; padding: 6px; font-size: 12px;" onclick="openEditServiceModal(${service.id})">✏️ Editar</button>
+                                        <button class="btn-secondary" style="flex: 1; padding: 6px; font-size: 12px;" onclick="deleteService(${service.id})">🗑️ Deletar</button>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
