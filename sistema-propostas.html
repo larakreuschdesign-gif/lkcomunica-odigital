@@ -612,6 +612,93 @@
             background: #e5e7eb;
         }
 
+        /* SERVIÇOS CUSTOMIZADOS */
+        .service-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .service-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #E91E63;
+        }
+
+        .service-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .service-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #030712;
+        }
+
+        .service-card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .service-card-actions button {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: none;
+            background: #f3f4f6;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .service-card-actions button:hover {
+            background: #e5e7eb;
+        }
+
+        .service-card-actions button.delete {
+            color: #dc2626;
+        }
+
+        .service-packages {
+            display: grid;
+            gap: 10px;
+        }
+
+        .service-package {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #E91E63;
+        }
+
+        .service-package-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #030712;
+            margin-bottom: 4px;
+        }
+
+        .service-package-price {
+            font-size: 14px;
+            font-weight: 700;
+            color: #E91E63;
+        }
+
+        .service-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .service-empty h3 {
+            color: #030712;
+            margin-bottom: 10px;
+        }
+
         /* FOOTER */
         footer {
             background: white;
@@ -989,10 +1076,12 @@
         <!-- SERVIÇOS -->
         <div id="servicos" class="page">
             <div style="padding: 30px;">
-                <h2>Biblioteca de Serviços</h2>
-                <p style="color: #6b7280; margin-bottom: 30px;">Gerencie seus serviços e precificação</p>
+                <h2>Meus Serviços</h2>
+                <p style="color: #6b7280; margin-bottom: 30px;">Customize seus serviços e precificação</p>
 
-                <div id="services-table-container"></div>
+                <button class="btn-primary" onclick="openServiceModal()" style="margin-bottom: 30px;">➕ Adicionar Serviço</button>
+
+                <div id="my-services-container" style="display: grid; gap: 20px;"></div>
             </div>
         </div>
     </div>
@@ -1023,6 +1112,50 @@
         </div>
     </div>
 
+    <!-- MODAL NOVO SERVIÇO -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <span>Adicionar Serviço</span>
+                <button class="close-btn" onclick="closeModal('serviceModal')">×</button>
+            </div>
+
+            <div class="form-group">
+                <label>Categoria do Serviço</label>
+                <select id="modal-service-category" style="width: 100%;">
+                    <option value="">Selecione uma categoria</option>
+                    <option value="Social Media">Social Media</option>
+                    <option value="Design Gráfico">Design Gráfico</option>
+                    <option value="Criação de Conteúdo">Criação de Conteúdo</option>
+                    <option value="Planejamento Estratégico">Planejamento Estratégico</option>
+                    <option value="Identidade Visual">Identidade Visual</option>
+                    <option value="StoryMaker">StoryMaker</option>
+                    <option value="Edição de Vídeo">Edição de Vídeo</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Nome do Pacote</label>
+                <input type="text" id="modal-service-name" placeholder="Ex: Social Media - 1 conteúdo/semana">
+            </div>
+
+            <div class="form-group">
+                <label>Descrição (opcional)</label>
+                <textarea id="modal-service-description" placeholder="Descreva o que está incluído neste pacote" style="height: 80px;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Preço Base (R$)</label>
+                <input type="number" id="modal-service-price" placeholder="1180" min="0" step="10">
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('serviceModal')">Cancelar</button>
+                <button class="btn-primary" onclick="addCustomService()">Adicionar Serviço</button>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <p>© 2024 LK Comunicação Digital - Sistema de Propostas Comerciais</p>
     </footer>
@@ -1031,6 +1164,7 @@
         // DADOS
         let proposals = JSON.parse(localStorage.getItem('proposals')) || [];
         let clients = JSON.parse(localStorage.getItem('clients')) || [];
+        let myServices = JSON.parse(localStorage.getItem('myServices')) || [];
         let currentStep = 1;
         let selectedServices = [];
         let currentProposal = {};
@@ -1217,7 +1351,8 @@
         }
 
         function renderServicesGrid() {
-            const html = defaultServices.map(service => `
+            const servicesToUse = getAvailableServicesForWizard();
+            const html = servicesToUse.map(service => `
                 <div class="service-item ${selectedServices.find(s => s.id === service.id) ? 'selected' : ''}" onclick="toggleService(${service.id})">
                     <input type="checkbox" ${selectedServices.find(s => s.id === service.id) ? 'checked' : ''}>
                     <label>${service.name}</label>
@@ -1228,7 +1363,8 @@
         }
 
         function toggleService(id) {
-            const service = defaultServices.find(s => s.id === id);
+            const servicesToUse = getAvailableServicesForWizard();
+            const service = servicesToUse.find(s => s.id === id);
             const index = selectedServices.findIndex(s => s.id === id);
             if (index > -1) {
                 selectedServices.splice(index, 1);
@@ -1421,9 +1557,108 @@
             renderClients();
         }
 
+        // FUNÇÕES DE SERVIÇOS CUSTOMIZADOS
+        function openServiceModal() {
+            document.getElementById('serviceModal').classList.add('active');
+            document.getElementById('modal-service-category').value = '';
+            document.getElementById('modal-service-name').value = '';
+            document.getElementById('modal-service-description').value = '';
+            document.getElementById('modal-service-price').value = '';
+        }
+
+        function addCustomService() {
+            const category = document.getElementById('modal-service-category').value;
+            const name = document.getElementById('modal-service-name').value;
+            const description = document.getElementById('modal-service-description').value;
+            const price = parseInt(document.getElementById('modal-service-price').value);
+
+            if (!category || !name || !price) {
+                alert('Preencha categoria, nome e preço!');
+                return;
+            }
+
+            myServices.push({
+                id: Date.now(),
+                category,
+                name,
+                description,
+                price,
+                createdAt: new Date().toLocaleDateString('pt-BR')
+            });
+
+            localStorage.setItem('myServices', JSON.stringify(myServices));
+            closeModal('serviceModal');
+            renderMyServices();
+        }
+
+        function deleteService(id) {
+            if (confirm('Tem certeza que deseja deletar este serviço?')) {
+                myServices = myServices.filter(s => s.id !== id);
+                localStorage.setItem('myServices', JSON.stringify(myServices));
+                renderMyServices();
+            }
+        }
+
+        function renderMyServices() {
+            if (myServices.length === 0) {
+                document.getElementById('my-services-container').innerHTML = `
+                    <div class="service-empty">
+                        <h3>Nenhum serviço customizado</h3>
+                        <p>Clique em "Adicionar Serviço" para começar</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const grouped = {};
+            myServices.forEach(service => {
+                if (!grouped[service.category]) {
+                    grouped[service.category] = [];
+                }
+                grouped[service.category].push(service);
+            });
+
+            let html = '';
+            Object.keys(grouped).forEach(category => {
+                html += `
+                    <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
+                        <h3 style="margin-bottom: 15px; color: #E91E63;">${category}</h3>
+                        <div style="display: grid; gap: 10px;">
+                            ${grouped[category].map(service => `
+                                <div class="service-package">
+                                    <div class="service-package-title">${service.name}</div>
+                                    ${service.description ? `<p style="font-size: 12px; color: #6b7280; margin: 6px 0;">${service.description}</p>` : ''}
+                                    <div class="service-package-price">R$ ${service.price.toLocaleString('pt-BR')}</div>
+                                    <button class="btn-secondary" style="width: 100%; margin-top: 8px; padding: 6px; font-size: 12px;" onclick="deleteService(${service.id})">🗑️ Deletar</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('my-services-container').innerHTML = html;
+        }
+
+        function getAvailableServicesForWizard() {
+            if (myServices.length > 0) {
+                return myServices.map(s => ({
+                    id: s.id,
+                    name: `${s.name} (${s.category})`,
+                    category: s.category,
+                    ideal: s.price,
+                    min: Math.round(s.price * 0.8),
+                    premium: Math.round(s.price * 1.3),
+                    complexity: 'média'
+                }));
+            }
+            return defaultServices;
+        }
+
         // INIT
         renderServicesGrid();
         updateDashboard();
+        renderMyServices();
     </script>
 </body>
 </html>
