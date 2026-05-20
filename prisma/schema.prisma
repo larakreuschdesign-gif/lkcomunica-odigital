@@ -1,0 +1,329 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ============================================
+// Autenticação e Usuários
+// ============================================
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String     @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+
+  // Empresa
+  companyName   String?
+  companyLogo   String?
+  companyColor  String?     @default("#2563eb")
+  website       String?
+  phone         String?
+
+  // Dados de cobrança
+  planType      String     @default("free") // free, starter, professional, enterprise
+  subscriptionStatus String  @default("active") // active, canceled, expired
+
+  accounts      Account[]
+  sessions      Session[]
+
+  clientes      Cliente[]
+  propostas     Proposta[]
+  servicos      Servico[]
+  templates     Template[]
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([email])
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// Clientes
+// ============================================
+
+model Cliente {
+  id              String   @id @default(cuid())
+
+  nomeEmpresa     String
+  responsavel     String
+  email           String
+  whatsapp        String?
+  segmento        String?  // ex: varejo, tech, saude, etc
+  cidade          String?
+  estado          String?
+  instagram       String?
+  website         String?
+  porteEmpresa    String?  // startup, pequena, media, grande
+  observacoes     String?  @db.Text
+
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  propostas       Proposta[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([email])
+}
+
+// ============================================
+// Serviços (Biblioteca)
+// ============================================
+
+model Servico {
+  id              String   @id @default(cuid())
+
+  nome            String
+  descricao       String   @db.Text
+  categoria       String   // social-media, branding, video, design, consultoria, etc
+
+  // Precificação
+  valorMinimo     Decimal  @db.Decimal(10, 2)
+  valorIdeal      Decimal  @db.Decimal(10, 2)
+  valorPremium    Decimal  @db.Decimal(10, 2)
+
+  // Tempo
+  tempoMedioHoras Int
+
+  // Complexidade
+  complexidade    String   // baixa, media, alta
+
+  // Margem
+  margemPadrao    Decimal  @db.Decimal(5, 2) @default(40)
+
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  servicosPropostas ServicoPropostal[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ============================================
+// Propostas Comerciais
+// ============================================
+
+model Proposta {
+  id                   String   @id @default(cuid())
+
+  // Identificação
+  numero              String   @unique @default(cuid())
+  nomeProjeto         String
+  descricaoEscopo     String   @db.Text
+  objetivo            String   @db.Text
+
+  // Cliente
+  clienteId           String
+  cliente             Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  // Status
+  status              String   @default("rascunho") // rascunho, enviada, visualizada, aprovada, recusada
+
+  // Valores
+  valorTotal          Decimal  @db.Decimal(12, 2)
+  margem              Decimal  @db.Decimal(5, 2)
+  taxaExtra           Decimal  @db.Decimal(12, 2) @default(0)
+  desconto            Decimal  @db.Decimal(12, 2) @default(0)
+
+  // Condições
+  condicoesPagamento  String
+  prazo               Int      // em dias
+  urgencia            String   @default("normal") // normal, alta, critica
+  condicoes           String?  @db.Text
+
+  // IA
+  conteudoGeradoIA    Boolean  @default(false)
+
+  // Metadados
+  versao              Int      @default(1)
+  hash                String?  // para detecção de mudanças
+
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  servicosPropostas   ServicoPropostal[]
+  historico           HistoricoPropostal[]
+  documentos          DocumentoPropostal[]
+
+  dataEnvio           DateTime?
+  dataVisualizacao    DateTime?
+  dataAprovacao       DateTime?
+  dataExpiracao       DateTime?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([clienteId])
+  @@index([userId])
+  @@index([status])
+}
+
+model ServicoPropostal {
+  id              String   @id @default(cuid())
+
+  propostaId      String
+  proposta        Proposta @relation(fields: [propostaId], references: [id], onDelete: Cascade)
+
+  servicoId       String
+  servico         Servico  @relation(fields: [servicoId], references: [id], onDelete: Restrict)
+
+  quantidade      Int      @default(1)
+  valorUnitario   Decimal  @db.Decimal(10, 2)
+  valorTotal      Decimal  @db.Decimal(12, 2)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([propostaId, servicoId])
+}
+
+// ============================================
+// Documentos e Histórico
+// ============================================
+
+model DocumentoPropostal {
+  id              String   @id @default(cuid())
+
+  propostaId      String
+  proposta        Proposta @relation(fields: [propostaId], references: [id], onDelete: Cascade)
+
+  tipo            String   // pdf, assinatura, etc
+  url             String
+  nomeArquivo     String
+  versao          Int      @default(1)
+
+  createdAt       DateTime @default(now())
+
+  @@index([propostaId])
+}
+
+model HistoricoPropostal {
+  id              String   @id @default(cuid())
+
+  propostaId      String
+  proposta        Proposta @relation(fields: [propostaId], references: [id], onDelete: Cascade)
+
+  acao            String   // criada, enviada, visualizada, aprovada, recusada, editada
+  descricao       String?
+  dadosAntigos    String?  @db.Text // JSON dos dados anteriores
+
+  createdAt       DateTime @default(now())
+
+  @@index([propostaId])
+}
+
+// ============================================
+// Templates
+// ============================================
+
+model Template {
+  id              String   @id @default(cuid())
+
+  nome            String
+  descricao       String?  @db.Text
+  categoria       String   // social, branding, video, etc
+
+  // Conteúdo
+  estrutura       String   @db.Text // JSON da estrutura do template
+  estiloCustomizado String? @db.Text // JSON de customizações CSS
+
+  // Dados
+  isPublico       Boolean  @default(false)
+  isDefault       Boolean  @default(false)
+
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ============================================
+// Configurações e Integração
+// ============================================
+
+model ConfiguracaoEmpresa {
+  id                  String   @id @default(cuid())
+
+  // Email
+  emailSmtp           String?
+  emailSenha          String?
+  emailRemetente      String?
+
+  // IA
+  chaveOpenAI         String?
+
+  // Stripe (futuro)
+  chaveStripe         String?
+
+  // Dados gerais
+  nomeEmpresa         String
+  cnpj                String?
+  endereco            String?
+  telefone            String?
+  website             String?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// ============================================
+// Analytics e Logs
+// ============================================
+
+model Log {
+  id              String   @id @default(cuid())
+
+  tipo            String   // proposta_criada, proposta_enviada, etc
+  descricao       String?
+  usuarioId       String?
+  dados           String?  @db.Text
+
+  createdAt       DateTime @default(now())
+
+  @@index([usuarioId])
+}
