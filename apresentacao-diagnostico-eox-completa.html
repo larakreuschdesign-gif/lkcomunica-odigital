@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Digital EOX - Apresentação Completa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .slide {
+            display: none !important;
+            width: 100%;
+            padding: 60px;
+            overflow-y: auto;
+            animation: fadeIn 0.5s ease-in;
+            line-height: 1.6;
+        }
+
+        .slide.active {
+            display: block !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Cores */
+        .marca-rosa { color: #DD1B6A; }
+        .bg-rosa { background-color: #DD1B6A; }
+
+        /* Capa */
+        .slide-title {
+            text-align: center;
+            color: white;
+            background: linear-gradient(135deg, #DD1B6A 0%, #C0124A 100%);
+            padding: 80px 60px;
+        }
+
+        .slide-title h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+        }
+
+        .slide-title p {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+
+        /* Títulos dos slides */
+        h2 {
+            font-size: 2em;
+            color: white;
+            background-color: #DD1B6A;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        h3 {
+            font-size: 1.5em;
+            color: #DD1B6A;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-left: 5px solid #DD1B6A;
+            padding-left: 15px;
+        }
+
+        /* Parágrafos */
+        p {
+            margin-bottom: 15px;
+            font-size: 1em;
+            text-align: justify;
+        }
+
+        /* Listas */
+        ul {
+            margin: 15px 0 15px 30px;
+        }
+
+        ul li {
+            margin-bottom: 10px;
+            line-height: 1.8;
+        }
+
+        /* Tabelas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        table th {
+            background-color: #DD1B6A;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.95em;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tr:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #DD1B6A;
+            border-radius: 4px;
+        }
+
+        .card strong {
+            color: #DD1B6A;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .status-atencao {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-critico {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Navegação */
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: #f5f5f5;
+            border-top: 1px solid #ddd;
+        }
+
+        button {
+            background-color: #DD1B6A;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1em;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #C0124A;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .slide-counter {
+            font-weight: bold;
+            color: #DD1B6A;
+            font-size: 1.1em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #e0e0e0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #DD1B6A;
+            transition: width 0.3s ease;
+        }
+
+        /* Espaçamento */
+        .mt-20 { margin-top: 20px; }
+        .mb-20 { margin-bottom: 20px; }
+
+        /* Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .slide {
+                padding: 40px;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Capa -->
+        <div class="slide active slide-title">
+            <h1>Diagnóstico EOX Tecnologia</h1>
+            <p>Análise estratégica de posicionamento digital</p>
+            <p style="font-size: 1.1em; margin-top: 40px;">Junho de 2026</p>
+        </div>
+
+        <!-- Slide 2: Objeto da Análise -->
+        <div class="slide">
+            <h2>📋 Objeto da Análise</h2>
+
+            <h3>Canais Analisados</h3>
+            <ul>
+                <li><strong>Instagram:</strong> @eox_tecnologia</li>
+                <li><strong>LinkedIn:</strong> /company/eoxtecnologia</li>
+                <li><strong>Site:</strong> www.eox.com.br</li>
+            </ul>
+
+            <h3>Segmento</h3>
+            <p>CRM B2B para indústrias e distribuidoras</p>
+
+            <h3>Visão Geral do Diagnóstico</h3>
+            <p>A EOX Tecnologia é uma empresa com mais de 20 anos de mercado, 1.600 usuários ativos e credenciais sólidas para atender indústrias e distribuidoras B2B. Porém, sua presença digital está muito fora do potencial que a empresa representa. Existe um descompasso crítico entre a solidez do produto e a forma como ele é comunicado digitalmente, gerando perda de oportunidades de autoridade, geração de leads e crescimento de marca.</p>
+        </div>
+
+        <!-- Slide 3: Posicionamento de Marca - Avaliação Geral -->
+        <div class="slide">
+            <h2>01. Posicionamento de Marca</h2>
+
+            <h3>Avaliação Geral</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Critério</th>
+                        <th>Nota</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Clareza da proposta de valor da marca</td>
+                        <td>6/10</td>
+                        <td><span class="status-badge status-atencao">Atenção</span></td>
+                    </tr>
+                    <tr>
+                        <td>Diferencial competitivo perceptível</td>
+                        <td>5/10</td>
+                        <td><span class="status-badge status-atencao">Atenção</span></td>
+                    </tr>
+                    <tr>
+                        <td>Coerência entre os canais</td>
+                        <td>5/10</td>
+                        <td><span class="status-badge status-atencao">Atenção</span></td>
+                    </tr>
+                    <tr>
+                        <td>Transmissão de autoridade e confiança</td>
+                        <td>6/10</td>
+                        <td><span class="status-badge status-atencao">Atenção</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Slide 4: Proposta de Valor -->
+        <div class="slide">
+            <h2>01. Posicionamento de Marca</h2>
+
+            <h3>Proposta de Valor | Está clara?</h3>
+            <p>A EOX tem uma proposta bem definida no papel: CRM com alta performance para vendas e pós-vendas, especializado em indústrias e distribuidoras B2B. Porém, na comunicação digital essa clareza se perde. O site demora para deixar óbvio o nicho de atuação; o Instagram comunica de forma genérica como qualquer empresa de tech; e o LinkedIn, apesar de ser o canal mais maduro, ainda poderia extrair muito mais valor dos mais de 20 anos de experiência.</p>
+        </div>
+
+        <!-- Slide 5: Diferencial Competitivo e Coerência -->
+        <div class="slide">
+            <h2>01. Posicionamento de Marca</h2>
+
+            <h3>Diferencial Competitivo | É perceptível?</h3>
+            <p>O grande diferencial da EOX é o CRM desenvolvido especificamente para a realidade de indústrias e distribuidoras brasileiras, com integração nativa de telefonia e ERP, raramente aparece como protagonista na comunicação. O posicionamento de especialista para um nicho é um ativo poderoso que está sendo menos aproveitado em todos os canais.</p>
+
+            <h3 class="mt-20">Coerência Entre os Canais</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Canal</th>
+                        <th>Descrição</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Site</strong></td>
+                        <td>Linguagem técnica, mais institucional, focada em funcionalidades. Proposta de valor aparece, mas não de forma imediata.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LinkedIn</strong></td>
+                        <td>Tom mais corporativo e humanizado. Porém sem estratégia consistente de autoridade e geração de demanda.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Instagram</strong></td>
+                        <td>Comunicação genérica, desalinhada do ICP (indústrias B2B). Frequência e identidade visual frágeis.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Coerência Geral</strong></td>
+                        <td>Média. Existe uma identidade de marca reconhecível visualmente, mas a mensagem estratégica não é uniforme.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Slide 6: Instagram - Dados do Perfil -->
+        <div class="slide">
+            <h2>02. Análise do Instagram - @eox_tecnologia</h2>
+
+            <h3>Dados do Perfil</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Métrica</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Seguidores</td>
+                        <td>348</td>
+                    </tr>
+                    <tr>
+                        <td>Publicações</td>
+                        <td>257 posts</td>
+                    </tr>
+                    <tr>
+                        <td>Seguindo</td>
+                        <td>101</td>
+                    </tr>
+                    <tr>
+                        <td>Bio</td>
+                        <td>Solução completa de CRM com alta performance para vendas e pós-vendas | +20 anos transformando negócios | +1600 usuários ativos | Fale com um especialista</td>
+                    </tr>
+                    <tr>
+                        <td>Link na bio</td>
+                        <td>Não identificado link de conversão (landing page, WhatsApp, etc.)</td>
+                    </tr>
+                    <tr>
+                        <td>Foto de perfil</td>
+                        <td>Logo institucional - adequada</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Slide 7: Instagram - Análise Detalhada -->
+        <div class="slide">
+            <h2>02. Análise do Instagram</h2>
+
+            <h3>Análise Detalhada</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Critério</th>
+                        <th>Nota</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Bio (clareza e atração)</td>
+                        <td>6/10</td>
+                        <td><span class="status-badge status-atencao">Atenção</span></td>
+                    </tr>
+                    <tr>
+                        <td>Identidade visual e padronização</td>
+                        <td>5/10</td>
+                        <td><span class="status-badge status-atencao">Atenção</span></td>
+                    </tr>
+                    <tr>
+                        <td>Qualidade dos criativos</td>
+                        <td>5/10</td>
+                        <td><span class="status-badge status-atencao">Atenção</span></td>
+                    </tr>
+                    <tr>
+                        <td>Frequência de publicações</td>
+                        <td>4/10</td>
+                        <td><span class="status-badge status-critico">Crítico</span></td>
+                    </tr>
+                    <tr>
+                        <td>Tipos de conteúdo utilizados</td>
+                        <td>4/10</td>
+                        <td><span class="status-badge status-critico">Crítico</span></td>
+                    </tr>
+                    <tr>
+                        <td>Clareza das legendas e CTAs</td>
+                        <td>4/10</td>
+                        <td><span class="status-badge status-critico">Crítico</span></td>
+                    </tr>
+                    <tr>
+                        <td>Humanização da marca</td>
+                        <td>4/10</td>
+                        <td><span class="status-badge status-critico">Crítico</span></td>
+                    </tr>
+                    <tr>
+                        <td>Prova social</td>
+                        <td>3/10</td>
+                        <td><span class="status-badge status-critico">Crítico</span></td>
+                    </tr>
+                    <tr>
+                        <td>Posicionamento e percepção de valor</td>
+                        <td>4/10</td>
+                        <td><span class="status-badge status-critico">Crítico</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Slide 8: Instagram - Bio e Identidade Visual -->
+        <div class="slide">
+            <h2>02. Análise do Instagram</h2>
+
+            <h3>Bio</h3>
+            <p>A bio tem os elementos certos: proposta de valor, números de autoridade e CTA. Porém falta um link de conversão ativo (WhatsApp, landing page ou linktree). A tag '@eox_tecnologia' não comunica nicho. Uma bio mais estratégica poderia ser:</p>
+            <div class="card">
+                <strong>CRM para indústrias e distribuidoras B2B | +20 anos | +1.600 usuários | 👇 Fale com um especialista</strong>
+            </div>
+
+            <h3 class="mt-20">Identidade Visual e Frequência</h3>
+            <p>Com 257 posts publicados para apenas 348 seguidores, há claramente um problema de audiência e não de volume. A taxa de crescimento de seguidores por post é extremamente baixa, indicando que o conteúdo não está gerando alcance orgânico relevante nem conversões de visitante para seguidor.</p>
+            <p>Não há padronização visual clara no feed que sinalize sofisticação ou especialização, algo essencial para uma empresa B2B que vende confiança e performance.</p>
+        </div>
+
+        <!-- Slide 9: Instagram - Tipos de Conteúdo e Pontos Fortes -->
+        <div class="slide">
+            <h2>02. Análise do Instagram</h2>
+
+            <h3>Tipos de Conteúdo Identificados</h3>
+            <p>Com base nas publicações visíveis, os temas incluem: dados/estatísticas do mercado de CRM; datas comemorativas (Páscoa, Dia da Mulher, aniversário de Curitiba); novos colaboradores e cultura interna; eventos (EOX On The Road); posts educativos sobre vendas B2B e WhatsApp. O mix é desequilibrado, muito conteúdo institucional e comemorativo, pouco conteúdo estratégico voltado à dor do ICP (gestores comerciais de indústrias e distribuidoras).</p>
+
+            <h3 class="mt-20">Pontos Fortes</h3>
+            <ul>
+                <li>Existência de conteúdo educativo sobre vendas B2B e CRM</li>
+                <li>Uso de dados e estatísticas em alguns posts</li>
+                <li>Presença de eventos e ações de relacionamento documentados</li>
+                <li>Bio com números de credibilidade (+20 anos, +1.600 usuários)</li>
+            </ul>
+        </div>
+
+        <!-- Slide 10: Instagram - Pontos de Atenção e Oportunidades -->
+        <div class="slide">
+            <h2>02. Análise do Instagram</h2>
+
+            <h3>Pontos de Atenção</h3>
+            <ul>
+                <li>348 seguidores para uma empresa com 20 anos e 1.600 clientes é um número muito baixo, evidencia que a audiência não está sendo construída</li>
+                <li>Ausência de Reels com potencial de alcance orgânico</li>
+                <li>Conteúdo de datas comemorativas sem estratégia de aproveitamento para B2B</li>
+                <li>Falta de depoimentos de clientes, cases e resultados concretos</li>
+                <li>Sem CTAs claros e consistentes nas legendas</li>
+                <li>Ausência de uma persona/ICP bem definida como alvo do conteúdo</li>
+            </ul>
+
+            <h3 class="mt-20">Oportunidades de Melhoria</h3>
+            <ul>
+                <li>Criar série de Reels educativos: 'Como a indústria X aumentou X% em vendas com CRM'</li>
+                <li>Depoimentos de clientes em vídeo curto ou estáticos</li>
+                <li>Série de carrosséis com dados do setor industrial + solução EOX</li>
+                <li>Link na bio com fluxo de conversão ativo (WhatsApp ou landing page)</li>
+                <li>Calendário editorial focado nas dores do gestor comercial industrial</li>
+                <li>Bastidores de implantação e onboarding de clientes</li>
+            </ul>
+        </div>
+
+        <!-- Slide 11: LinkedIn - Dados e Análise -->
+        <div class="slide">
+            <h2>03. Análise do LinkedIn - /company/eoxtecnologia</h2>
+
+            <h3>Dados do Perfil</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Métrica</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Seguidores</td>
+                        <td>3.637</td>
+                    </tr>
+                    <tr>
+                        <td>Descrição</td>
+                        <td>EOX Tecnologia — Solução omnichannel em vendas e atendimento para indústrias e distribuidores B2B</td>
+                    </tr>
+                    <tr>
+                        <td>Posicionamento</td>
+                        <td>Presente, porém genérico para o potencial da empresa</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="mt-20">Análise Detalhada</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Critério</th>
+                        <th>Nota</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Qualidade e completude da página</td>
+                        <td>6/10</td>
+                        <td><span class="status-badge status-atencao">Atenção</span></td>
+                    </tr>
+                    <tr>
+                        <td>Frequência e consistência de publicações</td>
+                        <td>5/10</td>
+                        <td><span class="status-badge status-atencao">Atenção</span></td>
+                    </tr>
+                    <tr>
+                        <td>Construção de autoridade</td>
+                        <td>4/10</td>
+                        <td><span class="status-badge status-critico">Crítico</span></td>
+                    </tr>
+                    <tr>
+                        <td>Conteúdo corporativo e educativo</td>
+                        <td>5/10</td>
+                        <td><span class="status-badge status-atencao">Atenção</span></td>
+                    </tr>
+                    <tr>
+                        <td>Engajamento e networking</td>
+                        <td>4/10</td>
+                        <td><span class="status-badge status-critico">Crítico</span></td>
+                    </tr>
+                    <tr>
+                        <td>Uso de cases e depoimentos</td>
+                        <td>3/10</td>
+                        <td><span class="status-badge status-critico">Crítico</span></td>
+                    </tr>
+                    <tr>
+                        <td>Estratégia de LinkedIn para B2B</td>
+                        <td>4/10</td>
+                        <td><span class="status-badge status-critico">Crítico</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Slide 12: LinkedIn - Posicionamento Institucional -->
+        <div class="slide">
+            <h2>03. Análise do LinkedIn</h2>
+
+            <h3>Posicionamento Institucional</h3>
+            <p>O LinkedIn é, de longe, o canal mais importante para uma empresa B2B como a EOX e o que tem mais potencial inexplorado. Com 3.637 seguidores (vs. 348 no Instagram), há uma audiência qualificada já presente. Porém, o conteúdo publicado ainda mistura posts corporativos leves (celebrações, contratações, datas comemorativas) com alguns educativos, sem uma linha editorial estratégica clara voltada à geração de demanda.</p>
+
+            <h3 class="mt-20">Conteúdo Observado</h3>
+            <p>Posts identificados incluem: celebração dos 20 anos da empresa; boas-vindas a novos colaboradores (eoxers); Feliz Páscoa; aniversário de Curitiba; Dia Internacional da Mulher com carrossel; visita a cliente estratégico (Grupo Mueller); dados sobre WhatsApp B2B. O tom é positivo, mas a estratégia de educação e geração de demanda é fraca. Não há série de conteúdo estruturada, nenhum uso de CEO/lideranças como vozes de autoridade, e pouquíssimos cases com dados mensuráveis.</p>
+        </div>
+
+        <!-- Slide 13: LinkedIn - Ponto Crítico -->
+        <div class="slide">
+            <h2>03. Análise do LinkedIn</h2>
+
+            <h3>Ponto Crítico: Company Page vs. Perfis Pessoais</h3>
+            <p><strong>Dado Estratégico Importante</strong></p>
+            <p>Em 2026, o algoritmo do LinkedIn (360 Brew) aloca apenas 5% do feed para Company Pages e 65% para perfis pessoais. A EOX que concentra todo o esforço na Company Page está publicando com 5% do alcance disponível. Ativar o CEO e lideranças como criadores de conteúdo pode multiplicar o alcance em até 13x, seja republicando o conteúdo da página ou publicando individualmente.</p>
+
+            <h3 class="mt-20">Pontos Fortes</h3>
+            <ul>
+                <li>Base de 3.637 seguidores — audiência B2B qualificada já formada</li>
+                <li>Histórico de publicações com diversidade de temas</li>
+                <li>Presença de conteúdo de relacionamento com clientes (visita ao Grupo Mueller)</li>
+                <li>Marca reconhecível no segmento de CRM para indústria</li>
+            </ul>
+        </div>
+
+        <!-- Slide 14: LinkedIn - Pontos de Atenção e Oportunidades -->
+        <div class="slide">
+            <h2>03. Análise do LinkedIn</h2>
+
+            <h3>Pontos de Atenção</h3>
+            <ul>
+                <li>Sem estratégia de LinkedIn para geração de leads B2B</li>
+                <li>Ausência de conteúdo de liderança (CEO, diretores), perda de alcance orgânico</li>
+                <li>Cases de clientes praticamente ausentes no feed</li>
+                <li>Conteúdo de datas comemorativas sem aproveitamento comercial estratégico</li>
+            </ul>
+
+            <h3 class="mt-20">Oportunidades de Melhoria</h3>
+            <ul>
+                <li>Ativar o CEO e pessoas importantes da empresa como voz de liderança no LinkedIn</li>
+                <li>Série semanal de carrosséis PDF: 'Gestão Comercial na Indústria', educação + posicionamento</li>
+                <li>Publicar cases de clientes com dados reais</li>
+                <li>Newsletter do LinkedIn sobre vendas B2B para indústrias</li>
+                <li>Employee advocacy: incentivar colaboradores a compartilhar conteúdo da empresa</li>
+            </ul>
+        </div>
+
+        <!-- Slide 15: Diagnóstico Estratégico - Problemas -->
+        <div class="slide">
+            <h2>04. Diagnóstico Estratégico</h2>
+
+            <h3>O que está impedindo a EOX de crescer digitalmente</h3>
+
+            <h3 class="mt-20">Problema #1 — Descompasso entre produto e comunicação</h3>
+            <p>A EOX tem um produto sólido com 20 anos de mercado, cases reais e 1.600 usuários ativos. Mas sua comunicação digital não transmite essa solidez. O resultado é uma percepção de valor inferior ao real — o que prejudica conversão, ticket médio percebido e capacidade de competir com CRMs mais jovens mas com marketing mais agressivo.</p>
+
+            <h3 class="mt-20">Problema #2 — Ausência de estratégia de geração de demanda digital</h3>
+            <p>Não há funil de conteúdo estruturado em nenhum canal. O Instagram gera pouco alcance e quase nenhuma conversão. O LinkedIn está subutilizado para B2B. O site não captura leads de topo de funil. A empresa provavelmente depende excessivamente de indicações e relacionamentos — o que limita o crescimento escalável.</p>
+
+            <h3 class="mt-20">Problema #3 — Audiência digital muito abaixo do potencial</h3>
+            <p>348 seguidores no Instagram para uma empresa com 1.600 clientes ativos é um indicador crítico. Mesmo que Instagram não seja o canal principal de conversão para B2B, essa audiência revela que a marca não está construindo presença digital de forma consistente em nenhum canal.</p>
+        </div>
+
+        <!-- Slide 16: Diagnóstico Estratégico - Problemas 4 e 5 -->
+        <div class="slide">
+            <h2>04. Diagnóstico Estratégico</h2>
+
+            <h3>Problema #4 — Cases não estão sendo amplificados</h3>
+            <p>A EOX tem 8 cases publicados no site com resultados reais (Fati Ferramentas +18% vendas, Mormaii cliente mais antigo, etc.). Porém esses ativos de prova social raramente aparecem nas redes sociais — um erro estratégico relevante. Cases bem contados são o conteúdo de maior poder de conversão em B2B.</p>
+
+            <h3 class="mt-20">Problema #5 — LinkedIn sem estratégia de personal brand das lideranças</h3>
+            <p>O CEO e lideranças da EOX não atuam como vozes de autoridade no LinkedIn. Em 2026, perfis pessoais recebem 65% do alcance do feed vs. apenas 5% para Company Pages. A EOX está, na prática, publicando com 5% da capacidade disponível.</p>
+        </div>
+
+        <!-- Slide 17: Oportunidades - Autoridade -->
+        <div class="slide">
+            <h2>04. Diagnóstico Estratégico</h2>
+
+            <h3>Oportunidades Identificadas</h3>
+
+            <h3 class="mt-20">🎯 Autoridade</h3>
+            <ul>
+                <li>Posicionar o CEO e pessoas de importância na empresa como referência no LinkedIn</li>
+                <li>Publicar cases com dados mensuráveis em todos os canais</li>
+                <li>Criar série de conteúdo educativo sobre gestão comercial industrial</li>
+                <li>Webinars com parceiros e clientes sobre tendências de CRM na indústria</li>
+            </ul>
+
+            <h3>📈 Geração de Leads</h3>
+            <ul>
+                <li>Landing pages segmentadas por vertical (metalurgia, têxtil, eletrodomésticos, saúde)</li>
+                <li>Materiais ricos (e-book, diagnóstico) para captura de leads de topo de funil</li>
+                <li>Anúncios no LinkedIn direcionados a diretores comerciais e gerentes de vendas de indústrias</li>
+                <li>Fluxo de e-mail nurturing para leads que não converteram em demo</li>
+            </ul>
+
+            <h3>📱 Redes Sociais</h3>
+            <ul>
+                <li>Instagram: Reels educativos e de cases com segmentação para B2B</li>
+                <li>LinkedIn: carrosséis semanais + perfil do CEO ativo</li>
+            </ul>
+        </div>
+
+        <!-- Slide 18: Como Podemos Ajudar -->
+        <div class="slide">
+            <h2>🛠️ Como Podemos Ajudar?</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Problema Identificado</th>
+                        <th>Impacto no Negócio</th>
+                        <th>Solução Recomendada</th>
+                        <th>Serviço LK</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Comunicação digital não traduz a solidez da empresa</td>
+                        <td>Percepção de valor abaixo do real — perda de leads para concorrentes com marketing mais agressivo</td>
+                        <td>Estratégia de posicionamento e mensagem central unificada</td>
+                        <td>Planejamento Estratégico + Branding</td>
+                    </tr>
+                    <tr>
+                        <td>LinkedIn sem estratégia B2B e sem voz de liderança</td>
+                        <td>Perda de 95% do alcance potencial no canal mais importante para B2B</td>
+                        <td>Programa de LinkedIn com Company Page + CEO como criador de conteúdo</td>
+                        <td>Posicionamento no LinkedIn + Produção de Conteúdo</td>
+                    </tr>
+                    <tr>
+                        <td>Instagram com 348 seguidores e conteúdo sem ICP definido</td>
+                        <td>Canal sem geração de demanda nem construção de audiência qualificada</td>
+                        <td>Calendário editorial focado no gestor comercial industrial + Reels de cases</td>
+                        <td>Gestão de Redes Sociais + Vídeos e Reels</td>
+                    </tr>
+                    <tr>
+                        <td>8 cases com resultados reais não amplificados</td>
+                        <td>Prova social desperdiçada — principal ativo de conversão B2B subutilizado</td>
+                        <td>Programa de amplificação de cases em todos os canais digitais</td>
+                        <td>Produção de Conteúdo + Captação de Conteúdo</td>
+                    </tr>
+                    <tr>
+                        <td>Site com hero genérico e sem captura de leads de topo de funil</td>
+                        <td>Visitantes de topo e meio de funil saem sem converter</td>
+                        <td>Reformulação do hero + landing pages segmentadas + materiais ricos</td>
+                        <td>Otimização de Site + Geração de Leads</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Slide 19: Orçamento - Contexto -->
+        <div class="slide">
+            <h2>💰 Orçamento e Proposta Comercial</h2>
+
+            <h3>Contexto e Diagnóstico</h3>
+            <p>Nosso objetivo é fortalecer o posicionamento digital da EOX por meio de uma comunicação mais estratégica, criativa e consistente, transformando os canais digitais em ferramentas de relacionamento, autoridade e geração de oportunidades de negócio.</p>
+            <p>O trabalho contempla planejamento, produção de conteúdo, gestão das redes sociais e suporte estratégico para ações de marketing, com foco em atingir decisores da indústria e ampliar a percepção de valor da marca.</p>
+
+            <h3 class="mt-20">As entregas incluem:</h3>
+            <ul>
+                <li>Planejamento estratégico</li>
+                <li>Gestão das redes sociais</li>
+                <li>Produção de conteúdo</li>
+                <li>Design e identidade visual</li>
+                <li>Produção de vídeos</li>
+                <li>Consultoria estratégica</li>
+                <li>Eventos corporativos</li>
+            </ul>
+        </div>
+
+        <!-- Slide 20: Orçamento - Detalhes dos Serviços -->
+        <div class="slide">
+            <h2>💰 Orçamento e Proposta Comercial</h2>
+
+            <h3>Planejamento Estratégico</h3>
+            <ul>
+                <li>Planejamento mensal de conteúdo</li>
+                <li>Definição de pautas estratégicas</li>
+                <li>Calendário editorial</li>
+                <li>Reuniões de alinhamento</li>
+                <li>Acompanhamento de resultados</li>
+            </ul>
+
+            <h3 class="mt-20">Gestão das Redes Sociais</h3>
+            <ul>
+                <li>Gestão de LinkedIn</li>
+                <li>Gestão de Instagram</li>
+                <li>Gestão de Facebook</li>
+                <li>Publicação dos conteúdos</li>
+                <li>Organização do calendário</li>
+            </ul>
+
+            <h3 class="mt-20">Produção de Conteúdo</h3>
+            <ul>
+                <li>Desenvolvimento de conteúdos institucionais</li>
+                <li>Conteúdos educativos</li>
+                <li>Conteúdos comerciais</li>
+                <li>Cases de sucesso</li>
+                <li>Bastidores</li>
+                <li>Conteúdo voltado para geração de autoridade</li>
+            </ul>
+        </div>
+
+        <!-- Slide 21: Orçamento - Design, Vídeos e Consultoria -->
+        <div class="slide">
+            <h2>💰 Orçamento e Proposta Comercial</h2>
+
+            <h3>Design e Identidade Visual</h3>
+            <ul>
+                <li>Criação de artes</li>
+                <li>Carrosséis</li>
+                <li>Posts estáticos</li>
+                <li>Templates para Stories</li>
+                <li>Adequação do conteúdo para cada plataforma</li>
+            </ul>
+
+            <h3 class="mt-20">Produção de Vídeos</h3>
+            <ul>
+                <li>Desenvolvimento de roteiros</li>
+                <li>Edição de vídeos enviados pela equipe</li>
+                <li>Captações mensais</li>
+                <li>Legendas dinâmicas</li>
+            </ul>
+
+            <h3 class="mt-20">Consultoria Estratégica</h3>
+            <ul>
+                <li>Diagnóstico contínuo da comunicação</li>
+                <li>Recomendações para campanhas de tráfego pago</li>
+                <li>Apoio em ações comerciais</li>
+                <li>Planejamento de campanhas</li>
+            </ul>
+
+            <h3 class="mt-20">Eventos Corporativos</h3>
+            <ul>
+                <li>Planejamento estratégico da comunicação do evento</li>
+                <li>Apoio na divulgação</li>
+                <li>Desenvolvimento de materiais digitais</li>
+                <li>Organização do cronograma de comunicação</li>
+            </ul>
+        </div>
+
+        <!-- Slide 22: Pacote Social Start -->
+        <div class="slide">
+            <h2>💰 Pacote Social Start</h2>
+
+            <p style="font-style: italic; color: #666; margin-bottom: 20px;">Gestão estratégica com 2 conteúdos semanais, desenvolvimento de posicionamento e fortalecimento da marca nas redes sociais. Reorganização da base: conteúdo consistente e LinkedIn em prioridade.</p>
+
+            <div style="background: linear-gradient(135deg, #DD1B6A 0%, #C0124A 100%); color: white; padding: 30px; border-radius: 8px; text-align: center; margin: 20px 0;">
+                <div style="font-size: 2.5em; font-weight: bold;">R$ 2.390 / mês</div>
+            </div>
+
+            <h3>Entregáveis</h3>
+            <ul>
+                <li>Planejamento estratégico de conteúdo mensal</li>
+                <li>Calendário editorial</li>
+                <li>1 reunião mensal</li>
+                <li>8 criativos mensais (posts, carrosséis e reels)</li>
+                <li>Conteúdos replicados e contextualizados entre plataformas</li>
+                <li>Gestão de LinkedIn (canal prioritário) + Instagram e Facebook, com linguagem adaptada a cada rede</li>
+                <li>Até 2 vídeos curtos por mês</li>
+                <li>Roteiros estratégicos</li>
+                <li>2 rodadas de aprovação mensais, com flexibilidade quinzenal para ajustes</li>
+                <li>Relatório mensal de performance orgânica</li>
+                <li>Publicação dos conteúdos</li>
+            </ul>
+        </div>
+
+        <!-- Slide 23: Pacote Social Pro -->
+        <div class="slide">
+            <h2>💰 Pacote Social Pro</h2>
+
+            <p style="font-style: italic; color: #666; margin-bottom: 20px;">Gestão completa com 3 conteúdos semanais, planejamento estratégico, análise de métricas e fortalecimento de autoridade digital.</p>
+
+            <div style="background: linear-gradient(135deg, #DD1B6A 0%, #C0124A 100%); color: white; padding: 30px; border-radius: 8px; text-align: center; margin: 20px 0;">
+                <div style="font-size: 2.5em; font-weight: bold;">R$ 3.190 / mês</div>
+            </div>
+
+            <h3>Tudo do pacote start, mas:</h3>
+            <ul>
+                <li>12 criativos mensais (em vez de 8)</li>
+                <li>Até 4 vídeos por mês, incluindo 1 vídeo demonstrativo de produto/processo</li>
+                <li>Produção de 2 artigos de blog/mês</li>
+                <li>Suporte ágil quinzenal extra para demandas pontuais</li>
+                <li>Apoio estratégico e estrutural na organização do evento/jantar corporativo: planejamento, convites e identidade visual</li>
+            </ul>
+        </div>
+
+        <!-- Slide 24: Comparativo -->
+        <div class="slide">
+            <h2>💰 Comparativo Rápido</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Start (Essencial)</th>
+                        <th>Pro (Intermediário)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Investimento mensal</strong></td>
+                        <td>R$ 2.390</td>
+                        <td>R$ 3.190</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Criativos / mês</strong></td>
+                        <td>8</td>
+                        <td>12</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vídeos / mês</strong></td>
+                        <td>2</td>
+                        <td>4</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Gestão LinkedIn + Instagram + Facebook</strong></td>
+                        <td>✓</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Artigos de blog (SEO)</strong></td>
+                        <td>—</td>
+                        <td>2 / mês</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Suporte/otimização de tráfego pago</strong></td>
+                        <td>—</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Apoio à organização do evento/jantar</strong></td>
+                        <td>—</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Relatórios</strong></td>
+                        <td>Mensal</td>
+                        <td>Quinzenal/Mensal</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="text-align: center; margin-top: 30px; font-size: 0.9em; color: #666;">LK Comunicação Digital | lkcomunicacaodigital.com.br | Junho de 2026</p>
+        </div>
+
+        <!-- Slide 25: Obrigado -->
+        <div class="slide" style="display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center;">
+                <h1 style="color: #DD1B6A; font-size: 3em; margin-bottom: 20px;">Obrigado!</h1>
+                <p style="font-size: 1.5em; color: #666; margin-bottom: 30px;">Estamos prontos para fortalecer o posicionamento digital da EOX</p>
+                <div style="margin-top: 40px;">
+                    <p style="font-size: 1.1em; color: #DD1B6A; font-weight: bold;">LK Comunicação Digital</p>
+                    <p style="color: #666;">lkcomunicacaodigital.com.br</p>
+                    <p style="color: #666; margin-top: 10px;">Junho de 2026</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="nav-controls">
+            <button id="prevBtn" onclick="changeSlide(-1)">← Anterior</button>
+            <span class="slide-counter"><span id="currentSlide">1</span> / <span id="totalSlides">25</span></span>
+            <button id="nextBtn" onclick="changeSlide(1)">Próximo →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = document.querySelectorAll('.slide').length;
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+
+            if (n > totalSlides) currentSlide = totalSlides;
+            if (n < 1) currentSlide = 1;
+
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[currentSlide - 1].classList.add('active');
+
+            document.getElementById('currentSlide').textContent = currentSlide;
+
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+
+        function changeSlide(n) {
+            currentSlide += n;
+            showSlide(currentSlide);
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowLeft') changeSlide(-1);
+            if (event.key === 'ArrowRight') changeSlide(1);
+        });
+
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>
