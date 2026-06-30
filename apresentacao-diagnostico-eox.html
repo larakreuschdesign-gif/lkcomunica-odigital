@@ -29,7 +29,6 @@
         .slide {
             display: none;
             width: 100%;
-            min-height: 100vh;
             padding: 60px;
             overflow-y: auto;
             animation: fadeIn 0.5s ease-in;
@@ -37,12 +36,6 @@
 
         .slide.active {
             display: block;
-        }
-
-        .slide.active.slide-title {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
         }
 
         @keyframes fadeIn {
@@ -61,14 +54,6 @@
             color: white;
             background: linear-gradient(135deg, #DD1B6A 0%, #C0124A 100%);
             padding: 80px 60px;
-            min-height: 100vh;
-        }
-
-        .slide.active.slide-title {
-            display: flex !important;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
         .slide-title h1 {
