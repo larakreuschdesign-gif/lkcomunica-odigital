@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diagnóstico EOX Tecnologia - Apresentação</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -11,10 +12,16 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: white;
-            color: #333;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8f9fa;
+            color: #2d3748;
+            line-height: 1.6;
         }
 
         .presentation {
@@ -28,47 +35,58 @@
             display: none !important;
             width: 100%;
             height: calc(100vh - 80px);
-            padding: 50px;
+            padding: 60px 80px;
             overflow-y: auto;
             background: white;
+            position: relative;
         }
 
         .slide.active {
-            display: block !important;
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        /* CAPA */
+        /* ===== COVER SLIDE ===== */
         .slide-capa {
             display: none !important;
-            background: linear-gradient(135deg, #DD1B6A 0%, #C0124A 50%, #A80A40 100%);
+            background: linear-gradient(135deg, #DD1B6A 0%, #C0124A 35%, #A80A40 100%);
             color: white;
             justify-content: center;
             align-items: center;
             text-align: center;
             position: relative;
             overflow: hidden;
+            padding: 0;
         }
 
         .slide-capa::before {
             content: '';
             position: absolute;
-            width: 400px;
-            height: 400px;
-            background: rgba(255, 255, 255, 0.1);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
             border-radius: 50%;
-            top: -100px;
-            right: -100px;
+            top: -200px;
+            right: -150px;
+            animation: float 6s ease-in-out infinite;
         }
 
         .slide-capa::after {
             content: '';
             position: absolute;
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 255, 255, 0.05);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
             border-radius: 50%;
-            bottom: -50px;
-            left: -50px;
+            bottom: -100px;
+            left: -100px;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(30px); }
         }
 
         .slide-capa.active {
@@ -81,251 +99,287 @@
         .capa-content {
             position: relative;
             z-index: 2;
-        }
-
-        .slide-capa .capa-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            opacity: 0.9;
-        }
-
-        .slide-capa h1 {
-            font-size: 4em;
-            margin-bottom: 15px;
-            font-weight: bold;
-            letter-spacing: -1px;
-            line-height: 1.1;
-        }
-
-        .slide-capa .capa-subtitle {
-            font-size: 1.8em;
-            opacity: 0.95;
-            margin-bottom: 30px;
-            font-weight: 300;
             max-width: 900px;
         }
 
-        .slide-capa .capa-highlight {
-            font-size: 1.2em;
-            opacity: 0.85;
-            margin-top: 40px;
-            padding-top: 40px;
-            border-top: 2px solid rgba(255, 255, 255, 0.3);
-            max-width: 800px;
-            font-style: italic;
+        .slide-capa .capa-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        /* Estilos gerais */
+        .slide-capa h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 5.5em;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.1;
+            letter-spacing: -2px;
+        }
+
+        .slide-capa .capa-subtitle {
+            font-size: 2em;
+            font-weight: 400;
+            opacity: 0.95;
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+
+        .slide-capa .capa-highlight {
+            font-size: 1.35em;
+            opacity: 0.85;
+            margin-top: 50px;
+            padding-top: 50px;
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            max-width: 700px;
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        /* ===== REGULAR SLIDES ===== */
         h1 {
-            font-size: 2.5em;
+            font-family: 'Poppins', sans-serif;
+            font-size: 3em;
             color: #DD1B6A;
-            margin-bottom: 30px;
-            border-bottom: 3px solid #DD1B6A;
-            padding-bottom: 15px;
+            margin-bottom: 40px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            border: none;
         }
 
         h2 {
+            font-family: 'Poppins', sans-serif;
             font-size: 1.8em;
-            color: #DD1B6A;
-            margin-top: 25px;
+            color: #2d3748;
+            margin-top: 30px;
             margin-bottom: 20px;
-            border-left: 5px solid #DD1B6A;
-            padding-left: 15px;
+            font-weight: 700;
+            border: none;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        h2::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #DD1B6A, #C0124A);
+            border-radius: 4px;
         }
 
         h3 {
+            font-family: 'Poppins', sans-serif;
             font-size: 1.3em;
-            color: #333;
-            margin-top: 20px;
+            color: #2d3748;
+            margin-top: 25px;
             margin-bottom: 15px;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         p {
-            font-size: 1em;
+            font-size: 1.05em;
             line-height: 1.8;
             margin-bottom: 15px;
+            color: #4a5568;
             text-align: justify;
         }
 
         ul {
-            margin: 15px 0 15px 30px;
-            line-height: 1.9;
+            margin: 20px 0 20px 40px;
+            line-height: 2;
         }
 
         ul li {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            color: #4a5568;
+            font-size: 1.05em;
         }
 
-        /* Tabelas */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background: white;
-            font-size: 0.95em;
-        }
-
-        table th {
-            background-color: #DD1B6A;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-weight: bold;
-        }
-
-        table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        /* Seções especiais */
+        /* ===== CARDS & BOXES ===== */
         .destaque {
-            background-color: #FFF0F5;
+            background: linear-gradient(135deg, #FFF0F5 0%, #FFF5FA 100%);
             border-left: 5px solid #DD1B6A;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 4px;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .titulo-secao {
-            background-color: #DD1B6A;
+            background: linear-gradient(90deg, #DD1B6A 0%, #C0124A 100%);
             color: white;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            font-weight: bold;
-            border-radius: 4px;
+            padding: 18px 25px;
+            margin-bottom: 25px;
+            font-size: 1.4em;
+            font-weight: 700;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(221, 27, 106, 0.2);
         }
 
-        /* Barra de navegação */
-        .nav-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 40px;
-            background: #f5f5f5;
-            border-top: 1px solid #ddd;
-            height: 80px;
-        }
-
-        button {
-            background-color: #DD1B6A;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            font-size: 1em;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #C0124A;
-        }
-
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        .counter {
-            font-weight: bold;
-            color: #DD1B6A;
-            font-size: 1.1em;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background-color: #e0e0e0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 100;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background-color: #DD1B6A;
-        }
-
-        /* Conteúdo específico */
         .card {
             background: white;
             border-left: 4px solid #DD1B6A;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 4px;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
         }
 
+        .card:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* ===== TABLES ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            background: white;
+            font-size: 0.95em;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        table th {
+            background: linear-gradient(90deg, #DD1B6A 0%, #C0124A 100%);
+            color: white;
+            padding: 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.95em;
+            letter-spacing: 0.5px;
+        }
+
+        table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #4a5568;
+        }
+
+        table tr:last-child td {
+            border-bottom: none;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f7f9fc;
+        }
+
+        table tr:hover {
+            background-color: #f0f2f7;
+        }
+
+        /* ===== STATUS BADGES ===== */
         .status-badge {
             display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
+            padding: 6px 14px;
+            border-radius: 50px;
             font-size: 0.85em;
-            font-weight: bold;
+            font-weight: 700;
+            letter-spacing: 0.3px;
         }
 
         .atencao {
-            background-color: #fff3cd;
-            color: #856404;
+            background-color: #fef3c7;
+            color: #92400e;
         }
 
         .critico {
-            background-color: #f8d7da;
-            color: #721c24;
+            background-color: #fee2e2;
+            color: #991b1b;
         }
 
-        /* Grid */
+        /* ===== GRID LAYOUTS ===== */
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 20px 0;
+            gap: 30px;
+            margin: 25px 0;
         }
 
         .box {
             background: white;
-            border: 1px solid #e0e0e0;
-            padding: 15px;
-            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .box strong {
             color: #DD1B6A;
         }
 
-        /* Price box */
+        /* ===== PRICE BOXES ===== */
         .price-box {
             background: linear-gradient(135deg, #DD1B6A 0%, #C0124A 100%);
             color: white;
-            padding: 30px;
-            border-radius: 8px;
+            padding: 45px;
+            border-radius: 12px;
             text-align: center;
-            margin: 20px 0;
+            margin: 30px 0;
+            box-shadow: 0 8px 25px rgba(221, 27, 106, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .price-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(221, 27, 106, 0.35);
         }
 
         .price-box .price {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin: 20px 0;
+            font-family: 'Poppins', sans-serif;
+            font-size: 3.5em;
+            font-weight: 800;
+            margin: 25px 0;
         }
 
-        /* Slide Final */
+        /* ===== FINAL SLIDE ===== */
         .final-slide {
             display: none !important;
-            background: linear-gradient(135deg, #DD1B6A 0%, #C0124A 50%, #A80A40 100%);
+            background: linear-gradient(135deg, #DD1B6A 0%, #C0124A 35%, #A80A40 100%);
             color: white !important;
             justify-content: center;
             align-items: center;
             text-align: center;
             position: relative;
             overflow: hidden;
+            padding: 0;
+        }
+
+        .final-slide::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -200px;
+            right: -150px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .final-slide::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -100px;
+            left: -100px;
+            animation: float 8s ease-in-out infinite;
         }
 
         .final-slide.active {
@@ -335,87 +389,227 @@
             align-items: center;
         }
 
+        .final-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+        }
+
         .final-slide h1 {
             color: white !important;
             border: none;
-            font-size: 3.5em;
-            margin-bottom: 30px;
+            font-size: 4.5em;
+            margin-bottom: 50px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
         }
 
         .cta-box {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 40px;
-            border-radius: 15px;
-            margin: 30px 0;
-            max-width: 700px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            padding: 50px;
+            border-radius: 16px;
+            margin: 30px auto;
+            max-width: 800px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
         }
 
         .cta-box h2 {
             color: white !important;
             border: none;
-            font-size: 1.8em;
-            margin: 0 0 20px 0;
+            font-size: 2.2em;
+            margin: 0 0 35px 0;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
         }
 
         .next-steps {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
             text-align: left;
-            margin: 25px 0;
+            margin: 30px 0;
         }
 
         .step-item {
             display: flex;
             align-items: flex-start;
-            gap: 15px;
-            font-size: 1.05em;
-            line-height: 1.6;
+            gap: 20px;
+            font-size: 1.1em;
+            line-height: 1.7;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .step-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-left-color: rgba(255, 255, 255, 0.6);
         }
 
         .step-number {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            font-weight: 800;
             flex-shrink: 0;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4em;
         }
 
-        .cta-button {
-            background: white;
-            color: #DD1B6A;
-            padding: 15px 40px;
-            font-size: 1.2em;
-            font-weight: bold;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            margin-top: 25px;
-            transition: transform 0.3s, box-shadow 0.3s;
-            display: inline-block;
-        }
-
-        .cta-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            background: #f0f0f0;
+        .step-item strong {
+            color: white;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 5px;
         }
 
         .contact-info {
-            margin-top: 40px;
-            font-size: 0.95em;
+            margin-top: 50px;
+            font-size: 1em;
             opacity: 0.9;
         }
 
+        .contact-info p {
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .closing-message {
+            font-size: 1.25em;
+            margin-top: 40px;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        /* ===== NAVIGATION ===== */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 60px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            height: 80px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        button {
+            background: linear-gradient(90deg, #DD1B6A 0%, #C0124A 100%);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 0.95em;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 12px rgba(221, 27, 106, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(221, 27, 106, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .counter {
+            font-weight: 700;
+            color: #DD1B6A;
+            font-size: 1.05em;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background-color: #e2e8f0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #DD1B6A 0%, #C0124A 100%);
+            transition: width 0.4s ease;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {
+            .slide {
+                padding: 40px 50px;
+            }
+
             .grid-2 {
                 grid-template-columns: 1fr;
+            }
+
+            .slide-capa h1 {
+                font-size: 3.5em;
+            }
+
+            .final-slide h1 {
+                font-size: 3em;
+            }
+
+            h1 {
+                font-size: 2.2em;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            .cta-box {
+                padding: 35px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 30px;
+                height: calc(100vh - 60px);
+            }
+
+            .nav-bar {
+                padding: 12px 20px;
+                height: 60px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .slide-capa h1 {
+                font-size: 2.5em;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+
+            table th, table td {
+                padding: 10px 8px;
             }
         }
     </style>
@@ -429,11 +623,10 @@
         <!-- SLIDE 1: CAPA -->
         <div class="slide slide-capa active">
             <div class="capa-content">
-                <div class="capa-icon">📊</div>
-                <h1>Diagnóstico EOX Tecnologia</h1>
+                <div class="capa-badge">Diagnóstico Digital 2026</div>
+                <h1>EOX Tecnologia</h1>
                 <p class="capa-subtitle">Análise estratégica de posicionamento digital</p>
-                <p class="capa-highlight">Transformando solidez em visibilidade: um roadmap para crescimento digital escalável</p>
-                <p style="margin-top: 50px; font-size: 1em; opacity: 0.8;">Junho de 2026</p>
+                <p class="capa-highlight">Transformando solidez em visibilidade: um roadmap para crescimento digital escalável 🚀</p>
             </div>
         </div>
 
@@ -989,11 +1182,12 @@
         <div class="slide">
             <h1>Pacote Social Start</h1>
 
-            <p style="font-style: italic; color: #666; margin-bottom: 20px;">Gestão estratégica com 2 conteúdos semanais, desenvolvimento de posicionamento e fortalecimento da marca nas redes sociais. Reorganização da base: conteúdo consistente e LinkedIn em prioridade.</p>
+            <p style="font-size: 1.15em; color: #4a5568; margin-bottom: 30px;">Gestão estratégica com 2 conteúdos semanais, desenvolvimento de posicionamento e fortalecimento da marca nas redes sociais. Reorganização da base: conteúdo consistente e LinkedIn em prioridade.</p>
 
             <div class="price-box">
-                <div>Investimento Mensal</div>
-                <div class="price">R$ 2.390 / mês</div>
+                <div style="font-size: 1.1em; font-weight: 600; letter-spacing: 0.5px;">Investimento Mensal</div>
+                <div class="price">R$ 2.390</div>
+                <div style="font-size: 0.95em; opacity: 0.95;">/mês</div>
             </div>
 
             <h2>Entregáveis</h2>
@@ -1016,11 +1210,12 @@
         <div class="slide">
             <h1>Pacote Social Pro</h1>
 
-            <p style="font-style: italic; color: #666; margin-bottom: 20px;">Gestão completa com 3 conteúdos semanais, planejamento estratégico, análise de métricas e fortalecimento de autoridade digital.</p>
+            <p style="font-size: 1.15em; color: #4a5568; margin-bottom: 30px;">Gestão completa com 3 conteúdos semanais, planejamento estratégico, análise de métricas e fortalecimento de autoridade digital.</p>
 
             <div class="price-box">
-                <div>Investimento Mensal</div>
-                <div class="price">R$ 3.190 / mês</div>
+                <div style="font-size: 1.1em; font-weight: 600; letter-spacing: 0.5px;">Investimento Mensal</div>
+                <div class="price">R$ 3.190</div>
+                <div style="font-size: 0.95em; opacity: 0.95;">/mês</div>
             </div>
 
             <h2>Tudo do Pacote Start, Mais:</h2>
@@ -1091,49 +1286,51 @@
 
         <!-- SLIDE 20: PRÓXIMOS PASSOS E CTA -->
         <div class="slide final-slide active">
-            <h1>Vamos Começar?</h1>
+            <div class="final-content">
+                <h1>Vamos Começar? 🚀</h1>
 
-            <div class="cta-box">
-                <h2>Próximos Passos</h2>
-                <div class="next-steps">
-                    <div class="step-item">
-                        <div class="step-number">1</div>
-                        <div>
-                            <strong>Confirmação de Interesse</strong><br>
-                            Validar o diagnóstico e o escopo do projeto com a equipe EOX
+                <div class="cta-box">
+                    <h2>Próximos Passos</h2>
+                    <div class="next-steps">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <div>
+                                <strong>Confirmação de Interesse</strong><br>
+                                Validar o diagnóstico, escopo e modelo de trabalho com stakeholders da EOX
+                            </div>
                         </div>
-                    </div>
-                    <div class="step-item">
-                        <div class="step-number">2</div>
-                        <div>
-                            <strong>Alinhamento Estratégico</strong><br>
-                            Reunião com stakeholders para definir pautas, tom de voz e prioridades
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <div>
+                                <strong>Alinhamento Estratégico</strong><br>
+                                Reunião com equipe para definir pautas, tom de voz, personas e prioridades
+                            </div>
                         </div>
-                    </div>
-                    <div class="step-item">
-                        <div class="step-number">3</div>
-                        <div>
-                            <strong>Onboarding & Setup</strong><br>
-                            Acesso aos canais, coleta de conteúdo e criação de calendário editorial inicial
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <div>
+                                <strong>Onboarding & Setup</strong><br>
+                                Acesso aos canais, coleta de assets, conteúdo e criação de calendário editorial inicial
+                            </div>
                         </div>
-                    </div>
-                    <div class="step-item">
-                        <div class="step-number">4</div>
-                        <div>
-                            <strong>Kickoff do Projeto</strong><br>
-                            Início da produção de conteúdo e gestão das redes sociais
+                        <div class="step-item">
+                            <div class="step-number">4</div>
+                            <div>
+                                <strong>Kickoff do Projeto</strong><br>
+                                Início da produção estratégica de conteúdo e gestão das redes sociais
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <p style="font-size: 1.1em; margin-top: 40px; opacity: 0.9;">Estamos prontos para transformar o potencial digital da EOX em crescimento escalável 🚀</p>
+                <p class="closing-message">Estamos prontos para transformar o potencial digital da EOX em crescimento escalável e resultados mensuráveis.</p>
 
-            <div class="contact-info">
-                <p style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">LK Comunicação Digital</p>
-                <p>📧 contato@lkcomunicacao.com.br</p>
-                <p>🌐 lkcomunicacaodigital.com.br</p>
-                <p style="margin-top: 15px; opacity: 0.75;">Junho de 2026</p>
+                <div class="contact-info">
+                    <p style="font-size: 1.2em; font-weight: 700; margin-bottom: 12px;">LK Comunicação Digital</p>
+                    <p>📧 contato@lkcomunicacao.com.br</p>
+                    <p>🌐 lkcomunicacaodigital.com.br</p>
+                    <p style="margin-top: 20px; font-size: 0.95em; opacity: 0.8;">Junho de 2026</p>
+                </div>
             </div>
         </div>
     </div>
