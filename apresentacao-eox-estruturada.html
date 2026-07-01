@@ -103,16 +103,7 @@
         }
 
         .slide-capa .capa-badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-size: 0.9em;
-            font-weight: 600;
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
         }
 
         .slide-capa h1 {
@@ -395,101 +386,134 @@
         .final-content {
             position: relative;
             z-index: 2;
-            max-width: 900px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .final-content::before {
+            content: '✨';
+            position: absolute;
+            font-size: 3em;
+            top: -80px;
+            left: -60px;
+            opacity: 0.3;
+        }
+
+        .final-content::after {
+            content: '💡';
+            position: absolute;
+            font-size: 3em;
+            bottom: -60px;
+            right: -80px;
+            opacity: 0.3;
         }
 
         .final-slide h1 {
             color: white !important;
             border: none;
-            font-size: 4.5em;
-            margin-bottom: 50px;
+            font-size: 5.5em;
+            margin-bottom: 60px;
             font-family: 'Poppins', sans-serif;
             font-weight: 800;
+            letter-spacing: -1px;
         }
 
         .cta-box {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            padding: 50px;
-            border-radius: 16px;
-            margin: 30px auto;
-            max-width: 800px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(30px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 60px;
+            border-radius: 20px;
+            margin: 40px auto;
+            max-width: 900px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         .cta-box h2 {
             color: white !important;
             border: none;
-            font-size: 2.2em;
-            margin: 0 0 35px 0;
+            font-size: 2.5em;
+            margin: 0 0 45px 0;
             font-family: 'Poppins', sans-serif;
-            font-weight: 700;
+            font-weight: 800;
         }
 
         .next-steps {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 25px;
             text-align: left;
-            margin: 30px 0;
+            margin: 35px 0;
         }
 
         .step-item {
             display: flex;
             align-items: flex-start;
-            gap: 20px;
-            font-size: 1.1em;
-            line-height: 1.7;
-            background: rgba(255, 255, 255, 0.08);
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 4px solid rgba(255, 255, 255, 0.4);
-            transition: all 0.3s ease;
+            gap: 25px;
+            font-size: 1.15em;
+            line-height: 1.8;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 28px;
+            border-radius: 14px;
+            border-left: 5px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.4s ease;
         }
 
         .step-item:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-left-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.16);
+            border-left-color: rgba(255, 255, 255, 0.8);
+            transform: translateX(10px);
         }
 
         .step-number {
-            background: rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.25));
+            border: 2px solid rgba(255, 255, 255, 0.4);
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
             flex-shrink: 0;
             font-family: 'Poppins', sans-serif;
-            font-size: 1.4em;
+            font-size: 1.6em;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .step-item strong {
             color: white;
-            font-weight: 700;
+            font-weight: 800;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-size: 1.15em;
         }
 
         .contact-info {
-            margin-top: 50px;
-            font-size: 1em;
-            opacity: 0.9;
+            margin-top: 60px;
+            font-size: 1.05em;
+            opacity: 1;
         }
 
         .contact-info p {
             color: white;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .contact-info p:first-child {
+            font-size: 1.3em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
         }
 
         .closing-message {
-            font-size: 1.25em;
-            margin-top: 40px;
-            opacity: 0.95;
-            font-weight: 500;
+            font-size: 1.4em;
+            margin-top: 45px;
+            opacity: 1;
+            font-weight: 600;
+            line-height: 1.6;
         }
 
         /* ===== NAVIGATION ===== */
