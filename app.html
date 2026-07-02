@@ -1002,6 +1002,124 @@
         let currentReport = null;
         let uploadedImages = [];
 
+        // IndexedDB Setup for Images
+        let db;
+        const dbName = 'LKAnalyticsDB';
+        const storeName = 'reportImages';
+
+        function initIndexedDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(dbName, 1);
+
+                request.onerror = () => {
+                    console.error('IndexedDB error:', request.error);
+                    reject(request.error);
+                };
+
+                request.onsuccess = () => {
+                    db = request.result;
+                    console.log('IndexedDB initialized');
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    const database = event.target.result;
+                    if (!database.objectStoreNames.contains(storeName)) {
+                        database.createObjectStore(storeName, { keyPath: 'id' });
+                        console.log('Object store created');
+                    }
+                };
+            });
+        }
+
+        async function saveImageToIndexedDB(image) {
+            if (!db) await initIndexedDB();
+
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.put(image);
+
+                request.onsuccess = () => {
+                    console.log('Image saved to IndexedDB:', image.id);
+                    resolve(image.id);
+                };
+
+                request.onerror = () => {
+                    console.error('Error saving image:', request.error);
+                    reject(request.error);
+                };
+            });
+        }
+
+        async function getImagesFromIndexedDB(imageIds) {
+            if (!db) await initIndexedDB();
+
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const results = [];
+                let completed = 0;
+
+                if (imageIds.length === 0) {
+                    resolve([]);
+                    return;
+                }
+
+                imageIds.forEach(id => {
+                    const request = store.get(id);
+
+                    request.onsuccess = () => {
+                        if (request.result) {
+                            results.push(request.result);
+                        }
+                        completed++;
+                        if (completed === imageIds.length) {
+                            resolve(results);
+                        }
+                    };
+
+                    request.onerror = () => {
+                        completed++;
+                        if (completed === imageIds.length) {
+                            resolve(results);
+                        }
+                    };
+                });
+            });
+        }
+
+        async function deleteImagesFromIndexedDB(imageIds) {
+            if (!db) return;
+
+            return new Promise((resolve) => {
+                const transaction = db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+
+                imageIds.forEach(id => {
+                    store.delete(id);
+                });
+
+                transaction.oncomplete = () => {
+                    console.log('Images deleted from IndexedDB');
+                    resolve();
+                };
+            });
+        }
+
+        // Initialize IndexedDB on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await initIndexedDB();
+                setupImageUpload();
+                loadDashboard();
+            } catch (error) {
+                console.error('Failed to initialize:', error);
+                setupImageUpload();
+                loadDashboard();
+            }
+        });
+
         // IMAGE UPLOAD
         document.addEventListener('DOMContentLoaded', () => {
             setupImageUpload();
@@ -1113,7 +1231,7 @@
             });
         });
 
-        function saveReport(event) {
+        async function saveReport(event) {
             event.preventDefault();
 
             const clientName = document.getElementById('clientName').value.trim();
@@ -1141,31 +1259,43 @@
             console.log('Iniciando salvamento do relatório...');
             console.log('Imagens para salvar:', uploadedImages.length);
 
-            const report = {
-                id: Date.now(),
-                clientName: clientName,
-                month: month,
-                year: year,
-                images: uploadedImages.map(img => ({
-                    id: img.id,
-                    base64: img.base64,
-                    name: img.name
-                })),
-                platforms: ['Instagram', 'Facebook', 'TikTok'],
-                reach: 4324,
-                impressions: 28919,
-                interactions: 1000,
-                followers: 1982,
-                clicks: 688,
-                leads: 60,
-                createdAt: new Date().toLocaleDateString('pt-BR')
-            };
-
             try {
+                const reportId = Date.now();
+                const imageIds = [];
+
+                // Salvar imagens em IndexedDB
+                console.log('Salvando imagens em IndexedDB...');
+                for (const img of uploadedImages) {
+                    await saveImageToIndexedDB({
+                        id: img.id,
+                        reportId: reportId,
+                        base64: img.base64,
+                        name: img.name
+                    });
+                    imageIds.push(img.id);
+                }
+
+                // Criar relatório com referências às imagens
+                const report = {
+                    id: reportId,
+                    clientName: clientName,
+                    month: month,
+                    year: year,
+                    imageIds: imageIds,
+                    platforms: ['Instagram', 'Facebook', 'TikTok'],
+                    reach: 4324,
+                    impressions: 28919,
+                    interactions: 1000,
+                    followers: 1982,
+                    clicks: 688,
+                    leads: 60,
+                    createdAt: new Date().toLocaleDateString('pt-BR')
+                };
+
                 console.log('Adicionando relatório ao array...');
                 reports.push(report);
 
-                console.log('Salvando no localStorage...');
+                console.log('Salvando metadados no localStorage...');
                 localStorage.setItem('reports', JSON.stringify(reports));
 
                 console.log('Limpando formulário...');
@@ -1182,11 +1312,7 @@
 
             } catch (error) {
                 console.error('Erro completo:', error);
-                if (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                    alert('Erro: Espaço de armazenamento insuficiente. Tente com menos imagens ou imagens menores.');
-                } else {
-                    alert('Erro ao salvar relatório: ' + error.message + '\n\nVerifique o console para mais detalhes.');
-                }
+                alert('Erro ao salvar relatório: ' + error.message + '\n\nVerifique o console para mais detalhes.');
             }
         }
 
@@ -1241,23 +1367,29 @@
             }, 200);
         }
 
-        function loadReportData() {
+        async function loadReportData() {
             const r = currentReport;
 
             // Show screenshots if available
             const screenshotsContainer = document.getElementById('screenshotsContainer');
             const screenshotsGallery = document.getElementById('screenshotsGallery');
 
-            if (r.images && r.images.length > 0) {
-                screenshotsContainer.style.display = 'block';
-                screenshotsGallery.innerHTML = r.images.map(img => `
-                    <div class="screenshot-card">
-                        <img src="${img.base64}" alt="${img.name}" class="screenshot-image">
-                        <div class="screenshot-info">
-                            ${img.name}
+            if (r.imageIds && r.imageIds.length > 0) {
+                try {
+                    const images = await getImagesFromIndexedDB(r.imageIds);
+                    screenshotsContainer.style.display = 'block';
+                    screenshotsGallery.innerHTML = images.map(img => `
+                        <div class="screenshot-card">
+                            <img src="${img.base64}" alt="${img.name}" class="screenshot-image">
+                            <div class="screenshot-info">
+                                ${img.name}
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `).join('');
+                } catch (error) {
+                    console.error('Erro ao carregar imagens:', error);
+                    screenshotsContainer.style.display = 'none';
+                }
             } else {
                 screenshotsContainer.style.display = 'none';
             }
