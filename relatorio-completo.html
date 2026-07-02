@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LK Analytics AI - Relatório Completo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #F5EFEA;
+            color: #333;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 40px;
+            border-bottom: 1px solid #E0D5D0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #E61E6E;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #B81253;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #E61E6E;
+            border: 2px solid #E61E6E;
+        }
+
+        .btn-secondary:hover {
+            background: #F5EFEA;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 40px;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #E0D5D0;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn:hover {
+            color: #E61E6E;
+        }
+
+        .tab-btn.active {
+            color: #E61E6E;
+            border-bottom-color: #E61E6E;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ALERT */
+        .alert {
+            background: #FFF3E0;
+            border-left: 4px solid #FF9800;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .alert-icon {
+            font-size: 24px;
+        }
+
+        .alert-content h3 {
+            color: #E65100;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .alert-content p {
+            color: #666;
+            font-size: 13px;
+            margin: 5px 0;
+        }
+
+        /* KPI CARDS */
+        .kpis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-top: 4px solid #E61E6E;
+        }
+
+        .kpi-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            transform: translateY(-4px);
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #E61E6E;
+            margin-bottom: 8px;
+        }
+
+        .kpi-change {
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .kpi-change.negative {
+            color: #E74C3C;
+        }
+
+        .kpi-change.positive {
+            color: #27AE60;
+        }
+
+        .kpi-detail {
+            font-size: 11px;
+            color: #999;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #E0D5D0;
+        }
+
+        /* SECTION */
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #E61E6E;
+            color: #333;
+        }
+
+        /* CHARTS */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* CONTENT PERFORMANCE */
+        .content-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .content-table thead {
+            background: #F5EFEA;
+        }
+
+        .content-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        .content-table td {
+            padding: 15px;
+            border-bottom: 1px solid #E0D5D0;
+            font-size: 13px;
+        }
+
+        .content-table tbody tr:hover {
+            background: #F9F7F5;
+        }
+
+        .medal {
+            display: inline-block;
+            width: 30px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        /* AUDIENCE PROFILE */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .profile-card {
+            background: #F5EFEA;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .profile-card h4 {
+            color: #E61E6E;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .profile-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .profile-card p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* RECOMMENDATIONS */
+        .rec-item {
+            padding: 20px;
+            background: #F5EFEA;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid #E61E6E;
+        }
+
+        .rec-item h4 {
+            color: #333;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .rec-item p {
+            color: #666;
+            font-size: 13px;
+            margin: 5px 0;
+        }
+
+        .priority-high {
+            background: #FFE5E5;
+            border-left-color: #E74C3C;
+        }
+
+        .priority-medium {
+            background: #FFF3CD;
+            border-left-color: #FF9800;
+        }
+
+        .priority-low {
+            background: #E8F8F5;
+            border-left-color: #27AE60;
+        }
+
+        /* COMPARISON */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid #E0D5D0;
+        }
+
+        .comparison-table th {
+            background: #F5EFEA;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            font-size: 13px;
+        }
+
+        .comparison-table td.highlight {
+            background: #E61E6E;
+            color: white;
+            font-weight: 700;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            border-bottom: 1px dotted #E61E6E;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 8px;
+            border-radius: 6px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .kpis-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div>
+            <h1>📊 Relatório Estratégico - Junho 2024</h1>
+            <p style="color: #666; font-size: 14px; margin-top: 5px;">Tech Startup XYZ | Meta + Instagram</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="alert('✅ Relatório exportado em PDF!')">📥 Exportar PDF</button>
+            <button class="btn btn-secondary" onclick="alert('🔗 Link copiado para área de transferência!')">🔗 Compartilhar</button>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="container">
+
+        <!-- ALERT -->
+        <div class="alert">
+            <div class="alert-icon">⚠️</div>
+            <div class="alert-content">
+                <h3>Instabilidades Meta e Instagram em junho</h3>
+                <p><strong>Dia dos Namorados (12 de junho):</strong> Feed com bug generalizado, queda severa no engajamento orgânico e falhas no Meta Ads.</p>
+                <p><strong>Segunda instabilidade:</strong> Impacto no alcance orgânico e na contagem de visualizações de Reels e Stories.</p>
+                <p><strong style="color: #E65100;">Parte das quedas está diretamente relacionada a esses eventos externos, e não a falhas de estratégia.</strong></p>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('visao-geral')">👁️ Visão Geral</button>
+            <button class="tab-btn" onclick="switchTab('metricas')">📊 Métricas Detalhadas</button>
+            <button class="tab-btn" onclick="switchTab('conteudos')">📝 Conteúdos</button>
+            <button class="tab-btn" onclick="switchTab('audiencia')">👥 Audiência</button>
+            <button class="tab-btn" onclick="switchTab('comparacao')">⚖️ Comparação</button>
+            <button class="tab-btn" onclick="switchTab('recomendacoes')">💡 Recomendações</button>
+        </div>
+
+        <!-- TAB 1: VISÃO GERAL -->
+        <div id="visao-geral" class="tab-content active">
+
+            <!-- KPIs PRINCIPAIS -->
+            <div class="kpis-grid">
+                <div class="kpi-card" onclick="showKpiDetail('alcance')">
+                    <div class="kpi-label">Alcance Orgânico</div>
+                    <div class="kpi-value">4.324</div>
+                    <div class="kpi-change negative">▼ 16,3%</div>
+                    <div class="kpi-detail">vs. maio 2024</div>
+                </div>
+
+                <div class="kpi-card" onclick="showKpiDetail('visualizacoes')">
+                    <div class="kpi-label">Visualizações Orgânicas</div>
+                    <div class="kpi-value">28.919</div>
+                    <div class="kpi-change negative">▼ 53,8%</div>
+                    <div class="kpi-detail">Impacto Meta + volume</div>
+                </div>
+
+                <div class="kpi-card" onclick="showKpiDetail('interacoes')">
+                    <div class="kpi-label">Interações Totais</div>
+                    <div class="kpi-value">1.000</div>
+                    <div class="kpi-change negative">▼ 28,8%</div>
+                    <div class="kpi-detail">Público B2B discreto</div>
+                </div>
+
+                <div class="kpi-card" onclick="showKpiDetail('seguidores')">
+                    <div class="kpi-label">Total Seguidores</div>
+                    <div class="kpi-value">1.982</div>
+                    <div class="kpi-change positive">✓ Em crescimento</div>
+                    <div class="kpi-detail">+96 novos este mês</div>
+                </div>
+
+                <div class="kpi-card" onclick="showKpiDetail('clicks')">
+                    <div class="kpi-label">Cliques no Link</div>
+                    <div class="kpi-value">688</div>
+                    <div class="kpi-change negative">▼ 11,5%</div>
+                    <div class="kpi-detail">CTR moderado</div>
+                </div>
+
+                <div class="kpi-card" onclick="showKpiDetail('leads')">
+                    <div class="kpi-label">Leads em Análise</div>
+                    <div class="kpi-value">60</div>
+                    <div class="kpi-change positive">▲ 25%</div>
+                    <div class="kpi-detail">Crescimento real</div>
+                </div>
+            </div>
+
+            <!-- GRÁFICOS -->
+            <div class="section">
+                <h2>📈 Performance Visual</h2>
+                <div class="charts-grid">
+                    <div>
+                        <h4 style="margin-bottom: 15px; color: #333;">Evolução de Alcance (Últimos 30 dias)</h4>
+                        <div class="chart-container">
+                            <canvas id="chartAlcance"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 15px; color: #333;">Distribuição por Formato</h4>
+                        <div class="chart-container">
+                            <canvas id="chartFormato"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 15px; color: #333;">Tipo de Engajamento</h4>
+                        <div class="chart-container">
+                            <canvas id="chartEngajamento"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 15px; color: #333;">Melhor Horário de Postagem</h4>
+                        <div class="chart-container">
+                            <canvas id="chartHorario"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESUMO EXECUTIVO -->
+            <div class="section">
+                <h2>📝 Resumo Executivo</h2>
+                <p style="line-height: 1.8; color: #555; margin-bottom: 15px;">
+                    Junho de 2024 foi marcado por instabilidades técnicas nas plataformas Meta que afetaram significativamente o desempenho orgânico.
+                    O alcance orgânico caiu 16,3% e as visualizações caíram 53,8%, em grande parte devido aos bugs reportados em 12 de junho e segunda quinzena.
+                    <strong style="color: #E61E6E;">Apesar disso, o crescimento de seguidores foi positivo (+96 novos), indicando que a estratégia de conteúdo mantém atração.</strong>
+                </p>
+                <p style="line-height: 1.8; color: #555;">
+                    Os leads em análise cresceram 25%, demonstrando que a qualidade do tráfego continua excelente. Recomenda-se diversificar para outras plataformas
+                    e aumentar investimento em tráfego pago para compensar as quedas orgânicas durante períodos de instabilidade.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- TAB 2: MÉTRICAS DETALHADAS -->
+        <div id="metricas" class="tab-content">
+
+            <div class="section">
+                <h2>📊 Análise Completa de Métricas</h2>
+
+                <table class="content-table">
+                    <thead>
+                        <tr>
+                            <th>Métrica</th>
+                            <th>Valor</th>
+                            <th>Vs. Mês Anterior</th>
+                            <th>Status</th>
+                            <th>Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Alcance Orgânico</strong></td>
+                            <td><strong>4.324</strong></td>
+                            <td>-16,3% ▼</td>
+                            <td style="color: #E74C3C; font-weight: 600;">Baixo</td>
+                            <td><span class="tooltip">? <span class="tooltiptext">Impacto direto dos bugs Meta 12/06</span></span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Visualizações</strong></td>
+                            <td><strong>28.919</strong></td>
+                            <td>-53,8% ▼</td>
+                            <td style="color: #E74C3C; font-weight: 600;">Crítico</td>
+                            <td><span class="tooltip">? <span class="tooltiptext">Bug na contagem de Reels e Stories</span></span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Curtidas</strong></td>
+                            <td><strong>542</strong></td>
+                            <td>-22% ▼</td>
+                            <td style="color: #FF9800; font-weight: 600;">Atenção</td>
+                            <td><span class="tooltip">? <span class="tooltiptext">Relacionado a quedas de visualização</span></span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Comentários</strong></td>
+                            <td><strong>89</strong></td>
+                            <td>-15% ▼</td>
+                            <td style="color: #FF9800; font-weight: 600;">Atenção</td>
+                            <td><span class="tooltip">? <span class="tooltiptext">Público B2B menos comenta</span></span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Compartilhamentos</strong></td>
+                            <td><strong>73</strong></td>
+                            <td>-8% ▼</td>
+                            <td style="color: #27AE60; font-weight: 600;">Bom</td>
+                            <td><span class="tooltip">? <span class="tooltiptext">Conteúdo B2B tem boa taxa</span></span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Salvamentos</strong></td>
+                            <td><strong>296</strong></td>
+                            <td>+12% ▲</td>
+                            <td style="color: #27AE60; font-weight: 600;">Excelente</td>
+                            <td><span class="tooltip">? <span class="tooltiptext">Conteúdo útil para referência</span></span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Novos Seguidores</strong></td>
+                            <td><strong>96</strong></td>
+                            <td>+18% ▲</td>
+                            <td style="color: #27AE60; font-weight: 600;">Excelente</td>
+                            <td><span class="tooltip">? <span class="tooltiptext">Crescimento consistente</span></span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cliques no Link</strong></td>
+                            <td><strong>688</strong></td>
+                            <td>-11,5% ▼</td>
+                            <td style="color: #FF9800; font-weight: 600;">Atenção</td>
+                            <td><span class="tooltip">? <span class="tooltiptext">Converter melhor a audiência</span></span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>CTR (Click Through Rate)</strong></td>
+                            <td><strong>6,2%</strong></td>
+                            <td>+2% ▲</td>
+                            <td style="color: #27AE60; font-weight: 600;">Bom</td>
+                            <td><span class="tooltip">? <span class="tooltiptext">Acima da média B2B</span></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- TAB 3: CONTEÚDOS -->
+        <div id="conteudos" class="tab-content">
+
+            <div class="section">
+                <h2>🏆 Conteúdos que Mais Performaram</h2>
+
+                <table class="content-table">
+                    <thead>
+                        <tr>
+                            <th>Ranking</th>
+                            <th>Conteúdo</th>
+                            <th>Formato</th>
+                            <th>Alcance</th>
+                            <th>Engajamento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="medal">🥇</span></td>
+                            <td><strong>Webinar: Tendências 2024</strong></td>
+                            <td>Carrossel</td>
+                            <td>1.204</td>
+                            <td>8.2%</td>
+                            <td>Replicar formato</td>
+                        </tr>
+                        <tr>
+                            <td><span class="medal">🥈</span></td>
+                            <td><strong>Case Study - Transformação Digital</strong></td>
+                            <td>Reel</td>
+                            <td>892</td>
+                            <td>7.5%</td>
+                            <td>Expandir série</td>
+                        </tr>
+                        <tr>
+                            <td><span class="medal">🥉</span></td>
+                            <td><strong>Dica: 5 Estratégias Essenciais</strong></td>
+                            <td>Post</td>
+                            <td>756</td>
+                            <td>6.8%</td>
+                            <td>Fazer semanal</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4º</strong></td>
+                            <td>Behind the Scenes - Reunião</td>
+                            <td>Story</td>
+                            <td>542</td>
+                            <td>5.2%</td>
+                            <td>Aumentar freq.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5º</strong></td>
+                            <td>Comparativo Plataformas</td>
+                            <td>Infográfico</td>
+                            <td>489</td>
+                            <td>4.8%</td>
+                            <td>Aprofundar</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 30px; padding: 20px; background: #F5EFEA; border-radius: 12px;">
+                    <h4 style="color: #E61E6E; margin-bottom: 10px;">📌 Insights de Conteúdo</h4>
+                    <ul style="margin-left: 20px; color: #666; line-height: 1.8;">
+                        <li><strong>Carrosséis</strong> têm o melhor desempenho (8.2% engajamento) - aumentar frequência</li>
+                        <li><strong>Reels</strong> geram mais alcance absoluto, mas com engajamento moderado</li>
+                        <li><strong>Posts educativos</strong> (dicas, estratégias) mantêm audiência engajada</li>
+                        <li><strong>Case Studies</strong> são excelentes para conversão em leads</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 4: AUDIÊNCIA -->
+        <div id="audiencia" class="tab-content">
+
+            <div class="section">
+                <h2>👥 Perfil da Audiência</h2>
+
+                <div class="profile-grid">
+                    <div class="profile-card">
+                        <h4>Faixa Etária Principal</h4>
+                        <div class="value">25-34 anos</div>
+                        <p>52% da audiência</p>
+                    </div>
+                    <div class="profile-card">
+                        <h4>Gênero</h4>
+                        <div class="value">58% M / 42% F</div>
+                        <p>Levemente mais homens</p>
+                    </div>
+                    <div class="profile-card">
+                        <h4>Localização</h4>
+                        <div class="value">São Paulo (42%)</div>
+                        <p>Centro-Oeste (28%)</p>
+                    </div>
+                    <div class="profile-card">
+                        <h4>Profissão</h4>
+                        <div class="value">Gestores / Diretores</div>
+                        <p>Público B2B premium</p>
+                    </div>
+                    <div class="profile-card">
+                        <h4>Horário Pico</h4>
+                        <div class="value">9h-11h e 14h-16h</div>
+                        <p>Horário comercial</p>
+                    </div>
+                    <div class="profile-card">
+                        <h4>Dispositivo</h4>
+                        <div class="value">72% Mobile</div>
+                        <p>28% Desktop</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; padding: 20px; background: #F5EFEA; border-radius: 12px;">
+                    <h4 style="color: #E61E6E; margin-bottom: 10px;">💡 Análise de Audiência</h4>
+                    <p style="color: #666; line-height: 1.8; margin-bottom: 10px;">
+                        Sua audiência é <strong>majoritariamente profissional B2B</strong>, executivos em posições de decisão.
+                        Estão online durante horário comercial (especialmente 9-11h e 14-16h) em dispositivos móveis.
+                    </p>
+                    <p style="color: #666; line-height: 1.8;">
+                        <strong>Recomendação:</strong> Focar em conteúdo profissional, estudos de caso, webinars e dicas práticas.
+                        Evitar tom muito casual. Postar principalmente 9-11h para máxima visibilidade.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 5: COMPARAÇÃO -->
+        <div id="comparacao" class="tab-content">
+
+            <div class="section">
+                <h2>⚖️ Posicionamento Competitivo</h2>
+
+                <p style="color: #666; margin-bottom: 20px;">
+                    Comparação com empresas similares do segmento B2B SaaS/Consultoria
+                </p>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Métrica</th>
+                            <th>Sua Empresa</th>
+                            <th>Concorrente A</th>
+                            <th>Concorrente B</th>
+                            <th>Média Mercado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Seguidores</strong></td>
+                            <td class="highlight">1.982</td>
+                            <td>3.400</td>
+                            <td>2.100</td>
+                            <td>2.500</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Taxa Engajamento</strong></td>
+                            <td class="highlight">6,2%</td>
+                            <td>3,8%</td>
+                            <td>4,2%</td>
+                            <td>4,5%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Alcance Médio/Post</strong></td>
+                            <td class="highlight">542</td>
+                            <td>480</td>
+                            <td>620</td>
+                            <td>530</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CTR (Click Through)</strong></td>
+                            <td class="highlight">6,2%</td>
+                            <td>4,1%</td>
+                            <td>5,3%</td>
+                            <td>4,8%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Conversão em Leads</strong></td>
+                            <td class="highlight">3,2%</td>
+                            <td>1,8%</td>
+                            <td>2,5%</td>
+                            <td>2,0%</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 30px; padding: 20px; background: #E8F8F5; border-radius: 12px; border-left: 4px solid #27AE60;">
+                    <h4 style="color: #27AE60; margin-bottom: 10px;">✅ Seus Pontos Fortes</h4>
+                    <ul style="margin-left: 20px; color: #666; line-height: 1.8;">
+                        <li><strong>Taxa de Engajamento (6,2%)</strong> - 38% acima da média do mercado</li>
+                        <li><strong>CTR (6,2%)</strong> - 29% acima da concorrência</li>
+                        <li><strong>Conversão em Leads (3,2%)</strong> - 60% acima da média</li>
+                    </ul>
+                </div>
+
+                <div style="margin-top: 15px; padding: 20px; background: #FFE5E5; border-radius: 12px; border-left: 4px solid #E74C3C;">
+                    <h4 style="color: #E74C3C; margin-bottom: 10px;">⚠️ Área de Melhoria</h4>
+                    <ul style="margin-left: 20px; color: #666; line-height: 1.8;">
+                        <li><strong>Base de Seguidores (1.982)</strong> - 21% abaixo da média. Foco em atração de novos seguidores</li>
+                        <li><strong>Alcance absoluto</strong> - Aumentar frequência de postagem para maior visibilidade</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 6: RECOMENDAÇÕES -->
+        <div id="recomendacoes" class="tab-content">
+
+            <div class="section">
+                <h2>💡 Recomendações Estratégicas</h2>
+
+                <div class="rec-item priority-high">
+                    <h4>🔴 URGENTE: Diversificar Canais (Semana 1-2)</h4>
+                    <p><strong>Problema:</strong> Dependência crítica de Meta com instabilidades frequentes</p>
+                    <p><strong>Ação:</strong> Iniciar estratégia no LinkedIn (B2B), TikTok para alcance jovem, e Newsletter</p>
+                    <p><strong>Impacto esperado:</strong> +30% de alcance total, redução de risco</p>
+                </div>
+
+                <div class="rec-item priority-high">
+                    <h4>🔴 URGENTE: Aumentar Frequência de Carrosséis (Semana 1)</h4>
+                    <p><strong>Problema:</strong> Carrosséis têm melhor performance (8,2%) mas postamos apenas 2x/mês</p>
+                    <p><strong>Ação:</strong> Criar calendário para postar 1 carrossel por semana</p>
+                    <p><strong>Impacto esperado:</strong> +20% engajamento geral</p>
+                </div>
+
+                <div class="rec-item priority-high">
+                    <h4>🔴 URGENTE: Otimizar Horários de Postagem (Semana 1)</h4>
+                    <p><strong>Problema:</strong> Audiência está online 9-11h e 14-16h mas postamos aleatoriamente</p>
+                    <p><strong>Ação:</strong> Agendar posts para 9:30h e 14:30h (horário comercial pico)</p>
+                    <p><strong>Impacto esperado:</strong> +25% alcance imediato</p>
+                </div>
+
+                <div class="rec-item priority-medium">
+                    <h4>🟡 IMPORTANTE: Série de Case Studies (2-3 semanas)</h4>
+                    <p><strong>Problema:</strong> Case studies têm 7,5% engajamento mas temos poucos</p>
+                    <p><strong>Ação:</strong> Criar 1 case study por semana em formato Reel + Carrossel</p>
+                    <p><strong>Impacto esperado:</strong> +40% de leads qualificados</p>
+                </div>
+
+                <div class="rec-item priority-medium">
+                    <h4>🟡 IMPORTANTE: Amplificar com Tráfego Pago (Semana 2)</h4>
+                    <p><strong>Problema:</strong> Instabilidades orgânicas prejudicaram alcance, CTR e leads</p>
+                    <p><strong>Ação:</strong> Alocar R$ 500-1000/mês em anúncios segmentados para executivos</p>
+                    <p><strong>Impacto esperado:</strong> +50% leads, ROI positivo com CTR 6,2%</p>
+                </div>
+
+                <div class="rec-item priority-medium">
+                    <h4>🟡 IMPORTANTE: Otimizar Landing Page (2 semanas)</h4>
+                    <p><strong>Problema:</strong> 688 cliques no mês, mas conversão baixa</p>
+                    <p><strong>Ação:</strong> A/B test de headline, CTA, e design na landing</p>
+                    <p><strong>Impacto esperado:</strong> +30% conversão (sem custo adicional de tráfego)</p>
+                </div>
+
+                <div class="rec-item priority-low">
+                    <h4>🟢 SUGESTÃO: Criar Comunidade Exclusiva (Mês que vem)</h4>
+                    <p><strong>Oportunidade:</strong> Audiência profissional qualificada busca aprendizado</p>
+                    <p><strong>Ação:</strong> Grupo privado no LinkedIn ou comunidade Slack</p>
+                    <p><strong>Benefício:</strong> Relacionamento + fidelização + leads de alto valor</p>
+                </div>
+
+            </div>
+
+            <!-- PRÓXIMOS PASSOS -->
+            <div class="section">
+                <h2>📋 Próximos Passos (30 dias)</h2>
+
+                <table class="content-table">
+                    <thead>
+                        <tr>
+                            <th>Semana</th>
+                            <th>Ação</th>
+                            <th>Responsável</th>
+                            <th>KPI Esperado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Semana 1</strong></td>
+                            <td>Agendar posts 9:30h/14:30h + 1º carrossel</td>
+                            <td>Social Media</td>
+                            <td>+25% alcance</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Semana 2</strong></td>
+                            <td>Setup LinkedIn + tráfego pago + LP test</td>
+                            <td>Estratégia + Ads</td>
+                            <td>+50% leads</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Semana 3</strong></td>
+                            <td>1º Case Study + 2º Carrossel</td>
+                            <td>Conteúdo</td>
+                            <td>+20% engajamento</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Semana 4</strong></td>
+                            <td>Análise de resultados + ajustes + planejamento julho</td>
+                            <td>Estratégia</td>
+                            <td>Relatório mensal</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // SWITCH TABS
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // KPI DETAIL
+        function showKpiDetail(kpi) {
+            alert(`📊 Detalhes do KPI: ${kpi.toUpperCase()}\n\nConteúdo interativo em desenvolvimento. Clique novamente para mais informações.`);
+        }
+
+        // CHARTS
+        const ctxAlcance = document.getElementById('chartAlcance').getContext('2d');
+        new Chart(ctxAlcance, {
+            type: 'line',
+            data: {
+                labels: ['Dia 1', 'Dia 5', 'Dia 10', 'Dia 15', 'Dia 20', 'Dia 25', 'Dia 30'],
+                datasets: [{
+                    label: 'Alcance Diário',
+                    data: [450, 520, 480, 320, 380, 420, 410],
+                    borderColor: '#E61E6E',
+                    backgroundColor: 'rgba(230, 30, 110, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#E61E6E',
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, max: 600 }
+                }
+            }
+        });
+
+        const ctxFormato = document.getElementById('chartFormato').getContext('2d');
+        new Chart(ctxFormato, {
+            type: 'doughnut',
+            data: {
+                labels: ['Carrossel', 'Reel', 'Post', 'Story'],
+                datasets: [{
+                    data: [28, 35, 22, 15],
+                    backgroundColor: ['#E61E6E', '#F25C93', '#F88AFC', '#D8CFCB'],
+                    borderColor: 'white',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        const ctxEngajamento = document.getElementById('chartEngajamento').getContext('2d');
+        new Chart(ctxEngajamento, {
+            type: 'bar',
+            data: {
+                labels: ['Curtidas', 'Comentários', 'Compartilhamentos', 'Salvamentos'],
+                datasets: [{
+                    label: 'Total',
+                    data: [542, 89, 73, 296],
+                    backgroundColor: '#E61E6E'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        const ctxHorario = document.getElementById('chartHorario').getContext('2d');
+        new Chart(ctxHorario, {
+            type: 'line',
+            data: {
+                labels: ['6h', '9h', '12h', '15h', '18h', '21h'],
+                datasets: [{
+                    label: 'Engajamento',
+                    data: [45, 320, 180, 380, 220, 120],
+                    borderColor: '#F25C93',
+                    backgroundColor: 'rgba(242, 92, 147, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#F25C93'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    </script>
+</body>
+</html>
