@@ -613,6 +613,93 @@
         .checkbox {
             cursor: pointer;
         }
+
+        .upload-area {
+            border: 2px dashed #E61E6E;
+            border-radius: 8px;
+            background: #F5EFEA;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            background: #F0E8E0;
+            border-color: #B81253;
+        }
+
+        .upload-area.dragover {
+            background: white;
+            border-color: #E61E6E;
+            box-shadow: 0 0 10px rgba(230, 30, 110, 0.2);
+        }
+
+        .image-thumbnail {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #E0D5D0;
+            background: white;
+            aspect-ratio: 1;
+        }
+
+        .image-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-thumbnail-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #E61E6E;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .image-thumbnail:hover .image-thumbnail-remove {
+            opacity: 1;
+        }
+
+        .screenshots-section {
+            margin-bottom: 30px;
+        }
+
+        .screenshots-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .screenshot-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #E0D5D0;
+        }
+
+        .screenshot-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: #F5EFEA;
+        }
+
+        .screenshot-info {
+            padding: 15px;
+            font-size: 12px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -741,6 +828,19 @@
                         </div>
 
                         <div class="form-group">
+                            <label>Prints dos Resultados</label>
+                            <div class="upload-area" id="uploadArea">
+                                <div style="text-align: center; padding: 40px; color: #999;">
+                                    <p style="font-size: 24px; margin-bottom: 10px;">📸</p>
+                                    <p>Clique ou arraste os prints aqui</p>
+                                    <p style="font-size: 12px; margin-top: 5px;">PNG, JPG, GIF - Máx 5MB cada</p>
+                                </div>
+                                <input type="file" id="imageInput" accept="image/*" multiple style="display: none;">
+                            </div>
+                            <div id="imagePreview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 15px;"></div>
+                        </div>
+
+                        <div class="form-group">
                             <label>Objetivo / Notas</label>
                             <textarea id="objective" placeholder="Descreva o objetivo da campanha..."></textarea>
                         </div>
@@ -781,6 +881,12 @@
 
                     <!-- OVERVIEW TAB -->
                     <div id="overview" class="tab-content active">
+                        <!-- Screenshots Section -->
+                        <div id="screenshotsContainer" class="screenshots-section" style="display: none;">
+                            <h3 style="margin-bottom: 20px; color: #333;">📸 Prints Fornecidos</h3>
+                            <div class="screenshots-gallery" id="screenshotsGallery"></div>
+                        </div>
+
                         <div class="alert">
                             <div class="alert-icon">⚠️</div>
                             <div class="alert-content">
@@ -937,6 +1043,83 @@
         // DATA MANAGEMENT
         let reports = JSON.parse(localStorage.getItem('reports')) || [];
         let currentReport = null;
+        let uploadedImages = [];
+
+        // IMAGE UPLOAD
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadArea = document.getElementById('uploadArea');
+            const imageInput = document.getElementById('imageInput');
+
+            if (uploadArea && imageInput) {
+                uploadArea.addEventListener('click', () => imageInput.click());
+
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                });
+
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('dragover');
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    const files = Array.from(e.dataTransfer.files);
+                    processImages(files);
+                });
+
+                imageInput.addEventListener('change', (e) => {
+                    const files = Array.from(e.target.files);
+                    processImages(files);
+                });
+            }
+
+            document.querySelectorAll('input[name="platforms"]').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    this.parentElement.classList.toggle('active');
+                });
+            });
+        });
+
+        function processImages(files) {
+            uploadedImages = [];
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+
+            files.forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        uploadedImages.push({
+                            id: Date.now() + index,
+                            base64: e.target.result,
+                            name: file.name
+                        });
+
+                        const thumbnail = document.createElement('div');
+                        thumbnail.className = 'image-thumbnail';
+                        thumbnail.innerHTML = `
+                            <img src="${e.target.result}" alt="${file.name}">
+                            <button class="image-thumbnail-remove" onclick="removeImage(${Date.now() + index})">✕</button>
+                        `;
+                        preview.appendChild(thumbnail);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function removeImage(imageId) {
+            uploadedImages = uploadedImages.filter(img => img.id !== imageId);
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = uploadedImages.map(img => `
+                <div class="image-thumbnail">
+                    <img src="${img.base64}" alt="${img.name}">
+                    <button class="image-thumbnail-remove" onclick="removeImage(${img.id})">✕</button>
+                </div>
+            `).join('');
+        }
 
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -993,12 +1176,14 @@
                 clicks: parseInt(document.getElementById('clicks').value) || 0,
                 leads: parseInt(document.getElementById('leads').value) || 0,
                 objective: document.getElementById('objective').value,
+                images: uploadedImages,
                 createdAt: new Date().toLocaleDateString('pt-BR')
             };
 
             reports.push(report);
             localStorage.setItem('reports', JSON.stringify(reports));
             closeCreateModal();
+            uploadedImages = [];
 
             // Abrir o relatório criado
             viewReport(report.id);
@@ -1044,6 +1229,24 @@
 
         function loadReportData() {
             const r = currentReport;
+
+            // Show screenshots if available
+            const screenshotsContainer = document.getElementById('screenshotsContainer');
+            const screenshotsGallery = document.getElementById('screenshotsGallery');
+
+            if (r.images && r.images.length > 0) {
+                screenshotsContainer.style.display = 'block';
+                screenshotsGallery.innerHTML = r.images.map(img => `
+                    <div class="screenshot-card">
+                        <img src="${img.base64}" alt="${img.name}" class="screenshot-image">
+                        <div class="screenshot-info">
+                            ${img.name}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                screenshotsContainer.style.display = 'none';
+            }
 
             // KPIs with dummy trends
             const kpis = [
