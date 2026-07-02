@@ -874,7 +874,8 @@
                         </div>
                     </div>
 
-                    <div class="card" style="max-width: 600px;">
+                    <!-- Step 1: Dados do Cliente -->
+                    <div class="card" style="max-width: 600px;" data-step="1">
                         <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 20px;">Dados do Cliente</h2>
 
                         <div class="form-group">
@@ -905,9 +906,60 @@
                             <textarea rows="4" placeholder="Descreva o objetivo da campanha..."></textarea>
                         </div>
 
-                        <button class="btn-primary" style="width: 100%; margin-top: 20px;">
+                        <button class="btn-primary" style="width: 100%; margin-top: 20px;" onclick="nextStep()">
                             Próximo →
                         </button>
+                    </div>
+
+                    <!-- Step 2: Seleção de Plataformas -->
+                    <div class="card" style="max-width: 600px;" data-step="2">
+                        <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 20px;">Selecione as Plataformas</h2>
+                        <p style="color: #666; margin-bottom: 20px;">Escolha quais plataformas você deseja analisar</p>
+
+                        <div class="platforms">
+                            <div class="platform-btn selected" onclick="this.classList.toggle('selected')">
+                                📱 Instagram
+                            </div>
+                            <div class="platform-btn" onclick="this.classList.toggle('selected')">
+                                👍 Facebook
+                            </div>
+                            <div class="platform-btn" onclick="this.classList.toggle('selected')">
+                                💼 LinkedIn
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 30px;">
+                            <button class="btn-secondary" style="flex: 1;" onclick="currentStep = 1; showStep();">
+                                ← Voltar
+                            </button>
+                            <button class="btn-primary" style="flex: 1;" onclick="nextStep()">
+                                Próximo →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Upload de Arquivos -->
+                    <div class="card" style="max-width: 600px;" data-step="3">
+                        <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 20px;">Upload de Prints</h2>
+                        <p style="color: #666; margin-bottom: 20px;">Arraste seus prints de métricas aqui</p>
+
+                        <div class="dropzone" style="margin: 20px 0;">
+                            <h3>📸 Arraste aqui</h3>
+                            <p>ou clique para selecionar arquivos</p>
+                        </div>
+
+                        <p style="font-size: 12px; color: #999; margin-bottom: 20px;">
+                            Aceita: PNG, JPG, PDF, Excel, CSV
+                        </p>
+
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-secondary" style="flex: 1;" onclick="currentStep = 2; showStep();">
+                                ← Voltar
+                            </button>
+                            <button class="btn-primary" style="flex: 1;" onclick="nextStep()">
+                                ✅ Gerar Relatório
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -983,6 +1035,8 @@
     </div>
 
     <script>
+        let currentStep = 1;
+
         function showPage(pageId) {
             // Hide all pages
             document.querySelectorAll('.page').forEach(page => {
@@ -1000,8 +1054,54 @@
             // Highlight active nav
             event?.target?.closest('.nav-item')?.classList.add('active');
 
+            // Reset step counter when changing pages
+            if (pageId !== 'create') {
+                currentStep = 1;
+            }
+
             // Scroll to top
             document.querySelector('.content').scrollTop = 0;
+        }
+
+        function nextStep() {
+            if (currentStep === 1) {
+                // Validação simples
+                const clientName = document.querySelector('input[placeholder="Ex: João da Silva"]');
+                if (!clientName || !clientName.value.trim()) {
+                    alert('Por favor, preencha o nome do cliente');
+                    return;
+                }
+                currentStep = 2;
+                showStep();
+            } else if (currentStep === 2) {
+                currentStep = 3;
+                showStep();
+            } else if (currentStep === 3) {
+                alert('✅ Relatório criado com sucesso! Redirecionando...');
+                showPage('view');
+            }
+        }
+
+        function showStep() {
+            // Hide all step content
+            const stepContents = document.querySelectorAll('[data-step]');
+            stepContents.forEach(el => el.style.display = 'none');
+
+            // Show current step
+            const currentContent = document.querySelector(`[data-step="${currentStep}"]`);
+            if (currentContent) {
+                currentContent.style.display = 'block';
+            }
+
+            // Update step indicators
+            document.querySelectorAll('.step').forEach((step, idx) => {
+                step.classList.remove('active', 'completed');
+                if (idx + 1 < currentStep) {
+                    step.classList.add('completed');
+                } else if (idx + 1 === currentStep) {
+                    step.classList.add('active');
+                }
+            });
         }
 
         // Dropzone functionality
@@ -1019,9 +1119,15 @@
             dropzone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 dropzone.classList.remove('dragover');
-                alert('Upload simulado! Na versão real, aqui teríamos processamento com OCR.');
+                alert('✅ Upload simulado! Na versão real, aqui teríamos processamento com OCR.');
+                nextStep();
             });
         }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            showStep();
+        });
     </script>
 </body>
 </html>
