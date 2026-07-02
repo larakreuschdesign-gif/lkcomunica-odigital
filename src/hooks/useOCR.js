@@ -1,28 +1,18 @@
 import { useState, useCallback } from 'react'
+import { processImageWithOCR, processMultipleImages, groupOCRResults, consolidateMetrics } from '../services/ocr'
 
 export function useOCR() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [progress, setProgress] = useState(null)
 
   const extractMetrics = useCallback(async (file) => {
     setLoading(true)
     setError(null)
 
     try {
-      // Placeholder para Tesseract.js OCR
-      // Será implementado na Fase 5
-      const mockMetrics = {
-        alcance: Math.floor(Math.random() * 50000) + 5000,
-        impressoes: Math.floor(Math.random() * 100000) + 10000,
-        engajamento: (Math.random() * 10).toFixed(2),
-        seguidores: Math.floor(Math.random() * 10000) + 1000,
-        curtidas: Math.floor(Math.random() * 5000) + 100,
-        comentarios: Math.floor(Math.random() * 500) + 10,
-        compartilhamentos: Math.floor(Math.random() * 300) + 5,
-        salvamentos: Math.floor(Math.random() * 1000) + 50,
-      }
-
-      return mockMetrics
+      const result = await processImageWithOCR(file)
+      return result
     } catch (err) {
       setError(err.message)
       throw err
@@ -31,9 +21,39 @@ export function useOCR() {
     }
   }, [])
 
+  const processFiles = useCallback(async (files) => {
+    setLoading(true)
+    setError(null)
+    setProgress(null)
+
+    try {
+      const results = await processMultipleImages(files, (prog) => {
+        setProgress(prog)
+      })
+
+      const grouped = groupOCRResults(results)
+      const consolidated = consolidateMetrics(results)
+
+      return {
+        results,
+        grouped,
+        consolidated,
+        success: results.filter(r => r.success).length > 0
+      }
+    } catch (err) {
+      setError(err.message)
+      throw err
+    } finally {
+      setLoading(false)
+      setProgress(null)
+    }
+  }, [])
+
   return {
     loading,
     error,
+    progress,
     extractMetrics,
+    processFiles,
   }
 }

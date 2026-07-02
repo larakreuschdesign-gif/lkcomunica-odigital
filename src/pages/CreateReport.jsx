@@ -7,7 +7,7 @@ import { Header, Button, Card, Input, Textarea, Dropzone, Spinner, Container, Ba
 export default function CreateReport() {
   const navigate = useNavigate()
   const { createReport } = useReport()
-  const { extractMetrics, loading: ocrLoading } = useOCR()
+  const { extractMetrics, processFiles, loading: ocrLoading, progress: ocrProgress } = useOCR()
 
   const [step, setStep] = useState(1) // 1: Form, 2: Upload, 3: Processing
   const [formData, setFormData] = useState({
@@ -19,7 +19,8 @@ export default function CreateReport() {
     platforms: [],
   })
   const [uploadedFiles, setUploadedFiles] = useState([])
-  const [metrics, setMetrics] = useState([])
+  const [ocrResults, setOcrResults] = useState(null)
+  const [processedFiles, setProcessedFiles] = useState(new Set())
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -38,17 +39,13 @@ export default function CreateReport() {
   const handleFilesAccepted = async (files) => {
     setUploadedFiles(prev => [...prev, ...files])
 
-    // Process each file with OCR
-    for (const file of files) {
-      try {
-        const fileMetrics = await extractMetrics(file)
-        setMetrics(prev => [...prev, {
-          file: file.name,
-          ...fileMetrics
-        }])
-      } catch (err) {
-        console.error('Erro ao processar arquivo:', err)
-      }
+    // Processar todos os arquivos com OCR
+    try {
+      const results = await processFiles(files)
+      setOcrResults(results)
+      setProcessedFiles(new Set(files.map(f => f.name)))
+    } catch (err) {
+      console.error('Erro ao processar arquivos:', err)
     }
   }
 
@@ -56,7 +53,8 @@ export default function CreateReport() {
     const reportData = {
       ...formData,
       uploadedFiles: uploadedFiles.length,
-      metrics: metrics,
+      ocrResults: ocrResults,
+      metrics: ocrResults?.consolidated?.metrics || {},
     }
     const id = createReport(reportData)
     navigate(`/report/${id}`)
@@ -221,27 +219,39 @@ export default function CreateReport() {
                     Arquivos Enviados ({uploadedFiles.length})
                   </h3>
                   <div className="space-y-2">
-                    {uploadedFiles.map((file, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">📄</span>
-                          <div>
-                            <p className="font-medium">{file.name}</p>
-                            <p className="text-sm text-gray-500">
-                              {(file.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
+                    {uploadedFiles.map((file, idx) => {
+                      const isProcessing = ocrLoading && !processedFiles.has(file.name)
+                      const isProcessed = processedFiles.has(file.name)
+
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">
+                              {isProcessing ? '⏳' : isProcessed ? '✓' : '📄'}
+                            </span>
+                            <div>
+                              <p className="font-medium">{file.name}</p>
+                              <p className="text-sm text-gray-500">
+                                {(file.size / 1024 / 1024).toFixed(2)} MB
+                              </p>
+                            </div>
                           </div>
+                          {isProcessing && (
+                            <Badge status="attention" size="sm">
+                              Processando OCR...
+                            </Badge>
+                          )}
+                          {isProcessed && (
+                            <Badge status="excellent" size="sm">
+                              Processado
+                            </Badge>
+                          )}
                         </div>
-                        {metrics.find(m => m.file === file.name) && (
-                          <Badge status="excellent" size="sm">
-                            Processado
-                          </Badge>
-                        )}
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               )}

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useReport } from '../contexts/ReportContext'
 import { useAI } from '../hooks/useAI'
+import { buildDashboardData, generateBasicAnalysis } from '../services/dataProcessing'
 import { Header, Button, Card, KPICard, Chart, Badge, Container, Spinner } from '../components'
 
 export default function Dashboard() {
@@ -37,41 +38,15 @@ export default function Dashboard() {
     )
   }
 
-  // Mock data for demonstration
-  const mockMetrics = {
-    alcance: 25000,
-    alcanceVar: '+15%',
-    impressoes: 85000,
-    impressoesVar: '+22%',
-    engajamento: 3.8,
-    engajamentoVar: '+8%',
-    seguidores: 12500,
-    seguidoresVar: '+5.2%',
-    curtidas: 4200,
-    comentarios: 320,
-    compartilhamentos: 150,
-    salvamentos: 890,
-  }
+  // Processar dados do OCR ou usar mock
+  const dashboardData = useMemo(() => {
+    return buildDashboardData(report?.ocrResults, report)
+  }, [report])
 
-  const lineChartData = [
-    { name: 'Semana 1', alcance: 5000, engajamento: 2.5 },
-    { name: 'Semana 2', alcance: 6500, engajamento: 3.1 },
-    { name: 'Semana 3', alcance: 7200, engajamento: 3.5 },
-    { name: 'Semana 4', alcance: 6300, engajamento: 4.2 },
-  ]
-
-  const barChartData = [
-    { name: 'Instagram', value: 15000 },
-    { name: 'Facebook', value: 7000 },
-    { name: 'LinkedIn', value: 3000 },
-  ]
-
-  const pieChartData = [
-    { name: 'Reels', value: 45 },
-    { name: 'Posts', value: 30 },
-    { name: 'Stories', value: 15 },
-    { name: 'Carrosséis', value: 10 },
-  ]
+  const mockMetrics = dashboardData.metrics
+  const lineChartData = dashboardData.charts.line
+  const barChartData = dashboardData.charts.bar
+  const pieChartData = dashboardData.charts.pie
 
   return (
     <>
