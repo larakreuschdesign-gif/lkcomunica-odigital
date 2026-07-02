@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useReport } from '../contexts/ReportContext'
 import { useAI } from '../hooks/useAI'
 import { buildDashboardData, generateBasicAnalysis } from '../services/dataProcessing'
-import { Header, Button, Card, KPICard, Chart, Badge, Container, Spinner } from '../components'
+import { Header, Button, Card, KPICard, Chart, Badge, Container, Spinner, Table } from '../components'
 
 export default function Dashboard() {
   const { id } = useParams()
@@ -132,35 +132,35 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <KPICard
                     label="Alcance"
-                    value={mockMetrics.alcance}
-                    icon="📊"
-                    variation={mockMetrics.alcanceVar}
-                    trend="up"
+                    value={mockMetrics.alcance.value}
+                    icon={mockMetrics.alcance.icon}
+                    variation={mockMetrics.alcance.variation}
+                    trend={mockMetrics.alcance.variation?.includes('+') ? 'up' : 'down'}
                     comparison="vs. mês anterior"
                   />
                   <KPICard
                     label="Impressões"
-                    value={mockMetrics.impressoes}
-                    icon="👀"
-                    variation={mockMetrics.impressoesVar}
-                    trend="up"
+                    value={mockMetrics.impressoes.value}
+                    icon={mockMetrics.impressoes.icon}
+                    variation={mockMetrics.impressoes.variation}
+                    trend={mockMetrics.impressoes.variation?.includes('+') ? 'up' : 'down'}
                     comparison="vs. mês anterior"
                   />
                   <KPICard
                     label="Taxa de Engajamento"
-                    value={mockMetrics.engajamento}
-                    icon="💬"
-                    variation={mockMetrics.engajamentoVar}
-                    trend="up"
+                    value={mockMetrics.engajamento.value}
+                    icon={mockMetrics.engajamento.icon}
+                    variation={mockMetrics.engajamento.variation}
+                    trend={mockMetrics.engajamento.variation?.includes('+') ? 'up' : 'down'}
                     unit="%"
                     comparison="vs. mês anterior"
                   />
                   <KPICard
                     label="Novos Seguidores"
-                    value={mockMetrics.seguidores}
-                    icon="👥"
-                    variation={mockMetrics.seguidoresVar}
-                    trend="up"
+                    value={mockMetrics.seguidores.value}
+                    icon={mockMetrics.seguidores.icon}
+                    variation={mockMetrics.seguidores.variation}
+                    trend={mockMetrics.seguidores.variation?.includes('+') ? 'up' : 'down'}
                     comparison="vs. mês anterior"
                   />
                 </div>
@@ -206,26 +206,42 @@ export default function Dashboard() {
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Curtidas</span>
-                      <span className="font-semibold">{mockMetrics.curtidas.toLocaleString('pt-BR')}</span>
+                      <span className="font-semibold">{mockMetrics.curtidas.value.toLocaleString('pt-BR')}</span>
                     </div>
                     <div className="border-t" />
                     <div className="flex justify-between">
                       <span className="text-gray-600">Comentários</span>
-                      <span className="font-semibold">{mockMetrics.comentarios}</span>
+                      <span className="font-semibold">{mockMetrics.comentarios.value}</span>
                     </div>
                     <div className="border-t" />
                     <div className="flex justify-between">
                       <span className="text-gray-600">Compartilhamentos</span>
-                      <span className="font-semibold">{mockMetrics.compartilhamentos}</span>
+                      <span className="font-semibold">{mockMetrics.compartilhamentos.value}</span>
                     </div>
                     <div className="border-t" />
                     <div className="flex justify-between">
                       <span className="text-gray-600">Salvamentos</span>
-                      <span className="font-semibold">{mockMetrics.salvamentos}</span>
+                      <span className="font-semibold">{mockMetrics.salvamentos.value}</span>
                     </div>
                   </div>
                 </Card>
               </div>
+
+              {/* Ranking de Conteúdos */}
+              <Card padding="lg">
+                <h2 className="text-2xl font-bold mb-6">🏆 Ranking de Conteúdos</h2>
+                <Table
+                  headers={['Post/Conteúdo', 'Formato', 'Alcance', 'Engajamento', 'Salvamentos']}
+                  rows={[
+                    ['Reel: Tutorial Inovador', 'Reel', '18.5K', '8.2%', '1.2K'],
+                    ['Carrossel: Dicas de Design', 'Carrossel', '12.3K', '6.5%', '890'],
+                    ['Post: Promoção Flash', 'Post', '8.7K', '4.1%', '320'],
+                    ['Story: Behind the Scenes', 'Story', '5.2K', '3.8%', '120'],
+                    ['Reel: Tendência do Momento', 'Reel', '4.8K', '2.5%', '95'],
+                  ]}
+                  medals={true}
+                />
+              </Card>
             </div>
           )}
 
