@@ -1,37 +1,90 @@
 import { useState, useCallback } from 'react'
+import {
+  generateExecutiveSummary,
+  generateStrategicAnalyses,
+  generateInsights,
+  generateActionPlan,
+  askAI as callAI
+} from '../services/ai'
 
 export function useAI() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const generateAnalysis = useCallback(async (reportData, analysisType) => {
+  const generateSummary = useCallback(async (reportData) => {
     setLoading(true)
     setError(null)
 
     try {
-      // Placeholder para Claude API
-      // Será implementado na Fase 7
-      const mockAnalyses = {
-        summary: `O mês de ${reportData.month} foi marcado por um crescimento consistente nas métricas de engajamento. O alcance aumentou 15% em relação ao mês anterior, enquanto as impressões tiveram um incremento de 22%. Esses números refletem uma estratégia eficaz de conteúdo e um engajamento cada vez maior da audiência. Destaca-se o desempenho excepcional dos Reels e Stories, que juntos foram responsáveis por mais de 60% do engajamento total.`,
-
-        insights: [
-          'O horário de maior desempenho foi entre 19h e 21h',
-          'Reels tiveram 3x mais engajamento que posts estáticos',
-          'Conteúdo educativo obteve melhor taxa de salvamentos',
-          'A audiência cresceu 8% neste mês',
-          'Compatilhamentos aumentaram 25% vs. mês anterior',
-        ],
-
-        actionPlan: [
-          { problema: 'Baixa retenção em Stories', impacto: 'Alto', recomendacao: 'Aumentar frequência e variar formatos', prioridade: 'Alta', prazo: '1 semana' },
-          { problema: 'Baixa taxa de conversão em cliques', impacto: 'Médio', recomendacao: 'Melhorar CTA e testar layouts', prioridade: 'Média', prazo: '2 semanas' },
-          { problema: 'Falta de conteúdo videoUniverso', impacto: 'Alto', recomendacao: 'Produzir 2-3 vídeos/semana', prioridade: 'Alta', prazo: '1 semana' },
-        ],
-      }
-
-      return mockAnalyses[analysisType] || mockAnalyses.summary
+      const summary = await generateExecutiveSummary(reportData)
+      return summary
     } catch (err) {
       setError(err.message)
+      console.error('Erro ao gerar resumo:', err)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const generateAnalyses = useCallback(async (reportData) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const analyses = await generateStrategicAnalyses(reportData)
+      return analyses
+    } catch (err) {
+      setError(err.message)
+      console.error('Erro ao gerar análises:', err)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const generateActionPlanData = useCallback(async (reportData) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const actionPlan = await generateActionPlan(reportData)
+      return actionPlan
+    } catch (err) {
+      setError(err.message)
+      console.error('Erro ao gerar plano de ação:', err)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const generateInsightsData = useCallback(async (reportData) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const insights = await generateInsights(reportData)
+      return insights
+    } catch (err) {
+      setError(err.message)
+      console.error('Erro ao gerar insights:', err)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const askQuestion = useCallback(async (question, reportData) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await callAI(question, reportData)
+      return response
+    } catch (err) {
+      setError(err.message)
+      console.error('Erro ao responder pergunta:', err)
       throw err
     } finally {
       setLoading(false)
@@ -41,6 +94,10 @@ export function useAI() {
   return {
     loading,
     error,
-    generateAnalysis,
+    generateSummary,
+    generateAnalyses,
+    generateActionPlanData,
+    generateInsightsData,
+    askQuestion,
   }
 }
