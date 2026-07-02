@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LK Analytics AI - Sistema Completo</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -831,7 +832,6 @@
                         <button class="tab-btn active" onclick="switchTab(event, 'overview')">👁️ Visão Geral</button>
                         <button class="tab-btn" onclick="switchTab(event, 'metrics')">📊 Métricas</button>
                         <button class="tab-btn" onclick="switchTab(event, 'content')">📝 Conteúdos</button>
-                        <button class="tab-btn" onclick="switchTab(event, 'prints')">📸 Prints</button>
                         <button class="tab-btn" onclick="switchTab(event, 'audience')">👥 Audiência</button>
                         <button class="tab-btn" onclick="switchTab(event, 'comparison')">⚖️ Comparação</button>
                         <button class="tab-btn" onclick="switchTab(event, 'recommendations')">💡 Recomendações</button>
@@ -839,14 +839,6 @@
 
                     <!-- OVERVIEW TAB -->
                     <div id="overview" class="tab-content active">
-                        <div class="alert">
-                            <div class="alert-icon">⚠️</div>
-                            <div class="alert-content">
-                                <h3>Meta e Instagram tiveram instabilidades em Junho</h3>
-                                <p>Algumas métricas podem estar subestimadas. Recomendamos comparar com dados do Meta Business Suite.</p>
-                            </div>
-                        </div>
-
                         <!-- KPIs -->
                         <div class="kpis-grid" id="kpisGrid"></div>
 
@@ -915,14 +907,6 @@
                                 </thead>
                                 <tbody id="contentTable"></tbody>
                             </table>
-                        </div>
-                    </div>
-
-                    <!-- PRINTS TAB -->
-                    <div id="prints" class="tab-content">
-                        <div class="screenshots-section">
-                            <h3 style="margin-bottom: 20px; color: #333;">📸 Prints dos Resultados</h3>
-                            <div class="screenshots-gallery" id="screenshotsGallery"></div>
                         </div>
                     </div>
 
@@ -1243,21 +1227,6 @@
         function loadReportData() {
             const r = currentReport;
 
-            // Show screenshots in prints tab
-            const screenshotsGallery = document.getElementById('screenshotsGallery');
-            const images = reportImagesCache[r.id] || [];
-
-            if (screenshotsGallery) {
-                screenshotsGallery.innerHTML = images.map(img => `
-                    <div class="screenshot-card">
-                        <img src="${img.base64}" alt="${img.name}" class="screenshot-image">
-                        <div class="screenshot-info">
-                            ${img.name}
-                        </div>
-                    </div>
-                `).join('');
-            }
-
             // KPIs with dummy trends
             const kpis = [
                 { label: 'Alcance Orgânico', value: r.reach, trend: '-16,3%', negative: true },
@@ -1513,11 +1482,33 @@
         }
 
         function exportPDF() {
-            alert('Funcionalidade de exportação PDF em desenvolvimento');
+            const r = currentReport;
+            const fileName = `Relatorio_${r.clientName}_${r.month}_${r.year}.pdf`;
+
+            const element = document.querySelector('.report-container');
+            const opt = {
+                margin: 10,
+                filename: fileName,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+
+            html2pdf().set(opt).from(element).save();
         }
 
         function shareReport() {
-            alert('Funcionalidade de compartilhamento em desenvolvimento');
+            const r = currentReport;
+            const text = `Relatório de ${r.clientName} - ${r.month}/${r.year}`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'LK Analytics',
+                    text: text
+                }).catch(err => console.log('Erro ao compartilhar:', err));
+            } else {
+                alert('Copie este link para compartilhar:\n\n' + window.location.href);
+            }
         }
     </script>
 </body>
