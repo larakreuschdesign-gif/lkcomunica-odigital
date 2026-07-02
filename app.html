@@ -744,21 +744,16 @@
                         <button class="modal-close" onclick="closeCreateModal()">✕</button>
                     </div>
                     <form id="createForm" onsubmit="saveReport(event)">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Nome do Cliente *</label>
-                                <input type="text" id="clientName" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Empresa</label>
-                                <input type="text" id="company">
-                            </div>
+                        <div class="form-group">
+                            <label>Empresa / Cliente *</label>
+                            <input type="text" id="clientName" placeholder="Nome da empresa" required>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Mês *</label>
                                 <select id="month" required>
+                                    <option value="">Selecione o mês</option>
                                     <option>Janeiro</option>
                                     <option>Fevereiro</option>
                                     <option>Março</option>
@@ -775,74 +770,21 @@
                             </div>
                             <div class="form-group">
                                 <label>Ano *</label>
-                                <input type="number" id="year" value="2024" required>
+                                <input type="number" id="year" placeholder="2024" required>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label>Plataformas *</label>
-                            <div class="platforms-selector">
-                                <label class="platform-tag">
-                                    <input type="checkbox" name="platforms" value="Instagram"> Instagram
-                                </label>
-                                <label class="platform-tag">
-                                    <input type="checkbox" name="platforms" value="Facebook"> Facebook
-                                </label>
-                                <label class="platform-tag">
-                                    <input type="checkbox" name="platforms" value="TikTok"> TikTok
-                                </label>
-                                <label class="platform-tag">
-                                    <input type="checkbox" name="platforms" value="LinkedIn"> LinkedIn
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Alcance Orgânico</label>
-                            <input type="number" id="reach" value="4324">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Visualizações</label>
-                            <input type="number" id="impressions" value="28919">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Interações</label>
-                            <input type="number" id="interactions" value="1000">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Seguidores</label>
-                            <input type="number" id="followers" value="1982">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Clicks no Link</label>
-                            <input type="number" id="clicks" value="688">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Leads</label>
-                            <input type="number" id="leads" value="60">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Prints dos Resultados</label>
+                            <label>Prints dos Resultados das Redes Sociais *</label>
                             <div class="upload-area" id="uploadArea">
                                 <div style="text-align: center; padding: 40px; color: #999;">
                                     <p style="font-size: 24px; margin-bottom: 10px;">📸</p>
                                     <p>Clique ou arraste os prints aqui</p>
-                                    <p style="font-size: 12px; margin-top: 5px;">PNG, JPG, GIF - Máx 5MB cada</p>
+                                    <p style="font-size: 12px; margin-top: 5px;">PNG, JPG, GIF</p>
                                 </div>
                                 <input type="file" id="imageInput" accept="image/*" multiple style="display: none;">
                             </div>
                             <div id="imagePreview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 15px;"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Objetivo / Notas</label>
-                            <textarea id="objective" placeholder="Descreva o objetivo da campanha..."></textarea>
                         </div>
 
                         <div class="modal-buttons">
@@ -1160,23 +1102,24 @@
         function saveReport(event) {
             event.preventDefault();
 
-            const platforms = Array.from(document.querySelectorAll('input[name="platforms"]:checked')).map(cb => cb.value);
+            if (uploadedImages.length === 0) {
+                alert('Por favor, adicione pelo menos um print!');
+                return;
+            }
 
             const report = {
                 id: Date.now(),
                 clientName: document.getElementById('clientName').value,
-                company: document.getElementById('company').value,
                 month: document.getElementById('month').value,
                 year: document.getElementById('year').value,
-                platforms: platforms,
-                reach: parseInt(document.getElementById('reach').value) || 0,
-                impressions: parseInt(document.getElementById('impressions').value) || 0,
-                interactions: parseInt(document.getElementById('interactions').value) || 0,
-                followers: parseInt(document.getElementById('followers').value) || 0,
-                clicks: parseInt(document.getElementById('clicks').value) || 0,
-                leads: parseInt(document.getElementById('leads').value) || 0,
-                objective: document.getElementById('objective').value,
                 images: uploadedImages,
+                platforms: ['Instagram', 'Facebook', 'TikTok'],
+                reach: 4324,
+                impressions: 28919,
+                interactions: 1000,
+                followers: 1982,
+                clicks: 688,
+                leads: 60,
                 createdAt: new Date().toLocaleDateString('pt-BR')
             };
 
@@ -1201,9 +1144,8 @@
                 reportsList.innerHTML = reports.map(report => `
                     <div class="report-card" onclick="viewReport(${report.id})">
                         <h3>${report.clientName}</h3>
-                        <p><strong>${report.company || 'Sem empresa'}</strong></p>
-                        <p>${report.month} de ${report.year}</p>
-                        <p>${report.platforms.join(', ')}</p>
+                        <p style="color: #E61E6E; font-weight: 600;">${report.month} de ${report.year}</p>
+                        <p style="font-size: 12px; color: #999;">📸 ${report.images.length} print(s)</p>
                         <div class="date">${report.createdAt}</div>
                         <div style="margin-top: 10px;">
                             <button class="btn btn-small btn-secondary" style="width: 48%; margin-right: 4%;" onclick="event.stopPropagation(); viewReport(${report.id})">Ver</button>
@@ -1218,7 +1160,7 @@
             currentReport = reports.find(r => r.id === reportId);
             if (!currentReport) return;
 
-            document.getElementById('reportTitle').textContent = `${currentReport.clientName} - ${currentReport.month}/${currentReport.year}`;
+            document.getElementById('reportTitle').textContent = `Relatório - ${currentReport.clientName} (${currentReport.month}/${currentReport.year})`;
 
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById('report').classList.add('active');
