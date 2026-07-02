@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LK Analytics AI - Dashboard Premium</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #F5EFEA;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid #E0D5D0;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #E61E6E, #B81253);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .logo h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: #666;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #F5EFEA;
+            color: #E61E6E;
+        }
+
+        .nav-btn.active {
+            background: #E61E6E;
+            color: white;
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 40px;
+            border-bottom: 1px solid #E0D5D0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* CARDS E BUTTONS */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #E61E6E;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #B81253;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #E61E6E;
+            border: 2px solid #E61E6E;
+        }
+
+        .btn-secondary:hover {
+            background: #F5EFEA;
+        }
+
+        /* FORM */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #D8CFCB;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #E61E6E;
+            box-shadow: 0 0 0 3px rgba(230, 30, 110, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* WIZARD STEPS */
+        .wizard {
+            margin-bottom: 30px;
+        }
+
+        .steps {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-num {
+            width: 40px;
+            height: 40px;
+            background: #E61E6E;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .step-num.done {
+            background: #27AE60;
+        }
+
+        .step-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        /* PLATFORMS */
+        .platforms-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .platform-card {
+            padding: 20px;
+            border: 2px solid #D8CFCB;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .platform-card:hover {
+            border-color: #E61E6E;
+        }
+
+        .platform-card.selected {
+            background: #E61E6E;
+            color: white;
+            border-color: #E61E6E;
+        }
+
+        /* DROPZONE */
+        .dropzone {
+            border: 3px dashed #E61E6E;
+            border-radius: 16px;
+            padding: 50px;
+            text-align: center;
+            cursor: pointer;
+            background: #F5EFEA;
+            transition: all 0.3s;
+            margin: 20px 0;
+        }
+
+        .dropzone:hover {
+            background: white;
+        }
+
+        .dropzone.dragover {
+            background: #E61E6E;
+            color: white;
+        }
+
+        .dropzone h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .files-list {
+            margin-top: 20px;
+            padding: 15px;
+            background: #F5EFEA;
+            border-radius: 10px;
+        }
+
+        .file-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #D8CFCB;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        /* DASHBOARD */
+        .hero {
+            margin-bottom: 30px;
+        }
+
+        .hero h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .hero p {
+            color: #666;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .report-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .report-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .report-card p {
+            color: #999;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 8px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: #F88AFC;
+            color: #B81253;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .metric {
+            background: #F5EFEA;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* REPORT VIEW */
+        .report-header {
+            margin-bottom: 30px;
+        }
+
+        .report-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .report-info {
+            display: flex;
+            gap: 20px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .kpi-change {
+            font-size: 12px;
+            color: #27AE60;
+            margin-top: 8px;
+        }
+
+        .summary {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            line-height: 1.6;
+        }
+
+        .summary h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .chart-placeholder {
+            background: white;
+            padding: 50px;
+            border-radius: 16px;
+            text-align: center;
+            color: #999;
+            margin: 30px 0;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .insight-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #E61E6E;
+        }
+
+        .insight-card h4 {
+            color: #B81253;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .insight-card .value {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .insight-card p {
+            font-size: 12px;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">LK</div>
+                <div>
+                    <h1>Analytics</h1>
+                    <p style="font-size: 11px; color: #999;">AI Powered</p>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <button class="nav-btn active" onclick="showSection('dashboard')">📊 Dashboard</button>
+                <button class="nav-btn" onclick="showSection('create')">➕ Novo Relatório</button>
+                <button class="nav-btn" onclick="showSection('reports')">📑 Meus Relatórios</button>
+                <button class="nav-btn" onclick="showSection('view')">👁️ Ver Relatório</button>
+            </nav>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main">
+            <!-- HEADER -->
+            <div class="header">
+                <h2>LK Analytics AI</h2>
+                <div style="display: flex; gap: 15px;">
+                    <button class="btn btn-secondary" onclick="alert('Notificações')">🔔</button>
+                    <button class="btn btn-secondary" onclick="alert('Perfil')">👤</button>
+                </div>
+            </div>
+
+            <!-- CONTENT -->
+            <div class="content">
+
+                <!-- DASHBOARD SECTION -->
+                <div id="dashboard" class="content-section active">
+                    <div class="hero">
+                        <h1>LK Analytics AI</h1>
+                        <p>Transforme prints em relatórios estratégicos com IA</p>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="showSection('create')" style="margin-bottom: 30px;">
+                        ➕ Criar Novo Relatório
+                    </button>
+
+                    <h2 style="margin-bottom: 20px; font-size: 18px; font-weight: 700;">Últimos Relatórios</h2>
+
+                    <div class="grid">
+                        <div class="report-card" onclick="showSection('view')">
+                            <h3>Tech Startup XYZ</h3>
+                            <p>Junho 2024</p>
+                            <div class="badges">
+                                <span class="badge">Instagram</span>
+                                <span class="badge">Facebook</span>
+                            </div>
+                            <div class="metrics">
+                                <div class="metric">
+                                    <div class="metric-value">45K</div>
+                                    <div class="metric-label">Alcance</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value">8.5%</div>
+                                    <div class="metric-label">Engajamento</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-card">
+                            <h3>E-commerce Beauty</h3>
+                            <p>Junho 2024</p>
+                            <div class="badges">
+                                <span class="badge">Instagram</span>
+                                <span class="badge">LinkedIn</span>
+                            </div>
+                            <div class="metrics">
+                                <div class="metric">
+                                    <div class="metric-value">32K</div>
+                                    <div class="metric-label">Alcance</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value">6.2%</div>
+                                    <div class="metric-label">Engajamento</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-card">
+                            <h3>SaaS Company</h3>
+                            <p>Maio 2024</p>
+                            <div class="badges">
+                                <span class="badge">LinkedIn</span>
+                            </div>
+                            <div class="metrics">
+                                <div class="metric">
+                                    <div class="metric-value">18K</div>
+                                    <div class="metric-label">Alcance</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value">4.8%</div>
+                                    <div class="metric-label">Engajamento</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CREATE REPORT SECTION -->
+                <div id="create" class="content-section">
+                    <h1 style="margin-bottom: 10px;">Novo Relatório</h1>
+                    <p style="color: #666; margin-bottom: 30px;">Crie um relatório completo em 3 passos simples</p>
+
+                    <div class="card">
+                        <div class="steps">
+                            <div class="step">
+                                <div class="step-num" id="step1">1</div>
+                                <span class="step-label">Informações</span>
+                            </div>
+                            <div class="step">
+                                <div class="step-num" id="step2">2</div>
+                                <span class="step-label">Plataformas</span>
+                            </div>
+                            <div class="step">
+                                <div class="step-num" id="step3">3</div>
+                                <span class="step-label">Upload</span>
+                            </div>
+                        </div>
+
+                        <!-- STEP 1 -->
+                        <div id="form-step1" class="wizard">
+                            <h3 style="margin-bottom: 20px;">Dados do Cliente</h3>
+
+                            <div class="form-group">
+                                <label>Nome do Cliente *</label>
+                                <input type="text" id="clientName" placeholder="Ex: João da Silva">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Empresa</label>
+                                    <input type="text" id="company" placeholder="Ex: Tech Startup XYZ">
+                                </div>
+                                <div class="form-group">
+                                    <label>Mês *</label>
+                                    <input type="text" id="month" placeholder="Ex: Junho">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Ano *</label>
+                                <input type="text" id="year" placeholder="Ex: 2024">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Objetivo do Cliente</label>
+                                <textarea id="objective" rows="4" placeholder="Descreva o objetivo..."></textarea>
+                            </div>
+
+                            <button class="btn btn-primary" onclick="nextStep()" style="width: 100%;">
+                                Próximo →
+                            </button>
+                        </div>
+
+                        <!-- STEP 2 -->
+                        <div id="form-step2" class="wizard" style="display: none;">
+                            <h3 style="margin-bottom: 20px;">Selecione as Plataformas</h3>
+
+                            <div class="platforms-grid">
+                                <div class="platform-card selected" onclick="togglePlatform(this, 'Instagram')">
+                                    <div style="font-size: 30px; margin-bottom: 8px;">📱</div>
+                                    <div>Instagram</div>
+                                </div>
+                                <div class="platform-card" onclick="togglePlatform(this, 'Facebook')">
+                                    <div style="font-size: 30px; margin-bottom: 8px;">👍</div>
+                                    <div>Facebook</div>
+                                </div>
+                                <div class="platform-card" onclick="togglePlatform(this, 'LinkedIn')">
+                                    <div style="font-size: 30px; margin-bottom: 8px;">💼</div>
+                                    <div>LinkedIn</div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                                <button class="btn btn-secondary" onclick="prevStep()" style="flex: 1;">
+                                    ← Voltar
+                                </button>
+                                <button class="btn btn-primary" onclick="nextStep()" style="flex: 1;">
+                                    Próximo →
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- STEP 3 -->
+                        <div id="form-step3" class="wizard" style="display: none;">
+                            <h3 style="margin-bottom: 20px;">Upload de Prints</h3>
+
+                            <div class="dropzone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" onclick="document.getElementById('fileInput').click()">
+                                <h3>📸 Arraste aqui</h3>
+                                <p>ou clique para selecionar arquivos</p>
+                                <p style="font-size: 12px; color: #999; margin-top: 10px;">PNG, JPG, PDF, Excel, CSV</p>
+                            </div>
+
+                            <input type="file" id="fileInput" multiple accept=".png,.jpg,.pdf,.xlsx,.csv" style="display: none;" onchange="handleFiles(event)">
+
+                            <div id="filesList"></div>
+
+                            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                                <button class="btn btn-secondary" onclick="prevStep()" style="flex: 1;">
+                                    ← Voltar
+                                </button>
+                                <button class="btn btn-primary" onclick="generateReport()" style="flex: 1;">
+                                    ✅ Gerar Relatório
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REPORTS LIST SECTION -->
+                <div id="reports" class="content-section">
+                    <h1 style="margin-bottom: 10px;">Meus Relatórios</h1>
+                    <p style="color: #666; margin-bottom: 30px;">Todos os seus relatórios gerados</p>
+
+                    <div class="grid">
+                        <div class="report-card" onclick="showSection('view')">
+                            <h3>Tech Startup XYZ</h3>
+                            <p>Junho 2024</p>
+                            <div class="badges">
+                                <span class="badge">Instagram</span>
+                                <span class="badge">Facebook</span>
+                            </div>
+                            <div class="metrics">
+                                <div class="metric">
+                                    <div class="metric-value">45K</div>
+                                    <div class="metric-label">Alcance</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value">8.5%</div>
+                                    <div class="metric-label">Engajamento</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-card">
+                            <h3>E-commerce Beauty</h3>
+                            <p>Junho 2024</p>
+                            <div class="badges">
+                                <span class="badge">Instagram</span>
+                            </div>
+                            <div class="metrics">
+                                <div class="metric">
+                                    <div class="metric-value">32K</div>
+                                    <div class="metric-label">Alcance</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value">6.2%</div>
+                                    <div class="metric-label">Engajamento</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW REPORT SECTION -->
+                <div id="view" class="content-section">
+                    <div class="report-header">
+                        <h1 id="reportTitle">Tech Startup XYZ</h1>
+                        <div class="report-info">
+                            <span>📅 Junho 2024</span>
+                            <span>•</span>
+                            <span>📆 Gerado em 30 de Junho</span>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="alert('📥 Relatório exportado em PDF!')">📥 Exportar PDF</button>
+                            <button class="btn btn-secondary" onclick="alert('🔗 Link copiado!')">🔗 Compartilhar</button>
+                        </div>
+                    </div>
+
+                    <!-- SUMMARY -->
+                    <div class="summary">
+                        <h2>📝 Resumo Executivo</h2>
+                        <p>
+                            Junho de 2024 foi um mês excepcional para a Tech Startup XYZ. O alcance total atingiu 45.230 contas, representando um crescimento de 12% em relação ao mês anterior. O engajamento manteve-se em um nível premium de 8.5%, indicando que os conteúdos publicados ressoaram fortemente com a audiência.
+                        </p>
+                        <p style="margin-top: 15px;">
+                            Os pontos de atenção concentram-se na redução de visualizações em Stories (↓ 8%), possivelmente influenciada por mudanças no algoritmo. Recomenda-se um teste A/B com formatos de conteúdo mais dinâmicos.
+                        </p>
+                    </div>
+
+                    <!-- KPIs -->
+                    <h2 style="margin: 30px 0 20px; font-size: 18px; font-weight: 700;">📊 KPIs Principais</h2>
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-label">Alcance</div>
+                            <div class="kpi-value">45.230</div>
+                            <div class="kpi-change">↑ 12% vs mês anterior</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Impressões</div>
+                            <div class="kpi-value">128.450</div>
+                            <div class="kpi-change">↑ 8% vs mês anterior</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Engajamento</div>
+                            <div class="kpi-value">8.5%</div>
+                            <div class="kpi-change" style="color: #E74C3C;">↓ 2% vs mês anterior</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Seguidores Novos</div>
+                            <div class="kpi-value">1.243</div>
+                            <div class="kpi-change">↑ 15% vs mês anterior</div>
+                        </div>
+                    </div>
+
+                    <!-- CHART -->
+                    <div class="chart-placeholder">
+                        📈 Gráficos Interativos (Demonstração)
+                    </div>
+
+                    <!-- INSIGHTS -->
+                    <h2 style="margin: 30px 0 20px; font-size: 18px; font-weight: 700;">✨ Insights Automáticos</h2>
+                    <div class="insights-grid">
+                        <div class="insight-card">
+                            <h4>Melhor Horário</h4>
+                            <div class="value">19h - 21h</div>
+                            <p>Pico de engajamento 3.2x maior</p>
+                        </div>
+                        <div class="insight-card">
+                            <h4>Formato Vencedor</h4>
+                            <div class="value">Reels</div>
+                            <p>8.500 interações em média</p>
+                        </div>
+                        <div class="insight-card">
+                            <h4>Tema Top</h4>
+                            <div class="value">Educativo</div>
+                            <p>2.1x mais engajamento</p>
+                        </div>
+                    </div>
+
+                    <!-- ACTION PLAN -->
+                    <h2 style="margin: 30px 0 20px; font-size: 18px; font-weight: 700;">🎯 Plano de Ação</h2>
+                    <div class="card" style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #E0D5D0;">
+                                    <th style="text-align: left; padding: 12px; font-weight: 600;">Problema</th>
+                                    <th style="text-align: left; padding: 12px; font-weight: 600;">Impacto</th>
+                                    <th style="text-align: left; padding: 12px; font-weight: 600;">Recomendação</th>
+                                    <th style="text-align: left; padding: 12px; font-weight: 600;">Prazo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #E0D5D0;">
+                                    <td style="padding: 12px;">Queda em Stories</td>
+                                    <td style="padding: 12px;"><span style="background: #FFE5E5; color: #C0392B; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">Alto</span></td>
+                                    <td style="padding: 12px;">Testar Stories interativas</td>
+                                    <td style="padding: 12px;">7 dias</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px;">Pouco carrossel</td>
+                                    <td style="padding: 12px;"><span style="background: #FFF3CD; color: #FF9800; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">Médio</span></td>
+                                    <td style="padding: 12px;">Aumentar para 2x semana</td>
+                                    <td style="padding: 12px;">14 dias</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let selectedPlatforms = ['Instagram'];
+        let uploadedFiles = [];
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function nextStep() {
+            if (currentStep === 1) {
+                const name = document.getElementById('clientName').value;
+                if (!name.trim()) {
+                    alert('⚠️ Por favor, preencha o nome do cliente');
+                    return;
+                }
+                currentStep = 2;
+            } else if (currentStep === 2) {
+                currentStep = 3;
+            }
+            updateStep();
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+            }
+            updateStep();
+        }
+
+        function updateStep() {
+            document.getElementById('form-step1').style.display = currentStep === 1 ? 'block' : 'none';
+            document.getElementById('form-step2').style.display = currentStep === 2 ? 'block' : 'none';
+            document.getElementById('form-step3').style.display = currentStep === 3 ? 'block' : 'none';
+
+            document.getElementById('step1').classList.toggle('done', currentStep > 1);
+            document.getElementById('step2').classList.toggle('done', currentStep > 2);
+        }
+
+        function togglePlatform(element, platform) {
+            element.classList.toggle('selected');
+            if (element.classList.contains('selected')) {
+                selectedPlatforms.push(platform);
+            } else {
+                selectedPlatforms = selectedPlatforms.filter(p => p !== platform);
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            processFiles(files);
+        }
+
+        function handleFiles(e) {
+            const files = e.target.files;
+            processFiles(files);
+        }
+
+        function processFiles(files) {
+            uploadedFiles = Array.from(files);
+            updateFilesList();
+        }
+
+        function updateFilesList() {
+            const filesList = document.getElementById('filesList');
+            if (uploadedFiles.length === 0) {
+                filesList.innerHTML = '';
+                return;
+            }
+
+            let html = '<div class="files-list"><strong>Arquivos carregados:</strong>';
+            uploadedFiles.forEach((file, i) => {
+                html += `<div class="file-item"><span>✅ ${file.name}</span><button class="btn" onclick="removeFile(${i})">✕</button></div>`;
+            });
+            html += '</div>';
+            filesList.innerHTML = html;
+        }
+
+        function removeFile(index) {
+            uploadedFiles.splice(index, 1);
+            updateFilesList();
+        }
+
+        function generateReport() {
+            if (uploadedFiles.length === 0) {
+                alert('⚠️ Por favor, carregue pelo menos um arquivo');
+                return;
+            }
+
+            const clientName = document.getElementById('clientName').value;
+            const company = document.getElementById('company').value;
+            const month = document.getElementById('month').value;
+
+            alert(`✅ Relatório criado com sucesso!\n\nCliente: ${clientName}\nEmpresa: ${company || 'N/A'}\nPeríodo: ${month}\nArquivos: ${uploadedFiles.length}\nPlataformas: ${selectedPlatforms.join(', ')}`);
+
+            // Reset form
+            currentStep = 1;
+            updateStep();
+            uploadedFiles = [];
+            updateFilesList();
+
+            // Show report
+            setTimeout(() => showSection('view'), 500);
+        }
+
+        // Initialize
+        updateStep();
+    </script>
+</body>
+</html>
