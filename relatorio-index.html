@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório SYYNC - Escolha a Versão</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            animation: slideDown 0.6s ease;
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .versions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .version-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .version-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .version-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .version-header {
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 4px solid #e91e63;
+        }
+
+        .version-header.interactive {
+            border-bottom-color: #667eea;
+        }
+
+        .version-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .version-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .version-subtitle {
+            color: #888;
+            font-size: 0.95em;
+        }
+
+        .version-content {
+            padding: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 25px;
+            flex-grow: 1;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            color: #555;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            font-size: 0.95em;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li::before {
+            content: "✓";
+            color: #4caf50;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 1.1em;
+        }
+
+        .version-footer {
+            padding: 20px 30px;
+            background: #f9f9f9;
+            border-top: 1px solid #eee;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e91e63, #c2185b);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(233, 30, 99, 0.3);
+        }
+
+        .btn-interactive {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-interactive:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .tag-recommended {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .tag-new {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .comparison-section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-top: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .comparison-section h2 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table th {
+            background: #f5f5f5;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .check {
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .footer p {
+            margin-bottom: 10px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .versions-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .comparison-section {
+                padding: 20px;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+        }
+
+        .badge-performance {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            background: #f3e5f5;
+            color: #6a1b9a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 Relatório Instagram SYYNC</h1>
+            <p>Escolha a versão ideal para sua apresentação</p>
+        </div>
+
+        <!-- Version Cards -->
+        <div class="versions-grid">
+            <!-- Estática -->
+            <div class="version-card">
+                <div class="version-header">
+                    <div class="version-icon">📄</div>
+                    <h2 class="version-title">Versão Estática</h2>
+                    <p class="version-subtitle">Limpa e Profissional</p>
+                </div>
+                <div class="version-content">
+                    <span class="tag tag-recommended">✨ Recomendada para PDF</span>
+                    <ul class="feature-list">
+                        <li>Design minimalista e profissional</li>
+                        <li>Layout impresso perfeito</li>
+                        <li>Sem JavaScript pesado</li>
+                        <li>Carregamento ultra-rápido</li>
+                        <li>Compatível com todos navegadores</li>
+                        <li>Dados estruturados em cards</li>
+                        <li>Tabelas bem organizadas</li>
+                    </ul>
+                </div>
+                <div class="version-footer">
+                    <a href="relatorio-syync.html" class="btn btn-primary">Abrir Versão Estática</a>
+                </div>
+            </div>
+
+            <!-- Interativa -->
+            <div class="version-card">
+                <div class="version-header interactive">
+                    <div class="version-icon">⚡</div>
+                    <h2 class="version-title">Versão Interativa</h2>
+                    <p class="version-subtitle">Dinâmica e Exploratória</p>
+                </div>
+                <div class="version-content">
+                    <span class="tag tag-new">🆕 Novidade</span>
+                    <ul class="feature-list">
+                        <li>6 abas temáticas interativas</li>
+                        <li>7 gráficos dinâmicos</li>
+                        <li>Dark mode com toggle</li>
+                        <li>Cards clicáveis com modal</li>
+                        <li>Filtros por tipo conteúdo</li>
+                        <li>Animações suaves</li>
+                        <li>Tema responsivo perfeito</li>
+                    </ul>
+                </div>
+                <div class="version-footer">
+                    <a href="relatorio-syync-interativo.html" class="btn btn-interactive">Abrir Versão Interativa</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Section -->
+        <div class="comparison-section">
+            <h2>📋 Comparativo Detalhado</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Recurso</th>
+                        <th>Estática</th>
+                        <th>Interativa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Design Profissional</strong></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dados Completos</strong></td>
+                        <td><span class="check">✓</span></td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Gráficos Dinâmicos</strong></td>
+                        <td>—</td>
+                        <td><span class="check">✓</span> (7 gráficos)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Modo Noturno (Dark Mode)</strong></td>
+                        <td>—</td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Abas Temáticas</strong></td>
+                        <td>—</td>
+                        <td><span class="check">✓</span> (6 abas)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cards Interativos</strong></td>
+                        <td>—</td>
+                        <td><span class="check">✓</span> com modais</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Filtros de Conteúdo</strong></td>
+                        <td>—</td>
+                        <td><span class="check">✓</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Otimizado para PDF</strong></td>
+                        <td><span class="check">✓</span></td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tamanho do Arquivo</strong></td>
+                        <td>37 KB</td>
+                        <td>62 KB</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tempo de Carregamento</strong></td>
+                        <td><span class="badge-performance">&lt;100ms</span></td>
+                        <td><span class="badge-performance">&lt;300ms</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 style="color: #333; margin-top: 30px; margin-bottom: 15px;">💡 Quando Usar Cada Versão?</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div style="padding: 20px; background: #f3e5f5; border-radius: 8px;">
+                    <h4 style="color: #6a1b9a; margin-bottom: 10px;">📄 Use a Estática se:</h4>
+                    <ul style="list-style: none; color: #555; font-size: 0.9em;">
+                        <li>✓ Vai imprimir em PDF</li>
+                        <li>✓ Quer máxima compatibilidade</li>
+                        <li>✓ Precisa de carregamento ultra-rápido</li>
+                        <li>✓ Apresentação formal executiva</li>
+                        <li>✓ Compartilhamento por email</li>
+                    </ul>
+                </div>
+                <div style="padding: 20px; background: #e3f2fd; border-radius: 8px;">
+                    <h4 style="color: #1565c0; margin-bottom: 10px;">⚡ Use a Interativa se:</h4>
+                    <ul style="list-style: none; color: #555; font-size: 0.9em;">
+                        <li>✓ Apresentação ao vivo</li>
+                        <li>✓ Análise exploratória</li>
+                        <li>✓ Quer impressionar com gráficos</li>
+                        <li>✓ Reunião online/videoconferência</li>
+                        <li>✓ Navegação interativa preferida</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>LK Comunicação Digital</strong> | Relatório Orgânico Instagram | Junho 2026</p>
+            <p>Ambas as versões contêm os mesmos dados e análises completas do PDF original</p>
+            <p style="margin-top: 20px; opacity: 0.8; font-size: 0.85em;">✨ Desenvolvido com ❤️ para apresentações profissionais</p>
+        </div>
+    </div>
+</body>
+</html>
