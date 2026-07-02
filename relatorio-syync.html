@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Instagram SYYNC - Junho 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(233, 30, 99, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.95;
+            margin-bottom: 20px;
+        }
+
+        .header-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .meta-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .meta-item strong {
+            display: block;
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .meta-item span {
+            display: block;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        /* Alert Box */
+        .alert-box {
+            background: #fce4ec;
+            border-left: 5px solid #e91e63;
+            padding: 25px;
+            margin-bottom: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .alert-box h3 {
+            color: #c2185b;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 1.2em;
+        }
+
+        .alert-box h3::before {
+            content: "⚠️ ";
+            margin-right: 10px;
+            font-size: 1.3em;
+        }
+
+        .alert-box ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .alert-box li {
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .alert-box strong {
+            color: #c2185b;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #f3e5f5;
+            border-left: 5px solid #9c27b0;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            color: #555;
+        }
+
+        .info-box h4 {
+            color: #7b1fa2;
+            margin-bottom: 10px;
+        }
+
+        /* Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-top: 4px solid #e91e63;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(233, 30, 99, 0.15);
+        }
+
+        .metric-card .label {
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-card .value {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #e91e63;
+            margin-bottom: 10px;
+        }
+
+        .metric-card .change {
+            font-size: 0.95em;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .metric-card .change.down {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .metric-card .change.up {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .metric-card .change.stable {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .metric-card .insight {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        /* Section */
+        section {
+            margin-bottom: 50px;
+        }
+
+        section h2 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #e91e63;
+            display: inline-block;
+        }
+
+        section h3 {
+            font-size: 1.5em;
+            color: #555;
+            margin: 30px 0 20px 0;
+            font-weight: 600;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        table thead {
+            background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+            color: white;
+        }
+
+        table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+
+        table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge.highlight {
+            background: #ffe0e6;
+            color: #c2185b;
+        }
+
+        .badge.positive {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge.warning {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        /* Comparison Box */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .comparison-item {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .comparison-item h4 {
+            color: #e91e63;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .comparison-item .data {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-item .data:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .comparison-item .label {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .comparison-item .value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        /* Recommendation Box */
+        .recommendation-box {
+            background: linear-gradient(135deg, #f3e5f5 0%, #ede7f6 100%);
+            border-left: 5px solid #9c27b0;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+        }
+
+        .recommendation-box h4 {
+            color: #6a1b9a;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .recommendation-box ul {
+            margin-left: 20px;
+            list-style-position: inside;
+        }
+
+        .recommendation-box li {
+            margin-bottom: 12px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .recommendation-box strong {
+            color: #6a1b9a;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            border-top: 1px solid #ddd;
+            margin-top: 50px;
+            font-size: 0.9em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            section h2 {
+                font-size: 1.5em;
+            }
+
+            table th, table td {
+                padding: 12px;
+                font-size: 0.9em;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        /* Highlights */
+        .highlight {
+            background: linear-gradient(120deg, #ffe0e6 0%, #f3e5f5 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .highlight strong {
+            color: #c2185b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Relatório de Desempenho Instagram</h1>
+            <p class="subtitle">SYYNC | Junho 2026</p>
+            <div class="header-meta">
+                <div class="meta-item">
+                    <strong>Data do Relatório</strong>
+                    <span>01 de julho de 2026</span>
+                </div>
+                <div class="meta-item">
+                    <strong>Período Analisado</strong>
+                    <span>30 dias</span>
+                </div>
+                <div class="meta-item">
+                    <strong>Plataforma</strong>
+                    <span>Meta Business</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Alert -->
+        <section>
+            <div class="alert-box">
+                <h3>Instabilidades Meta e Instagram em junho de 2026</h3>
+                <p style="margin-bottom: 15px;">Junho foi um mês atípico para toda a plataforma Meta. Foram registradas duas instabilidades técnicas de grande impacto:</p>
+                <ul>
+                    <li><strong>Dia dos Namorados (12 de junho):</strong> a instabilidade mais crítica do mês. Feed com bug generalizado, queda severa no engajamento orgânico e falhas no Meta Ads, afetando entrega de anúncios e alcance pago de forma simultânea. Perfis de todos os segmentos registraram quedas abruptas sem explicação de conteúdo.</li>
+                    <li><strong>Segunda instabilidade no mês:</strong> novo episódio de instabilidade registrado ao longo de junho, com impacto no alcance orgânico e na contagem de visualizações de Reels e Stories.</li>
+                </ul>
+                <p style="margin-top: 15px; color: #c2185b; font-weight: 600;">Parte das quedas apresentadas neste relatório está diretamente relacionada a esses eventos externos, e não a falhas de estratégia ou queda de qualidade do conteúdo.</p>
+            </div>
+
+            <div class="info-box">
+                <h4>Por que analisar o orgânico separadamente?</h4>
+                <p>No mês de junho, a maior parte do alcance e das visualizações totais foi sustentada por anúncios pagos. Este relatório isola exclusivamente o desempenho orgânico, o que o conteúdo gerou por si só, sem investimento em mídia, para uma leitura real da força da marca e da estratégia de conteúdo publicada.</p>
+            </div>
+        </section>
+
+        <!-- Metrics Overview -->
+        <section>
+            <h2>Métricas Orgânicas — Junho Completo</h2>
+            <div class="card-grid">
+                <div class="metric-card">
+                    <div class="label">Visualizações Orgânicas</div>
+                    <div class="value">28.919</div>
+                    <div class="change down">▼ 53,8%</div>
+                    <div class="insight">Impacto Meta + volume</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="label">Alcance Orgânico</div>
+                    <div class="value">4.324</div>
+                    <div class="change down">▼ 16,3%</div>
+                    <div class="insight">Controlável</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="label">Interações Totais</div>
+                    <div class="value">1.000</div>
+                    <div class="change down">▼ 28,8%</div>
+                    <div class="insight">Contexto: público B2B</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="label">Interações em Posts</div>
+                    <div class="value">360</div>
+                    <div class="change down">▼ 25,8%</div>
+                    <div class="insight">Reels dominam</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="label">Cliques no Link</div>
+                    <div class="value">688</div>
+                    <div class="change down">▼ 11,5%</div>
+                    <div class="insight">Queda leve, relevante</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="label">Visitas ao Perfil</div>
+                    <div class="value">910</div>
+                    <div class="change down">▼ 21%</div>
+                    <div class="insight">Instab. Meta impacta</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="label">Novos Seguidores</div>
+                    <div class="value">96</div>
+                    <div class="change stable">▼ 4%</div>
+                    <div class="insight">✅ Estável</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="label">Deixaram de Seguir</div>
+                    <div class="value">22</div>
+                    <div class="change up">▼ 4,3%</div>
+                    <div class="insight">✅ Retenção saudável</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="label">Total de Seguidores</div>
+                    <div class="value">1.982</div>
+                    <div class="change up">Base atual</div>
+                    <div class="insight">✅ Em crescimento</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="label">Stories — Visualizações</div>
+                    <div class="value">14.900</div>
+                    <div class="change down">▼ 54,6%</div>
+                    <div class="insight">Impacto instabilidade</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="label">Stories — Alcance</div>
+                    <div class="value">2.900</div>
+                    <div class="change up">▼ 15,8%</div>
+                    <div class="insight">✅ Queda controlada</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="label">Leads em Análise</div>
+                    <div class="value">60</div>
+                    <div class="change up">▲ 25%</div>
+                    <div class="insight">✅ Crescimento real</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparison -->
+        <section>
+            <h2>SYYNC vs. Mercado</h2>
+            <p style="margin-bottom: 25px; color: #666;">O Meta Business Suite forneceu dados comparativos do SYYNC frente a empresas da mesma categoria com alcance orgânico semelhante nos últimos 28 dias:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Indicador</th>
+                            <th>SYYNC</th>
+                            <th>Média do Setor</th>
+                            <th>Posição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Conteúdo publicado (28 dias)</td>
+                            <td><strong>79 posts/stories</strong></td>
+                            <td>Abaixo do SYYNC</td>
+                            <td><span class="badge positive">Mais alto que outros</span></td>
+                        </tr>
+                        <tr>
+                            <td>Seguidores</td>
+                            <td><strong>1.982</strong></td>
+                            <td>Normalmente: 1.055</td>
+                            <td><span class="badge highlight">Semelhante a outros</span></td>
+                        </tr>
+                        <tr>
+                            <td>Novos seguidores (28 dias)</td>
+                            <td><strong>96</strong></td>
+                            <td>Normalmente: 14</td>
+                            <td><span class="badge positive">Mais alto que outros</span></td>
+                        </tr>
+                        <tr>
+                            <td>Interações com o conteúdo</td>
+                            <td><strong>923</strong></td>
+                            <td>Normalmente: 86</td>
+                            <td><span class="badge positive">Mais alto que outros</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="highlight">
+                <p><strong>Análise Estratégica:</strong> O SYYNC supera a média do setor em volume de publicação, crescimento de seguidores e interações — três dos indicadores mais relevantes para o algoritmo. Isso é especialmente significativo considerando o impacto das instabilidades da Meta em junho, que afetaram toda a plataforma de forma uniforme. O perfil está performando acima do esperado para o seu estágio.</p>
+            </div>
+        </section>
+
+        <!-- Detailed Analysis -->
+        <section>
+            <h2>Análise dos Indicadores Orgânicos</h2>
+
+            <h3>1. Alcance Orgânico: 4.324 pessoas (▼ 16,3%)</h3>
+            <p style="margin-bottom: 15px;">O alcance orgânico de junho foi de 4.324 pessoas únicas, uma redução de 16,3% em relação ao período anterior. Essa variação é explicada por dois fatores: o comportamento natural do algoritmo em um perfil que ainda está consolidando seu histórico de engajamento e as instabilidades da Meta registradas durante o mês, especialmente no período do Dia dos Namorados, que afetaram a entrega de conteúdo e impactaram o alcance orgânico de perfis de diferentes portes. Parte dessa queda, portanto, não está relacionada à qualidade ou à estratégia do conteúdo.</p>
+            <div class="info-box">
+                <h4>Interpretação</h4>
+                <p>Para um perfil com 1.982 seguidores, alcançar 4.324 pessoas organicamente representa uma taxa de alcance de ~218% da base — resultado acima da média para o estágio. O conteúdo está ultrapassando os seguidores existentes e chegando a novos usuários de forma consistente.</p>
+            </div>
+
+            <h3>2. Visualizações Orgânicas: 28.919 (▼ 53,8%)</h3>
+            <p style="margin-bottom: 15px;">As visualizações orgânicas registraram uma queda de 53,8%, influenciada principalmente pelas instabilidades da Meta em junho, que afetaram tanto a entrega dos Reels quanto a contagem de visualizações. Além disso, a diferença entre a redução no alcance (16,3%) e nas visualizações, ou seja, os conteúdos continuam alcançando pessoas, mas estão sendo assistidos menos vezes. Reforçar os primeiros segundos dos vídeos tende a aumentar a retenção e contribuir para a recuperação deste indicador.</p>
+            <div class="info-box">
+                <h4>Interpretação</h4>
+                <p>A queda expressiva nas visualizações é resultado da combinação entre efeito das instabilidades técnicas da Meta e menor taxa de rewatch. Não representa queda na qualidade do conteúdo — o alcance orgânico, indicador mais estável, caiu apenas 16,3%.</p>
+            </div>
+
+            <h3>3. Interações em Posts: 360 (▼ 25,8%) — 1.000 no total</h3>
+            <p style="margin-bottom: 15px;">As interações com os posts totalizaram 360 no mês, ou 1.000 considerando stories e outras formas de interação, representando uma queda de 25,8%. Esse resultado é esperado para o perfil do público da SYYNC, composto por empresários, gestores e profissionais de RH, que costumam consumir conteúdos de forma mais discreta, priorizando leituras, compartilhamentos e cliques em vez de comentários e reações públicas. Além disso, as instabilidades da Meta durante junho, especialmente no período do Dia dos Namorados, também podem ter contribuído para a redução das interações.</p>
+            <div class="info-box">
+                <h4>Interpretação</h4>
+                <p>360 interações em posts B2B com público de gestores e RH é um resultado consistente. Os Reels dominam as interações (~75% do total vs. ~25% das fotos). O indicador mais relevante para o negócio não é o comentário — é o clique, o compartilhamento e a visita ao perfil.</p>
+            </div>
+
+            <h3>4. Stories: 14.900 visualizações | 2.900 alcance (▼ 54,6% / ▼ 15,8%)</h3>
+            <p style="margin-bottom: 15px;">Os Stories foram publicados em bom volume durante o mês. Embora as visualizações tenham caído 54,6%, a redução no alcance foi de apenas 15,8%, indicando que o desempenho também foi impactado pelas instabilidades da Meta, que afetam especialmente a distribuição dos Stories. Ainda assim, alcançar cerca de 2.900 pessoas no mês representa um resultado consistente para o tamanho atual do perfil.</p>
+
+            <h3>5. Audiência e Conversão: Crescimento Consistente</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Indicador de Audiência</th>
+                            <th>Resultado</th>
+                            <th>Variação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Novos seguidores</td>
+                            <td>96</td>
+                            <td><span class="badge warning">▼ 4% (estável)</span></td>
+                        </tr>
+                        <tr>
+                            <td>Deixaram de seguir</td>
+                            <td>22</td>
+                            <td><span class="badge positive">▼ 4,3% (queda positiva)</span></td>
+                        </tr>
+                        <tr>
+                            <td>Total de seguidores</td>
+                            <td>1.982</td>
+                            <td><span class="badge positive">Base crescente</span></td>
+                        </tr>
+                        <tr>
+                            <td>Leads em análise</td>
+                            <td>60</td>
+                            <td><span class="badge positive">▲ 25%</span></td>
+                        </tr>
+                        <tr>
+                            <td>Cliques no link</td>
+                            <td>688</td>
+                            <td><span class="badge warning">▼ 11,5%</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="info-box">
+                <h4>Leitura Estratégica da Audiência</h4>
+                <p>O crescimento de 96 novos seguidores com apenas 22 unfollows representa um saldo líquido positivo expressivo. O destaque do mês é o aumento de 25% nos leads em análise — 60 leads gerados — que mostra que o conteúdo e os anúncios estão convertendo atenção em interesse comercial real. Para um perfil B2B de SaaS, esse é o indicador de maior valor estratégico do relatório.</p>
+            </div>
+        </section>
+
+        <!-- Audience Profile -->
+        <section>
+            <h2>Perfil da Audiência</h2>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dados Demográficos</th>
+                            <th>Resultado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Total de seguidores</td>
+                            <td><strong>1.982</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Gênero dominante</td>
+                            <td>Mulheres: 68,8% | Homens: 31,2%</td>
+                        </tr>
+                        <tr>
+                            <td>Faixa etária principal</td>
+                            <td>35-44 anos (~30%) | 25-34 anos (~22%)</td>
+                        </tr>
+                        <tr>
+                            <td>Principal cidade</td>
+                            <td>Gaspar, SC (17,2%)</td>
+                        </tr>
+                        <tr>
+                            <td>Cidades SC com maior presença</td>
+                            <td>Blumenau (12,6%), Florianópolis (8,3%), São José (4,3%), Joinville (4%)</td>
+                        </tr>
+                        <tr>
+                            <td>País dominante</td>
+                            <td>Brasil: 98,9%</td>
+                        </tr>
+                        <tr>
+                            <td>Público potencial estimado</td>
+                            <td>162.400.000 a 191.100.000 pessoas</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="info-box">
+                <h4>O que os dados de público revelam</h4>
+                <p>A audiência do SYYNC é predominantemente feminina (68,8%), na faixa dos 35-44 anos — perfil altamente compatível com profissionais de RH e gestoras de pessoas. A concentração em Santa Catarina é natural para uma empresa com origem no estado, mas representa também uma oportunidade de expansão para capitais como São Paulo e Rio de Janeiro, onde o público potencial é muito maior.</p>
+            </div>
+        </section>
+
+        <!-- Best Performing Content -->
+        <section>
+            <h2>Conteúdos que Mais Performaram — Junho</h2>
+            <p style="margin-bottom: 25px; color: #666;">Ranking baseado em métricas orgânicas: curtidas, compartilhamentos, visualizações e alcance sem impulsionamento.</p>
+
+            <h3>Top Posts por Interações</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Conteúdo</th>
+                            <th>Data</th>
+                            <th>Views</th>
+                            <th>Curtidas</th>
+                            <th>Comp.</th>
+                            <th>Destaque</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Com a movimentação de pessoas no SYYN</td>
+                            <td>Seg, 1 jun</td>
+                            <td>65</td>
+                            <td><strong>42</strong></td>
+                            <td>7</td>
+                            <td><span class="badge highlight">Mais curtido do mês</span></td>
+                        </tr>
+                        <tr>
+                            <td>O SYYNC estará no CONCARH 2026!</td>
+                            <td>Dom, 22 jun</td>
+                            <td>59</td>
+                            <td>30</td>
+                            <td><strong>10</strong></td>
+                            <td><span class="badge positive">Mais compartilhado</span></td>
+                        </tr>
+                        <tr>
+                            <td>A experiência do colaborador começa</td>
+                            <td>Sex, 19 jun</td>
+                            <td>52</td>
+                            <td>31</td>
+                            <td>10</td>
+                            <td><span class="badge highlight">Alto engajamento</span></td>
+                        </tr>
+                        <tr>
+                            <td>Temos o prazer de anunciar um dos…</td>
+                            <td>Sex, 26 jun</td>
+                            <td>48</td>
+                            <td>30</td>
+                            <td>4</td>
+                            <td><span class="badge positive">Prova social forte</span></td>
+                        </tr>
+                        <tr>
+                            <td>Cada conversa, cada conexão e cada…</td>
+                            <td>Seg, 29 jun</td>
+                            <td>39</td>
+                            <td>26</td>
+                            <td>5</td>
+                            <td><span class="badge highlight">Humanização da marca</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Top Stories por Visualizações</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Story</th>
+                            <th>Data</th>
+                            <th>👁 Views</th>
+                            <th>↗ Comp.</th>
+                            <th>Destaque</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>@edsonbau @dudeoliveira... (bastidores)</td>
+                            <td>Seg, 29 jun</td>
+                            <td><strong>2.400</strong></td>
+                            <td>8</td>
+                            <td><span class="badge highlight">Mais visto e compartilhado</span></td>
+                        </tr>
+                        <tr>
+                            <td>Hoje com a mini empresa... (bastidores)</td>
+                            <td>Qua, 3 jun</td>
+                            <td>2.100</td>
+                            <td>8</td>
+                            <td><span class="badge positive">Alto repost</span></td>
+                        </tr>
+                        <tr>
+                            <td>Comemorando novo parceiro em clima de copa</td>
+                            <td>Qua, 10 jun</td>
+                            <td>1.100</td>
+                            <td>5</td>
+                            <td><span class="badge highlight">Contexto comemorativo</span></td>
+                        </tr>
+                        <tr>
+                            <td>Lançamento da última semana, com...</td>
+                            <td>Ter, 30 jun</td>
+                            <td>428</td>
+                            <td><strong>16</strong></td>
+                            <td><span class="badge positive">Mais repostado do mês</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="highlight">
+                <h4>Padrão dos Conteúdos Orgânicos de Sucesso em Junho</h4>
+                <p>Três padrões se destacam entre os conteúdos de maior performance:</p>
+                <ul style="margin: 15px 0 0 20px;">
+                    <li><strong>(1) Conteúdo de dor e processo</strong> - posts que nomeiam problemas reais do RH geram as maiores curtidas orgânicas;</li>
+                    <li><strong>(2) Conteúdo de evento e prova social</strong> - a presença no CONCARH 2026 gerou os maiores compartilhamentos, mostrando que o público quer associar a marca a referências do setor;</li>
+                    <li><strong>(3) Bastidores com rostos reais</strong> - Stories com pessoas reais da empresa geram mais visualizações e reposts do que conteúdo institucional. Esses três tipos devem guiar a produção de julho.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Performance by Format -->
+        <section>
+            <h2>Performance por Formato — Junho</h2>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Formato</th>
+                            <th>Interações</th>
+                            <th>% do Total</th>
+                            <th>Tendência</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Reels</strong></td>
+                            <td>~270 interações</td>
+                            <td><strong>~75%</strong></td>
+                            <td><span class="badge positive">Formato dominante</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Posts estáticos</strong></td>
+                            <td>~90 interações</td>
+                            <td>~25%</td>
+                            <td><span class="badge highlight">Papel de apoio</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Stories</strong></td>
+                            <td>14.900 views / 2.900 alcance</td>
+                            <td>Alto volume</td>
+                            <td><span class="badge positive">Bastidores lideram</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Recommendations -->
+        <section>
+            <h2>Recomendações para Julho</h2>
+
+            <div class="recommendation-box">
+                <h4>Curto Prazo — primeiras 2 semanas de julho</h4>
+                <ul>
+                    <li><strong>Manter a frequência de publicação alta:</strong> Com 79 posts/stories em junho, o SYYNC já está acima da média do setor. Manter esse ritmo em julho é fundamental para preservar o posicionamento no algoritmo.</li>
+                    <li><strong>Apostar no trio vencedor de formatos:</strong> Dor do RH + Evento/prova social + Bastidores com pessoas reais. Esses três tipos tiveram os melhores resultados orgânicos de junho e devem ser a espinha dorsal de julho.</li>
+                    <li><strong>Fortalecer os ganchos nos primeiros 3 segundos dos Reels:</strong> A queda nas visualizações vs. alcance indica retenção baixa. Aberturas mais impactantes, com a dor nomeada logo de início, aumentam rewatch e alcance orgânico.</li>
+                    <li><strong>Criar CTA explícito em todos os Reels:</strong> 'Salva esse post', 'manda pra quem lidera um time', 'comenta se você já viveu isso' — sinais que o algoritmo valoriza e que o público B2B responde bem quando provocado.</li>
+                </ul>
+            </div>
+
+            <div class="recommendation-box">
+                <h4>Médio Prazo — próximos 30 dias</h4>
+                <ul>
+                    <li><strong>Capitalizar o CONCARH 2026:</strong> O evento gerou os maiores compartilhamentos do mês. Criar uma série de conteúdos pré, durante e pós-evento maximiza o alcance orgânico através de associação com referências do setor.</li>
+                    <li><strong>Expandir conteúdo de prova social:</strong> Depoimentos reais de clientes, cases com resultados e parceiros confirmados seguem o padrão dos posts mais engajados. Meta de ao menos 2 conteúdos de prova social por semana.</li>
+                    <li><strong>Testar carrosséis educacionais:</strong> Frameworks, checklists e guias práticos de RH geram salvamentos — o sinal orgânico mais valioso para o algoritmo atualmente. Criar ao menos 1 carrossel educacional por quinzena.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p><strong>LK Comunicação Digital</strong> | Relatório Orgânico Instagram | Junho 2026</p>
+            <p>Dados extraídos do Meta Business Suite | Período: 01 a 30 de junho de 2026 | Análise exclusiva de alcance orgânico</p>
+        </footer>
+    </div>
+</body>
+</html>
