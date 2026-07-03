@@ -1,0 +1,27 @@
+{
+  "name": "lkcomunica-odigital",
+  "version": "1.0.0",
+  "description": "SaaS Platform for Professional Video Script Generation with AI",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "start": "pnpm -r run start",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "type-check": "pnpm -r run type-check",
+    "backend": "pnpm -F backend dev",
+    "frontend": "pnpm -F frontend dev",
+    "db:push": "pnpm -F backend exec prisma db push",
+    "db:generate": "pnpm -F backend exec prisma generate",
+    "db:studio": "pnpm -F backend exec prisma studio"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

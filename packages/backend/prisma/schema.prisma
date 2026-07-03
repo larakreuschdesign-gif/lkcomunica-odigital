@@ -1,0 +1,124 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum ScriptStatus {
+  DRAFT
+  GENERATED
+  EDITING
+  FINALIZED
+  ARCHIVED
+}
+
+enum Platform {
+  TIKTOK
+  INSTAGRAM
+  YOUTUBE
+  LINKEDIN
+  OTHER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String
+  avatar        String?
+  plan          Plan      @default(FREE)
+  monthlyQuota  Int       @default(10)
+  used          Int       @default(0)
+  resetQuotaAt  DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  projects      Project[]
+  scripts       Script[]
+  templates     Template[]
+}
+
+model Project {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  logo          String?
+  brandColor    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  scripts       Script[]
+
+  @@index([userId])
+}
+
+model Script {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId     String?
+  project       Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  title         String
+  status        ScriptStatus @default(DRAFT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  clientName    String
+  objective     String
+  platform      Platform
+  contentType   String
+  duration      Int
+  voiceTone     String
+  targetAudience String
+  structure     String?
+  cta           String?
+  references    String[]
+  ideas         String?
+
+  script        Json
+  wordCount     Int       @default(0)
+  readingTime   Int       @default(0)
+
+  shareToken    String?   @unique
+  isPublic      Boolean   @default(false)
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([status])
+  @@index([platform])
+}
+
+model Template {
+  id            String    @id @default(cuid())
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name          String
+  category      String
+  description   String?
+  thumbnail     String?
+
+  content       Json
+  promptGuide   String?
+
+  isPublic      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([category])
+}
