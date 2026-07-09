@@ -1,5 +1,6 @@
 import express from 'express'
 import { generateScript, generateHookVariations } from '../services/aiService.js'
+import { analyzeScript, generateScriptVariation, suggestScriptImprovements } from '../services/scriptAnalyzer.js'
 import { getDatabase } from '../services/database.js'
 
 const router = express.Router()
@@ -224,6 +225,100 @@ router.post('/:id/hook-variations', async (req, res) => {
     res.json(variations)
   } catch (error) {
     console.error('Error generating variations:', error)
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// Analyze script
+router.post('/:id/analyze', async (req, res) => {
+  try {
+    const db = getDatabase()
+    const script = await db.get('SELECT * FROM scripts WHERE id = ?', [req.params.id])
+
+    if (!script) {
+      return res.status(404).json({ error: 'Script not found' })
+    }
+
+    const scenes = await db.all(
+      'SELECT * FROM scenes WHERE scriptId = ? ORDER BY sceneIndex',
+      [req.params.id]
+    )
+
+    const analysis = await analyzeScript({ ...script, scenes })
+    res.json(analysis)
+  } catch (error) {
+    console.error('Error analyzing script:', error)
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// Generate script variation
+router.post('/:id/variations', async (req, res) => {
+  try {
+    const db = getDatabase()
+    const { variationType } = req.body
+
+    const script = await db.get('SELECT * FROM scripts WHERE id = ?', [req.params.id])
+
+    if (!script) {
+      return res.status(404).json({ error: 'Script not found' })
+    }
+
+    const scenes = await db.all(
+      'SELECT * FROM scenes WHERE scriptId = ? ORDER BY sceneIndex',
+      [req.params.id]
+    )
+
+    const variation = await generateScriptVariation({ ...script, scenes }, variationType)
+    res.json(variation)
+  } catch (error) {
+    console.error('Error generating variation:', error)
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// Get script improvements
+router.post('/:id/improvements', async (req, res) => {
+  try {
+    const db = getDatabase()
+    const script = await db.get('SELECT * FROM scripts WHERE id = ?', [req.params.id])
+
+    if (!script) {
+      return res.status(404).json({ error: 'Script not found' })
+    }
+
+    const scenes = await db.all(
+      'SELECT * FROM scenes WHERE scriptId = ? ORDER BY sceneIndex',
+      [req.params.id]
+    )
+
+    const improvements = await suggestScriptImprovements({ ...script, scenes })
+    res.json(improvements)
+  } catch (error) {
+    console.error('Error getting improvements:', error)
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// Get script statistics
+router.get('/stats/overview', async (req, res) => {
+  try {
+    const db = getDatabase()
+    const scripts = await db.all('SELECT * FROM scripts')
+
+    const totalScripts = scripts.length
+    const totalScenes = await db.get('SELECT COUNT(*) as count FROM scenes')
+    const platformDistribution = await db.all(
+      'SELECT platform, COUNT(*) as count FROM scripts GROUP BY platform'
+    )
+
+    res.json({
+      totalScripts,
+      totalScenes: totalScenes.count,
+      platformDistribution,
+    })
+  } catch (error) {
+    console.error('Error getting stats:', error)
     res.status(500).json({ error: error.message })
   }
 })
