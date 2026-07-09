@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROTEIRO AI - Gerador de Roteiros Profissionais</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #818cf8;
+      --secondary: #ec4899;
+      --accent: #f59e0b;
+      --background: #ffffff;
+      --surface: #f9fafb;
+      --surface-light: #f3f4f6;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --text-tertiary: #9ca3af;
+      --border: #e5e7eb;
+      --success: #10b981;
+      --error: #ef4444;
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --spacing-2xl: 3rem;
+      --sidebar-width: 280px;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: #0f172a;
+        --surface: #1e293b;
+        --surface-light: #334155;
+        --text-primary: #f1f5f9;
+        --text-secondary: #cbd5e1;
+        --text-tertiary: #94a3b8;
+        --border: #334155;
+      }
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: var(--background);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .app {
+      display: flex;
+      height: 100vh;
+      background: var(--background);
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: var(--spacing-lg);
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar__logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: var(--spacing-xl);
+      text-align: center;
+    }
+
+    .sidebar__nav {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .sidebar__link {
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      transition: all 200ms;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      border: none;
+      background: none;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+    }
+
+    .sidebar__link:hover {
+      background: var(--surface-light);
+      color: var(--text-primary);
+    }
+
+    .sidebar__link.active {
+      background: var(--primary);
+      color: white;
+      font-weight: 500;
+    }
+
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--background);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 var(--spacing-lg);
+      width: 100%;
+    }
+
+    .page {
+      display: none;
+      padding: 3rem 1.5rem;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: 1.875rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+
+    h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      transition: all 200ms;
+      border: 1px solid transparent;
+      white-space: nowrap;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn--primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn--primary:hover {
+      background: var(--primary-dark);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn--primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn--secondary {
+      background: var(--surface);
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+
+    .btn--secondary:hover {
+      background: var(--surface-light);
+    }
+
+    .btn--lg {
+      padding: 0.875rem 1.75rem;
+      font-size: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .form-group__label {
+      display: block;
+      margin-bottom: var(--spacing-sm);
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+    }
+
+    .input,
+    .textarea,
+    .select {
+      width: 100%;
+      padding: var(--spacing-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--background);
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 200ms;
+    }
+
+    .input:focus,
+    .textarea:focus,
+    .select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .card {
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      transition: all 200ms;
+    }
+
+    .card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card--flat {
+      border: none;
+      background: var(--surface);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .text-muted {
+      color: var(--text-secondary);
+    }
+
+    .mb-lg {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .mt-lg {
+      margin-top: var(--spacing-lg);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(99, 102, 241, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hero {
+      text-align: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin: 3rem 0;
+    }
+
+    .feature-card {
+      padding: 2rem;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      text-align: center;
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    .scene-card {
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      margin-bottom: 1rem;
+    }
+
+    .scene-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .scene-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .scene-duration {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .scene-content {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .scene-content > div {
+      grid-column: auto;
+    }
+
+    .scene-content > div:last-child {
+      grid-column: span 2;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .alert--error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .alert--success {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: var(--spacing-md);
+      }
+
+      .app {
+        flex-direction: column;
+      }
+
+      .main-content {
+        max-height: calc(100vh - 80px);
+      }
+
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar__nav {
+        flex-direction: row;
+        gap: var(--spacing-md);
+        margin-bottom: 0;
+      }
+
+      .sidebar__link {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.875rem;
+      }
+
+      .scene-content {
+        grid-template-columns: 1fr;
+      }
+
+      .scene-content > div:last-child {
+        grid-column: auto;
+      }
+
+      .hero h1 {
+        font-size: 1.875rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar__logo">📹 ROTEIRO AI</div>
+      <nav class="sidebar__nav">
+        <button class="sidebar__link active" data-page="dashboard">Dashboard</button>
+        <button class="sidebar__link" data-page="builder">Novo Roteiro</button>
+        <button class="sidebar__link" data-page="scripts">Meus Roteiros</button>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <!-- DASHBOARD PAGE -->
+      <div id="dashboard" class="page active">
+        <div class="container">
+          <div class="hero">
+            <h1>Transforme um gancho em um roteiro pronto para gravar</h1>
+            <p>Insira sua ideia principal. A IA estrutura estratégia, cenas, falas e direção criativa.</p>
+            <button class="btn btn--primary btn--lg" onclick="app.goToPage('builder')">
+              ✨ Gerar Roteiro Completo
+            </button>
+          </div>
+
+          <section class="features">
+            <div class="feature-card">
+              <div class="feature-icon">🧠</div>
+              <h3>Inteligência Criativa</h3>
+              <p>IA especializada em estratégia de conteúdo, storytelling e copywriting para redes sociais.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">⚡</div>
+              <h3>Geração Instantânea</h3>
+              <p>De um gancho para um roteiro profissional em segundos. Sem fila, sem espera.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">✨</div>
+              <h3>Pronto para Gravação</h3>
+              <p>Cada roteiro vem com direção de câmera, movimentos, expressões e textos completos.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- SCRIPT BUILDER PAGE -->
+      <div id="builder" class="page">
+        <div class="container">
+          <h1>Novo Roteiro</h1>
+          <form id="scriptForm" onsubmit="app.handleGenerateScript(event)">
+            <div class="form-group">
+              <label class="form-group__label">Gancho Principal do Vídeo *</label>
+              <textarea
+                id="hook"
+                class="textarea"
+                placeholder="Ex: Você pode estar perdendo dinheiro todos os meses sem perceber..."
+                required
+              ></textarea>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-group__label">Plataforma</label>
+                <select id="platform" class="select">
+                  <option value="Instagram Reels">Instagram Reels</option>
+                  <option value="TikTok">TikTok</option>
+                  <option value="YouTube Shorts">YouTube Shorts</option>
+                  <option value="LinkedIn">LinkedIn</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-group__label">Objetivo</label>
+                <select id="objective" class="select">
+                  <option value="Engajamento">Engajamento</option>
+                  <option value="Alcance">Alcance</option>
+                  <option value="Conversão">Conversão</option>
+                  <option value="Educação">Educação</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-group__label">Tom de Voz</label>
+                <select id="tone" class="select">
+                  <option value="Conversacional">Conversacional</option>
+                  <option value="Profissional">Profissional</option>
+                  <option value="Provocativo">Provocativo</option>
+                  <option value="Emocional">Emocional</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-group__label">Formato</label>
+                <select id="format" class="select">
+                  <option value="Talking Head">Talking Head</option>
+                  <option value="Storytelling">Storytelling</option>
+                  <option value="Tutorial">Tutorial</option>
+                  <option value="POV">POV</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-group__label">Marca (Opcional)</label>
+                <input type="text" id="brand" class="input" placeholder="Nome da marca">
+              </div>
+              <div class="form-group">
+                <label class="form-group__label">Nicho (Opcional)</label>
+                <input type="text" id="niche" class="input" placeholder="Seu nicho">
+              </div>
+            </div>
+
+            <div id="errorAlert" class="alert alert--error" style="display: none;"></div>
+
+            <button type="submit" class="btn btn--primary btn--lg" id="submitBtn">
+              🚀 Gerar Roteiro Completo
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- SCRIPT RESULT PAGE -->
+      <div id="result" class="page">
+        <div class="container">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <h1 id="resultTitle">Roteiro</h1>
+              <p class="text-muted" id="resultMeta"></p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn btn--secondary" onclick="app.copyToClipboard()">📋 Copiar</button>
+              <button class="btn btn--secondary" onclick="app.goToPage('builder')">✏️ Novo</button>
+            </div>
+          </div>
+
+          <div id="resultContent"></div>
+        </div>
+      </div>
+
+      <!-- MY SCRIPTS PAGE -->
+      <div id="scripts" class="page">
+        <div class="container">
+          <h1>Meus Roteiros</h1>
+          <p class="text-muted mb-lg">Gerencie todos os roteiros que você criou</p>
+          <div id="scriptsList"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const app = {
+      currentScript: null,
+      scripts: [],
+      apiUrl: 'http://localhost:5000/api',
+
+      init() {
+        // Event listeners
+        document.querySelectorAll('[data-page]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const page = btn.dataset.page;
+            this.goToPage(page);
+          });
+        });
+
+        // Load scripts from localStorage
+        const saved = localStorage.getItem('scripts');
+        if (saved) {
+          this.scripts = JSON.parse(saved);
+        }
+
+        console.log('App initialized');
+      },
+
+      goToPage(page) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('[data-page]').forEach(b => b.classList.remove('active'));
+
+        document.getElementById(page).classList.add('active');
+        document.querySelector(`[data-page="${page}"]`).classList.add('active');
+
+        if (page === 'scripts') {
+          this.loadScripts();
+        }
+
+        window.scrollTo(0, 0);
+      },
+
+      async handleGenerateScript(e) {
+        e.preventDefault();
+
+        const hook = document.getElementById('hook').value.trim();
+        const platform = document.getElementById('platform').value;
+        const objective = document.getElementById('objective').value;
+        const tone = document.getElementById('tone').value;
+        const format = document.getElementById('format').value;
+        const brand = document.getElementById('brand').value;
+        const niche = document.getElementById('niche').value;
+
+        if (!hook) {
+          this.showError('Por favor, insira um gancho');
+          return;
+        }
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span> Gerando roteiro...';
+
+        try {
+          // Simular resposta (em produção, chamar API)
+          const response = await fetch(`${this.apiUrl}/scripts/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              hook,
+              platform,
+              objective,
+              tone,
+              format,
+              brand,
+              niche,
+            }),
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Erro ao gerar roteiro');
+          }
+
+          const scriptData = await response.json();
+          this.currentScript = scriptData;
+
+          // Salvar em localStorage
+          this.scripts.push(scriptData);
+          localStorage.setItem('scripts', JSON.stringify(this.scripts));
+
+          this.displayScript(scriptData);
+          this.goToPage('result');
+        } catch (error) {
+          console.error('Erro:', error);
+          this.showError(error.message);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '🚀 Gerar Roteiro Completo';
+        }
+      },
+
+      displayScript(script) {
+        document.getElementById('resultTitle').textContent = script.title;
+        document.getElementById('resultMeta').textContent = `${script.scenes.length} cenas • ${script.metadata?.duration || 'Duração não especificada'}`;
+
+        let html = `
+          <div class="card mb-lg">
+            <h3>Gancho Principal</h3>
+            <p style="font-size: 1.125rem; font-weight: 500; margin-top: 0.5rem;">${script.hook}</p>
+          </div>
+
+          <div class="card mb-lg">
+            <h3>Objetivo Estratégico</h3>
+            <p style="margin-top: 0.5rem;">${script.objective}</p>
+          </div>
+
+          <div class="card mb-lg">
+            <h3>Resumo Criativo</h3>
+            <p style="margin-top: 0.5rem; line-height: 1.7;">${script.summary}</p>
+          </div>
+
+          <h2 style="margin-top: 2rem;">Cenas</h2>
+        `;
+
+        script.scenes.forEach((scene, index) => {
+          html += `
+            <div class="scene-card">
+              <div class="scene-header">
+                <div>
+                  <div class="scene-title">CENA ${String(index + 1).padStart(2, '0')}</div>
+                  <div class="scene-duration">${scene.duration}</div>
+                </div>
+              </div>
+              <div class="scene-content">
+                <div><strong>Ambiente:</strong> ${scene.environment}</div>
+                <div><strong>Enquadramento:</strong> ${scene.framing}</div>
+                <div><strong>Expressão:</strong> ${scene.expression}</div>
+                <div><strong>Câmera:</strong> ${scene.cameraMovement}</div>
+                <div style="grid-column: span 2;">
+                  <strong>Texto Falado:</strong>
+                  <p style="margin-top: 0.5rem; font-style: italic; color: var(--text-primary);">"${scene.spokenText}"</p>
+                </div>
+                <div><strong>Texto na Tela:</strong> ${scene.onScreenText}</div>
+                <div><strong>Emoção:</strong> ${scene.emotion}</div>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `
+          <div class="card mt-lg">
+            <h3>CTA Final</h3>
+            <p style="margin-top: 0.5rem;">${script.ctaFinal}</p>
+          </div>
+
+          <div class="card mt-lg">
+            <h3>Observações</h3>
+            <p style="margin-top: 0.5rem; line-height: 1.7;">${script.observations}</p>
+          </div>
+        `;
+
+        document.getElementById('resultContent').innerHTML = html;
+      },
+
+      loadScripts() {
+        const container = document.getElementById('scriptsList');
+
+        if (this.scripts.length === 0) {
+          container.innerHTML = `
+            <div class="card text-center" style="padding: 3rem 1.5rem;">
+              <p class="text-muted" style="font-size: 1.125rem; margin-bottom: 1rem;">Nenhum roteiro ainda</p>
+              <button class="btn btn--primary" onclick="app.goToPage('builder')">Criar Primeiro Roteiro</button>
+            </div>
+          `;
+          return;
+        }
+
+        let html = '';
+        this.scripts.forEach((script, index) => {
+          html += `
+            <div class="card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <div style="flex: 1; cursor: pointer;" onclick="app.displayScriptFromList(${index})">
+                <h3 style="margin-bottom: 0.5rem;">${script.title}</h3>
+                <p class="text-muted">${script.hook.substring(0, 80)}...</p>
+                <p style="font-size: 0.875rem; color: var(--text-tertiary); margin-top: 0.5rem;">
+                  ${script.scenes.length} cenas • ${script.metadata?.platform || 'N/A'}
+                </p>
+              </div>
+              <button class="btn btn--secondary" onclick="app.displayScriptFromList(${index})">Ver</button>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+      },
+
+      displayScriptFromList(index) {
+        this.currentScript = this.scripts[index];
+        this.displayScript(this.currentScript);
+        this.goToPage('result');
+      },
+
+      copyToClipboard() {
+        if (!this.currentScript) return;
+
+        const text = `${this.currentScript.title}\n\n${this.currentScript.hook}\n\n${this.currentScript.scenes
+          .map((s) => `Cena: ${s.duration}\n${s.spokenText}`)
+          .join('\n\n')}`;
+
+        navigator.clipboard.writeText(text).then(() => {
+          alert('Roteiro copiado para a área de transferência!');
+        });
+      },
+
+      showError(message) {
+        const alert = document.getElementById('errorAlert');
+        alert.textContent = message;
+        alert.style.display = 'block';
+        setTimeout(() => {
+          alert.style.display = 'none';
+        }, 5000);
+      },
+    };
+
+    // Initialize app
+    document.addEventListener('DOMContentLoaded', () => app.init());
+  </script>
+</body>
+</html>
