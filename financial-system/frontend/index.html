@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor Financeiro Premium</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar__header">
+        <div class="logo">
+          <div class="logo__icon">💰</div>
+          <h1 class="logo__text">FinManager</h1>
+        </div>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="#" class="nav__item nav__item--active" data-page="dashboard">
+          <span class="nav__icon">📊</span>
+          <span class="nav__label">Dashboard</span>
+        </a>
+        <a href="#" class="nav__item" data-page="clients">
+          <span class="nav__icon">👥</span>
+          <span class="nav__label">Entradas</span>
+        </a>
+        <a href="#" class="nav__item" data-page="fixed-expenses">
+          <span class="nav__icon">🏠</span>
+          <span class="nav__label">Gastos Fixos</span>
+        </a>
+        <a href="#" class="nav__item" data-page="company-expenses">
+          <span class="nav__icon">💼</span>
+          <span class="nav__label">Empresa</span>
+        </a>
+        <a href="#" class="nav__item" data-page="extra-expenses">
+          <span class="nav__icon">🎁</span>
+          <span class="nav__label">Extras</span>
+        </a>
+        <a href="#" class="nav__item" data-page="third-party">
+          <span class="nav__icon">🤝</span>
+          <span class="nav__label">Terceiros</span>
+        </a>
+        <a href="#" class="nav__item" data-page="investments">
+          <span class="nav__icon">📈</span>
+          <span class="nav__label">Investimentos</span>
+        </a>
+        <a href="#" class="nav__item" data-page="summary">
+          <span class="nav__icon">📋</span>
+          <span class="nav__label">Resumo</span>
+        </a>
+        <a href="#" class="nav__item" data-page="calendar">
+          <span class="nav__icon">📅</span>
+          <span class="nav__label">Calendário</span>
+        </a>
+        <a href="#" class="nav__item" data-page="reports">
+          <span class="nav__icon">📑</span>
+          <span class="nav__label">Relatórios</span>
+        </a>
+      </nav>
+
+      <div class="sidebar__footer">
+        <button class="btn__theme" id="themeToggle" title="Alternar tema">🌙</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="topbar">
+        <div class="topbar__left">
+          <h2 class="topbar__title" id="pageTitle">Dashboard</h2>
+          <div class="topbar__date" id="currentDate"></div>
+        </div>
+        <div class="topbar__right">
+          <select class="month-select" id="monthSelect">
+            <option value="">Selecione um mês</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Content Area -->
+      <div class="content">
+        <!-- Dashboard Page -->
+        <div class="page" id="page-dashboard" style="display: block;">
+          <div class="dashboard">
+            <!-- KPI Cards -->
+            <div class="kpi-grid">
+              <div class="kpi-card">
+                <div class="kpi-card__icon">📥</div>
+                <div class="kpi-card__content">
+                  <div class="kpi-card__label">Receitas do Mês</div>
+                  <div class="kpi-card__value" id="kpi-revenue">R$ 0,00</div>
+                  <div class="kpi-card__change">+0%</div>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-card__icon">💸</div>
+                <div class="kpi-card__content">
+                  <div class="kpi-card__label">Total de Despesas</div>
+                  <div class="kpi-card__value" id="kpi-expenses">R$ 0,00</div>
+                  <div class="kpi-card__change negative">-0%</div>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-card__icon">💳</div>
+                <div class="kpi-card__content">
+                  <div class="kpi-card__label">Saldo Disponível</div>
+                  <div class="kpi-card__value" id="kpi-balance">R$ 0,00</div>
+                  <div class="kpi-card__change">+0%</div>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-card__icon">💎</div>
+                <div class="kpi-card__content">
+                  <div class="kpi-card__label">Total Investido</div>
+                  <div class="kpi-card__value" id="kpi-investments">R$ 0,00</div>
+                  <div class="kpi-card__change">+0%</div>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-card__icon">⏳</div>
+                <div class="kpi-card__content">
+                  <div class="kpi-card__label">A Receber</div>
+                  <div class="kpi-card__value" id="kpi-pending">R$ 0,00</div>
+                  <div class="kpi-card__sub">Clientes pendentes: <span id="pending-count">0</span></div>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-card__icon">✅</div>
+                <div class="kpi-card__content">
+                  <div class="kpi-card__label">Recebido</div>
+                  <div class="kpi-card__value" id="kpi-received">R$ 0,00</div>
+                  <div class="kpi-card__sub">Clientes pagos: <span id="paid-count">0</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+              <div class="chart-container">
+                <h3 class="chart-title">Receitas vs Despesas</h3>
+                <canvas id="chartRevenueExpenses"></canvas>
+              </div>
+
+              <div class="chart-container">
+                <h3 class="chart-title">Distribuição de Gastos</h3>
+                <canvas id="chartExpensesByCategory"></canvas>
+              </div>
+
+              <div class="chart-container">
+                <h3 class="chart-title">Evolução Financeira</h3>
+                <canvas id="chartEvolution"></canvas>
+              </div>
+
+              <div class="chart-container">
+                <h3 class="chart-title">Investimentos</h3>
+                <canvas id="chartInvestments"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clients Page -->
+        <div class="page" id="page-clients">
+          <div class="page-header">
+            <h2>Entradas - Clientes</h2>
+            <button class="btn btn__primary" id="addClientBtn">+ Adicionar Cliente</button>
+          </div>
+
+          <div class="filters-bar">
+            <input type="text" class="input-search" id="clientSearch" placeholder="Pesquisar cliente...">
+            <select id="clientStatusFilter">
+              <option value="">Todos os Status</option>
+              <option value="paid">Pago</option>
+              <option value="pending">Pendente</option>
+            </select>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="data-table" id="clientsTable">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Valor Mensal</th>
+                  <th>Dia do Pagamento</th>
+                  <th>Status</th>
+                  <th>Data de Pagamento</th>
+                  <th>Observações</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="clientsTableBody">
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <div class="footer-stat">
+              <span>Total Previsto:</span>
+              <strong id="clientTotalPrevisto">R$ 0,00</strong>
+            </div>
+            <div class="footer-stat">
+              <span>Total Recebido:</span>
+              <strong id="clientTotalRecebido">R$ 0,00</strong>
+            </div>
+            <div class="footer-stat">
+              <span>Total Pendente:</span>
+              <strong id="clientTotalPendente">R$ 0,00</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fixed Expenses Page -->
+        <div class="page" id="page-fixed-expenses">
+          <div class="page-header">
+            <h2>Gastos Fixos</h2>
+            <button class="btn btn__primary" id="addFixedExpenseBtn">+ Adicionar Gasto</button>
+          </div>
+
+          <div class="filters-bar">
+            <input type="text" class="input-search" id="fixedExpenseSearch" placeholder="Pesquisar gasto...">
+            <select id="fixedExpenseCategoryFilter">
+              <option value="">Todas as Categorias</option>
+              <option value="Mercado">Mercado</option>
+              <option value="Necessidades">Necessidades</option>
+              <option value="Lazer">Lazer</option>
+              <option value="Prazeres">Prazeres</option>
+              <option value="iFood">iFood</option>
+              <option value="Restaurante">Restaurante</option>
+              <option value="Assinaturas">Assinaturas</option>
+              <option value="Despesas eventuais">Despesas eventuais</option>
+              <option value="Trabalho">Trabalho</option>
+              <option value="Enxoval">Enxoval</option>
+              <option value="Despesas de casa">Despesas de casa</option>
+            </select>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="data-table" id="fixedExpensesTable">
+              <thead>
+                <tr>
+                  <th>Descrição</th>
+                  <th>Valor</th>
+                  <th>Categoria</th>
+                  <th>Forma de Pagamento</th>
+                  <th>Data</th>
+                  <th>Status</th>
+                  <th>Observações</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="fixedExpensesTableBody">
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <div class="footer-stat">
+              <span>Total Gasto:</span>
+              <strong id="fixedExpensesTotal">R$ 0,00</strong>
+            </div>
+          </div>
+
+          <!-- Category Distribution -->
+          <div class="chart-container" style="margin-top: 40px;">
+            <h3 class="chart-title">Gastos por Categoria</h3>
+            <canvas id="chartFixedByCategory"></canvas>
+          </div>
+        </div>
+
+        <!-- Company Expenses Page -->
+        <div class="page" id="page-company-expenses">
+          <div class="page-header">
+            <h2>Gastos da Empresa</h2>
+            <button class="btn btn__primary" id="addCompanyExpenseBtn">+ Adicionar Despesa</button>
+          </div>
+
+          <div class="filters-bar">
+            <input type="text" class="input-search" id="companyExpenseSearch" placeholder="Pesquisar...">
+            <select id="companyExpenseCategoryFilter">
+              <option value="">Todas as Categorias</option>
+              <option value="Despesas de trabalho">Despesas de Trabalho</option>
+              <option value="Assinaturas">Assinaturas</option>
+            </select>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="data-table" id="companyExpensesTable">
+              <thead>
+                <tr>
+                  <th>Descrição</th>
+                  <th>Valor</th>
+                  <th>Categoria</th>
+                  <th>Forma de Pagamento</th>
+                  <th>Data</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="companyExpensesTableBody">
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <div class="footer-stat">
+              <span>Total Gasto:</span>
+              <strong id="companyExpensesTotal">R$ 0,00</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Extra Expenses Page -->
+        <div class="page" id="page-extra-expenses">
+          <div class="page-header">
+            <h2>Gastos Extras</h2>
+            <button class="btn btn__primary" id="addExtraExpenseBtn">+ Adicionar Gasto Extra</button>
+          </div>
+
+          <div class="filters-bar">
+            <input type="text" class="input-search" id="extraExpenseSearch" placeholder="Pesquisar...">
+            <select id="extraExpenseStatusFilter">
+              <option value="">Todos os Status</option>
+              <option value="active">Ativo</option>
+              <option value="completed">Concluído</option>
+            </select>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="data-table" id="extraExpensesTable">
+              <thead>
+                <tr>
+                  <th>Descrição</th>
+                  <th>Valor</th>
+                  <th>Categoria</th>
+                  <th>Forma de Pagamento</th>
+                  <th>Parcelado</th>
+                  <th>Data</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="extraExpensesTableBody">
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <div class="footer-stat">
+              <span>Total:</span>
+              <strong id="extraExpensesTotal">R$ 0,00</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Third Party Expenses Page -->
+        <div class="page" id="page-third-party">
+          <div class="page-header">
+            <h2>Despesas de Terceiros</h2>
+            <button class="btn btn__primary" id="addThirdPartyBtn">+ Registrar Despesa</button>
+          </div>
+
+          <div class="filters-bar">
+            <input type="text" class="input-search" id="thirdPartySearch" placeholder="Pesquisar...">
+            <select id="thirdPartyStatusFilter">
+              <option value="">Todos os Status</option>
+              <option value="received">Recebido</option>
+              <option value="pending">Pendente</option>
+            </select>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="data-table" id="thirdPartyTable">
+              <thead>
+                <tr>
+                  <th>Pessoa</th>
+                  <th>Descrição</th>
+                  <th>Valor</th>
+                  <th>Categoria</th>
+                  <th>Forma de Pagamento</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="thirdPartyTableBody">
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <div class="footer-stat">
+              <span>Total Pendente:</span>
+              <strong id="thirdPartyTotal">R$ 0,00</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Investments Page -->
+        <div class="page" id="page-investments">
+          <div class="page-header">
+            <h2>Investimentos</h2>
+            <button class="btn btn__primary" id="addInvestmentBtn">+ Registrar Investimento</button>
+          </div>
+
+          <!-- Investment Goal -->
+          <div class="investment-goal">
+            <div class="goal-info">
+              <h3>Meta Mensal de Investimento</h3>
+              <p id="goalPeriod">Meta para julho/2026</p>
+            </div>
+            <div class="goal-display">
+              <div class="goal-value">
+                <span id="investmentGoal">R$ 7.500,00</span>
+              </div>
+              <div class="goal-progress">
+                <div class="progress-bar">
+                  <div class="progress-fill" id="investmentProgressBar" style="width: 0%"></div>
+                </div>
+                <div class="progress-info">
+                  <span id="investmentInvested">R$ 0,00</span> de <span id="investmentGoalAmount">R$ 7.500,00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filters-bar">
+            <input type="text" class="input-search" id="investmentSearch" placeholder="Pesquisar...">
+          </div>
+
+          <div class="table-wrapper">
+            <table class="data-table" id="investmentsTable">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Categoria</th>
+                  <th>Valor</th>
+                  <th>Data</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="investmentsTableBody">
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <div class="footer-stat">
+              <span>Total Investido no Mês:</span>
+              <strong id="investmentsTotal">R$ 0,00</strong>
+            </div>
+            <div class="footer-stat">
+              <span>Média Mensal:</span>
+              <strong id="investmentsAverage">R$ 0,00</strong>
+            </div>
+          </div>
+
+          <!-- Historical Chart -->
+          <div class="chart-container" style="margin-top: 40px;">
+            <h3 class="chart-title">Histórico de Investimentos</h3>
+            <canvas id="chartInvestmentHistory"></canvas>
+          </div>
+        </div>
+
+        <!-- Summary Page -->
+        <div class="page" id="page-summary">
+          <div class="page-header">
+            <h2>Resumo Financeiro</h2>
+          </div>
+
+          <div class="summary-grid">
+            <!-- Revenue Section -->
+            <div class="summary-card">
+              <h3 class="summary-card__title">📥 Receitas</h3>
+              <div class="summary-item">
+                <span>Total Recebido</span>
+                <strong id="summaryTotalReceived">R$ 0,00</strong>
+              </div>
+              <div class="summary-item">
+                <span>Total Pendente</span>
+                <strong id="summaryTotalPending">R$ 0,00</strong>
+              </div>
+              <div class="summary-item total">
+                <span>Total Receitas</span>
+                <strong id="summaryTotalRevenue">R$ 0,00</strong>
+              </div>
+            </div>
+
+            <!-- Expenses Section -->
+            <div class="summary-card">
+              <h3 class="summary-card__title">💸 Despesas</h3>
+              <div class="summary-item">
+                <span>Gastos Fixos</span>
+                <strong id="summaryFixedExpenses">R$ 0,00</strong>
+              </div>
+              <div class="summary-item">
+                <span>Gastos Empresa</span>
+                <strong id="summaryCompanyExpenses">R$ 0,00</strong>
+              </div>
+              <div class="summary-item">
+                <span>Gastos Extras</span>
+                <strong id="summaryExtraExpenses">R$ 0,00</strong>
+              </div>
+              <div class="summary-item">
+                <span>Despesas Terceiros</span>
+                <strong id="summaryThirdPartyExpenses">R$ 0,00</strong>
+              </div>
+              <div class="summary-item total">
+                <span>Total Despesas</span>
+                <strong id="summaryTotalExpenses">R$ 0,00</strong>
+              </div>
+            </div>
+
+            <!-- Investments Section -->
+            <div class="summary-card">
+              <h3 class="summary-card__title">💎 Investimentos</h3>
+              <div class="summary-item total">
+                <span>Total Investido</span>
+                <strong id="summaryInvestments">R$ 0,00</strong>
+              </div>
+            </div>
+
+            <!-- Balance Section -->
+            <div class="summary-card highlight">
+              <h3 class="summary-card__title">💳 Saldo</h3>
+              <div class="summary-item">
+                <span>Receita Líquida</span>
+                <strong id="summaryNetRevenue">R$ 0,00</strong>
+              </div>
+              <div class="summary-item">
+                <span>Saldo Final</span>
+                <strong id="summaryFinalBalance">R$ 0,00</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Indicators -->
+          <div class="indicators-grid">
+            <div class="indicator-card">
+              <h4>% Despesas vs Receitas</h4>
+              <div class="indicator-value" id="indicatorExpenseRatio">0%</div>
+              <div class="indicator-bar">
+                <div class="indicator-fill" id="indicatorExpenseRatioBar" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="indicator-card">
+              <h4>% Destinado a Investimentos</h4>
+              <div class="indicator-value" id="indicatorInvestmentRatio">0%</div>
+              <div class="indicator-bar">
+                <div class="indicator-fill" id="indicatorInvestmentRatioBar" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="indicator-card">
+              <h4>Economia do Mês</h4>
+              <div class="indicator-value" id="indicatorSavings">R$ 0,00</div>
+            </div>
+
+            <div class="indicator-card">
+              <h4>Receita vs Despesas</h4>
+              <div class="indicator-value" id="indicatorComparison">R$ 0,00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendar Page -->
+        <div class="page" id="page-calendar">
+          <div class="page-header">
+            <h2>Calendário Financeiro</h2>
+          </div>
+          <div id="calendarContainer"></div>
+        </div>
+
+        <!-- Reports Page -->
+        <div class="page" id="page-reports">
+          <div class="page-header">
+            <h2>Relatórios</h2>
+          </div>
+
+          <div class="filters-bar">
+            <select id="reportMonth">
+              <option value="">Selecione um mês</option>
+            </select>
+            <select id="reportType">
+              <option value="all">Todos os Tipos</option>
+              <option value="revenue">Receitas</option>
+              <option value="expenses">Despesas</option>
+              <option value="investments">Investimentos</option>
+            </select>
+            <select id="reportCategory">
+              <option value="">Todas as Categorias</option>
+            </select>
+          </div>
+
+          <div class="report-actions">
+            <button class="btn btn__secondary" id="exportPdfBtn">📄 Exportar PDF</button>
+            <button class="btn btn__secondary" id="exportExcelBtn">📊 Exportar Excel</button>
+            <button class="btn btn__secondary" id="exportCsvBtn">📋 Exportar CSV</button>
+          </div>
+
+          <div id="reportContent"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal-overlay" id="modalOverlay"></div>
+
+  <!-- Client Modal -->
+  <div class="modal" id="clientModal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 id="clientModalTitle">Adicionar Cliente</h3>
+        <button class="modal__close" id="clientModalClose">&times;</button>
+      </div>
+      <form id="clientForm" class="modal__form">
+        <div class="form-group">
+          <label for="clientName">Nome do Cliente</label>
+          <input type="text" id="clientName" required>
+        </div>
+        <div class="form-group">
+          <label for="clientValue">Valor Mensal</label>
+          <input type="number" id="clientValue" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label for="clientDay">Dia do Pagamento</label>
+          <input type="number" id="clientDay" min="1" max="31" required>
+        </div>
+        <div class="form-group">
+          <label for="clientStatus">Status</label>
+          <select id="clientStatus">
+            <option value="pending">Pendente</option>
+            <option value="paid">Pago</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="clientPaidDate">Data do Pagamento</label>
+          <input type="date" id="clientPaidDate">
+        </div>
+        <div class="form-group">
+          <label for="clientNotes">Observações</label>
+          <textarea id="clientNotes"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn__secondary" id="clientModalCancel">Cancelar</button>
+          <button type="submit" class="btn btn__primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Fixed Expense Modal -->
+  <div class="modal" id="fixedExpenseModal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 id="fixedExpenseModalTitle">Adicionar Gasto Fixo</h3>
+        <button class="modal__close" id="fixedExpenseModalClose">&times;</button>
+      </div>
+      <form id="fixedExpenseForm" class="modal__form">
+        <div class="form-group">
+          <label for="fexpName">Descrição</label>
+          <input type="text" id="fexpName" required>
+        </div>
+        <div class="form-group">
+          <label for="fexpValue">Valor</label>
+          <input type="number" id="fexpValue" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label for="fexpCategory">Categoria</label>
+          <select id="fexpCategory" required>
+            <option value="">Selecione</option>
+            <option value="Mercado">Mercado</option>
+            <option value="Necessidades">Necessidades</option>
+            <option value="Lazer">Lazer</option>
+            <option value="Prazeres">Prazeres</option>
+            <option value="iFood">iFood</option>
+            <option value="Restaurante">Restaurante</option>
+            <option value="Assinaturas">Assinaturas</option>
+            <option value="Despesas eventuais">Despesas eventuais</option>
+            <option value="Trabalho">Trabalho</option>
+            <option value="Enxoval">Enxoval</option>
+            <option value="Despesas de casa">Despesas de casa</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="fexpPaymentMethod">Forma de Pagamento</label>
+          <select id="fexpPaymentMethod" required>
+            <option value="">Selecione</option>
+            <option value="PIX">PIX</option>
+            <option value="Boleto">Boleto</option>
+            <option value="Cartão">Cartão</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="fexpDate">Data</label>
+          <input type="date" id="fexpDate" required>
+        </div>
+        <div class="form-group">
+          <label for="fexpStatus">Status</label>
+          <select id="fexpStatus">
+            <option value="pending">Pendente</option>
+            <option value="paid">Pago</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="fexpNotes">Observações</label>
+          <textarea id="fexpNotes"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn__secondary" id="fixedExpenseModalCancel">Cancelar</button>
+          <button type="submit" class="btn btn__primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Company Expense Modal -->
+  <div class="modal" id="companyExpenseModal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 id="companyExpenseModalTitle">Adicionar Despesa da Empresa</h3>
+        <button class="modal__close" id="companyExpenseModalClose">&times;</button>
+      </div>
+      <form id="companyExpenseForm" class="modal__form">
+        <div class="form-group">
+          <label for="cexpName">Descrição</label>
+          <input type="text" id="cexpName" required>
+        </div>
+        <div class="form-group">
+          <label for="cexpValue">Valor</label>
+          <input type="number" id="cexpValue" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label for="cexpCategory">Categoria</label>
+          <select id="cexpCategory" required>
+            <option value="">Selecione</option>
+            <option value="Despesas de trabalho">Despesas de Trabalho</option>
+            <option value="Assinaturas">Assinaturas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cexpPaymentMethod">Forma de Pagamento</label>
+          <select id="cexpPaymentMethod" required>
+            <option value="">Selecione</option>
+            <option value="PIX">PIX</option>
+            <option value="Boleto">Boleto</option>
+            <option value="Cartão">Cartão</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cexpDate">Data</label>
+          <input type="date" id="cexpDate" required>
+        </div>
+        <div class="form-group">
+          <label for="cexpStatus">Status</label>
+          <select id="cexpStatus">
+            <option value="pending">Pendente</option>
+            <option value="paid">Pago</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn__secondary" id="companyExpenseModalCancel">Cancelar</button>
+          <button type="submit" class="btn btn__primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Extra Expense Modal -->
+  <div class="modal" id="extraExpenseModal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 id="extraExpenseModalTitle">Adicionar Gasto Extra</h3>
+        <button class="modal__close" id="extraExpenseModalClose">&times;</button>
+      </div>
+      <form id="extraExpenseForm" class="modal__form">
+        <div class="form-group">
+          <label for="eexpName">Descrição</label>
+          <input type="text" id="eexpName" required>
+        </div>
+        <div class="form-group">
+          <label for="eexpValue">Valor Total</label>
+          <input type="number" id="eexpValue" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label for="eexpCategory">Categoria</label>
+          <select id="eexpCategory" required>
+            <option value="">Selecione</option>
+            <option value="Mercado">Mercado</option>
+            <option value="Necessidades">Necessidades</option>
+            <option value="Lazer">Lazer</option>
+            <option value="Prazeres">Prazeres</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="eexpPaymentMethod">Forma de Pagamento</label>
+          <select id="eexpPaymentMethod" required>
+            <option value="">Selecione</option>
+            <option value="PIX">PIX</option>
+            <option value="Boleto">Boleto</option>
+            <option value="Cartão">Cartão</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="eexpIsInstallment">Parcelado?</label>
+          <select id="eexpIsInstallment">
+            <option value="false">Não</option>
+            <option value="true">Sim</option>
+          </select>
+        </div>
+        <div class="form-group" id="eexpInstallmentGroup" style="display: none;">
+          <label for="eexpInstallmentCount">Número de Parcelas</label>
+          <input type="number" id="eexpInstallmentCount" min="2" max="12">
+        </div>
+        <div class="form-group">
+          <label for="eexpDate">Data</label>
+          <input type="date" id="eexpDate" required>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn__secondary" id="extraExpenseModalCancel">Cancelar</button>
+          <button type="submit" class="btn btn__primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Third Party Modal -->
+  <div class="modal" id="thirdPartyModal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 id="thirdPartyModalTitle">Registrar Despesa de Terceiro</h3>
+        <button class="modal__close" id="thirdPartyModalClose">&times;</button>
+      </div>
+      <form id="thirdPartyForm" class="modal__form">
+        <div class="form-group">
+          <label for="tpPersonName">Nome da Pessoa</label>
+          <input type="text" id="tpPersonName" required>
+        </div>
+        <div class="form-group">
+          <label for="tpDescription">Descrição</label>
+          <input type="text" id="tpDescription" required>
+        </div>
+        <div class="form-group">
+          <label for="tpValue">Valor</label>
+          <input type="number" id="tpValue" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label for="tpCategory">Categoria</label>
+          <select id="tpCategory" required>
+            <option value="">Selecione</option>
+            <option value="Mercado">Mercado</option>
+            <option value="Necessidades">Necessidades</option>
+            <option value="Lazer">Lazer</option>
+            <option value="Restaurante">Restaurante</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="tpPaymentMethod">Forma de Pagamento</label>
+          <select id="tpPaymentMethod" required>
+            <option value="">Selecione</option>
+            <option value="Cartão">Cartão</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="PIX">PIX</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="tpStatus">Status</label>
+          <select id="tpStatus">
+            <option value="pending">Pendente</option>
+            <option value="received">Recebido</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn__secondary" id="thirdPartyModalCancel">Cancelar</button>
+          <button type="submit" class="btn btn__primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Investment Modal -->
+  <div class="modal" id="investmentModal">
+    <div class="modal__content">
+      <div class="modal__header">
+        <h3 id="investmentModalTitle">Registrar Investimento</h3>
+        <button class="modal__close" id="investmentModalClose">&times;</button>
+      </div>
+      <form id="investmentForm" class="modal__form">
+        <div class="form-group">
+          <label for="invName">Nome do Investimento</label>
+          <input type="text" id="invName" required>
+        </div>
+        <div class="form-group">
+          <label for="invCategory">Categoria</label>
+          <input type="text" id="invCategory" required>
+        </div>
+        <div class="form-group">
+          <label for="invValue">Valor</label>
+          <input type="number" id="invValue" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label for="invDate">Data</label>
+          <input type="date" id="invDate" required>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn__secondary" id="investmentModalCancel">Cancelar</button>
+          <button type="submit" class="btn btn__primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
