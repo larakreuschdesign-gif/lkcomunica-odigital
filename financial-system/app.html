@@ -468,26 +468,6 @@
       color: var(--danger);
     }
 
-    .success-message {
-      background: #DCFCE7;
-      color: #166534;
-      padding: 12px 16px;
-      border-radius: 6px;
-      margin-bottom: 16px;
-      animation: slideDown 0.3s ease;
-    }
-
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
     @media (max-width: 768px) {
       .sidebar {
         width: 200px;
@@ -759,6 +739,7 @@
                   <th>Pessoa</th>
                   <th>Descrição</th>
                   <th>Valor</th>
+                  <th>Parcelas</th>
                   <th>Status</th>
                   <th>Ações</th>
                 </tr>
@@ -839,7 +820,7 @@
             </div>
 
             <div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px;">
-              <h3 style="margin-bottom: 16px;">💸 Despesas</h3>
+              <h3 style="margin-bottom: 16px;">💸 Despesas (SEM Investimento)</h3>
               <div style="margin-bottom: 12px; display: flex; justify-content: space-between;">
                 <span>Fixas:</span>
                 <strong id="summaryFixed">R$ 0,00</strong>
@@ -852,6 +833,10 @@
                 <span>Extras:</span>
                 <strong id="summaryExtra">R$ 0,00</strong>
               </div>
+              <div style="margin-bottom: 12px; display: flex; justify-content: space-between;">
+                <span>Terceiros:</span>
+                <strong id="summaryThird">R$ 0,00</strong>
+              </div>
               <div style="display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border-color); font-weight: 700;">
                 <span>Total:</span>
                 <strong id="summaryExpenses">R$ 0,00</strong>
@@ -861,6 +846,7 @@
             <div style="background: var(--primary-light); border: 2px solid var(--primary); border-radius: 12px; padding: 24px;">
               <h3 style="margin-bottom: 16px;">💳 Saldo Final</h3>
               <div style="font-size: 32px; font-weight: 700; color: var(--primary);" id="summaryBalance">R$ 0,00</div>
+              <div style="font-size: 12px; margin-top: 16px; opacity: 0.8;">Investido no mês: <strong id="summaryInvested">R$ 0,00</strong></div>
             </div>
           </div>
         </div>
@@ -874,7 +860,7 @@
   <!-- Client Modal -->
   <div class="modal" id="modal-client">
     <div class="modal__header">
-      <h3>Adicionar Cliente</h3>
+      <h3>Adicionar Cliente (Repetirá todos os meses)</h3>
       <button class="modal__close" onclick="closeModal()">×</button>
     </div>
     <form class="modal__form" onsubmit="saveClient(event)">
@@ -907,7 +893,7 @@
   <!-- Fixed Modal -->
   <div class="modal" id="modal-fixed">
     <div class="modal__header">
-      <h3>Adicionar Gasto Fixo</h3>
+      <h3>Adicionar Gasto Fixo (Repetirá todos os meses)</h3>
       <button class="modal__close" onclick="closeModal()">×</button>
     </div>
     <form class="modal__form" onsubmit="saveFixed(event)">
@@ -922,13 +908,14 @@
       <div class="form-group">
         <label>Categoria</label>
         <select id="fixedCategory" required>
-          <option value="Mercado">Mercado</option>
-          <option value="Necessidades">Necessidades</option>
-          <option value="Lazer">Lazer</option>
-          <option value="iFood">iFood</option>
-          <option value="Restaurante">Restaurante</option>
-          <option value="Assinaturas">Assinaturas</option>
-          <option value="Trabalho">Trabalho</option>
+          <option value="MERCADO">MERCADO</option>
+          <option value="NECESSIDADES">NECESSIDADES</option>
+          <option value="LAZER">LAZER</option>
+          <option value="ASSINATURAS">ASSINATURAS</option>
+          <option value="EMERGÊNCIA">EMERGÊNCIA</option>
+          <option value="LEILÃO">LEILÃO</option>
+          <option value="EMPRESA">EMPRESA</option>
+          <option value="CASA">CASA</option>
         </select>
       </div>
       <div class="form-group">
@@ -941,8 +928,11 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Data</label>
-        <input type="date" id="fixedDate" required>
+        <label>Status</label>
+        <select id="fixedStatus">
+          <option value="pending">Pendente</option>
+          <option value="paid">Pago</option>
+        </select>
       </div>
       <div class="form-actions">
         <button type="button" class="btn btn__secondary" onclick="closeModal()">Cancelar</button>
@@ -954,7 +944,7 @@
   <!-- Company Modal -->
   <div class="modal" id="modal-company">
     <div class="modal__header">
-      <h3>Adicionar Despesa da Empresa</h3>
+      <h3>Adicionar Despesa da Empresa (Repetirá todos os meses)</h3>
       <button class="modal__close" onclick="closeModal()">×</button>
     </div>
     <form class="modal__form" onsubmit="saveCompany(event)">
@@ -969,8 +959,15 @@
       <div class="form-group">
         <label>Categoria</label>
         <select id="companyCategory">
-          <option value="Trabalho">Trabalho</option>
-          <option value="Assinaturas">Assinaturas</option>
+          <option value="EMPRESA">EMPRESA</option>
+          <option value="ASSINATURAS">ASSINATURAS</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="companyStatus">
+          <option value="pending">Pendente</option>
+          <option value="paid">Pago</option>
         </select>
       </div>
       <div class="form-actions">
@@ -983,7 +980,7 @@
   <!-- Extra Modal -->
   <div class="modal" id="modal-extra">
     <div class="modal__header">
-      <h3>Adicionar Gasto Extra</h3>
+      <h3>Adicionar Gasto Extra (Apenas este mês)</h3>
       <button class="modal__close" onclick="closeModal()">×</button>
     </div>
     <form class="modal__form" onsubmit="saveExtra(event)">
@@ -998,8 +995,23 @@
       <div class="form-group">
         <label>Categoria</label>
         <select id="extraCategory">
-          <option value="Mercado">Mercado</option>
-          <option value="Lazer">Lazer</option>
+          <option value="MERCADO">MERCADO</option>
+          <option value="NECESSIDADES">NECESSIDADES</option>
+          <option value="LAZER">LAZER</option>
+          <option value="ASSINATURAS">ASSINATURAS</option>
+          <option value="EMERGÊNCIA">EMERGÊNCIA</option>
+          <option value="LEILÃO">LEILÃO</option>
+          <option value="CASA">CASA</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Parcelado?</label>
+        <select id="extraParcelado">
+          <option value="1">Não</option>
+          <option value="2">2x</option>
+          <option value="3">3x</option>
+          <option value="6">6x</option>
+          <option value="12">12x</option>
         </select>
       </div>
       <div class="form-actions">
@@ -1012,7 +1024,7 @@
   <!-- Third Party Modal -->
   <div class="modal" id="modal-third">
     <div class="modal__header">
-      <h3>Registrar Despesa de Terceiro</h3>
+      <h3>Registrar Despesa de Terceiro (Com parcelas)</h3>
       <button class="modal__close" onclick="closeModal()">×</button>
     </div>
     <form class="modal__form" onsubmit="saveThird(event)">
@@ -1025,8 +1037,12 @@
         <input type="text" id="thirdDesc" required>
       </div>
       <div class="form-group">
-        <label>Valor</label>
+        <label>Valor Total</label>
         <input type="number" id="thirdValue" step="0.01" required>
+      </div>
+      <div class="form-group">
+        <label>Número de Parcelas</label>
+        <input type="number" id="thirdParcelas" min="1" value="1" required>
       </div>
       <div class="form-group">
         <label>Status</label>
@@ -1045,7 +1061,7 @@
   <!-- Investment Modal -->
   <div class="modal" id="modal-investment">
     <div class="modal__header">
-      <h3>Registrar Investimento</h3>
+      <h3>Registrar Investimento (NÃO conta em despesas)</h3>
       <button class="modal__close" onclick="closeModal()">×</button>
     </div>
     <form class="modal__form" onsubmit="saveInvestment(event)">
@@ -1073,20 +1089,22 @@
   </div>
 
   <script>
+    const CATEGORIES = ['MERCADO', 'NECESSIDADES', 'LAZER', 'ASSINATURAS', 'EMERGÊNCIA', 'LEILÃO', 'EMPRESA', 'CASA'];
+
     // Dados em localStorage
     let data = {
-      clients: JSON.parse(localStorage.getItem('clients')) || [],
-      fixed: JSON.parse(localStorage.getItem('fixed')) || [],
-      company: JSON.parse(localStorage.getItem('company')) || [],
+      clientsTemplate: JSON.parse(localStorage.getItem('clientsTemplate')) || [],
+      fixedTemplate: JSON.parse(localStorage.getItem('fixedTemplate')) || [],
+      companyTemplate: JSON.parse(localStorage.getItem('companyTemplate')) || [],
       extra: JSON.parse(localStorage.getItem('extra')) || [],
       third: JSON.parse(localStorage.getItem('third')) || [],
       investments: JSON.parse(localStorage.getItem('investments')) || []
     };
 
     function saveToStorage() {
-      localStorage.setItem('clients', JSON.stringify(data.clients));
-      localStorage.setItem('fixed', JSON.stringify(data.fixed));
-      localStorage.setItem('company', JSON.stringify(data.company));
+      localStorage.setItem('clientsTemplate', JSON.stringify(data.clientsTemplate));
+      localStorage.setItem('fixedTemplate', JSON.stringify(data.fixedTemplate));
+      localStorage.setItem('companyTemplate', JSON.stringify(data.companyTemplate));
       localStorage.setItem('extra', JSON.stringify(data.extra));
       localStorage.setItem('third', JSON.stringify(data.third));
       localStorage.setItem('investments', JSON.stringify(data.investments));
@@ -1097,8 +1115,8 @@
     }
 
     function getCurrentMonth() {
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const select = document.getElementById('monthSelect');
+      return select.value || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
     }
 
     function initializeMonths() {
@@ -1155,11 +1173,44 @@
       else if (page === 'summary') renderSummary();
     }
 
+    function getMonthClients() {
+      return data.clientsTemplate.map(c => ({ ...c, id: c.id + getCurrentMonth() }));
+    }
+
+    function getMonthFixed() {
+      return data.fixedTemplate.map(f => ({ ...f, id: f.id + getCurrentMonth() }));
+    }
+
+    function getMonthCompany() {
+      return data.companyTemplate.map(c => ({ ...c, id: c.id + getCurrentMonth() }));
+    }
+
+    function getMonthThird() {
+      const month = getCurrentMonth();
+      const [year, monthNum] = month.split('-').map(Number);
+      return data.third.filter(t => {
+        const tMonth = parseInt(t.month);
+        const tYear = parseInt(t.year);
+        return tYear === year && tMonth <= monthNum && tMonth + t.parcelas > monthNum;
+      });
+    }
+
     function loadDashboard() {
-      const totalReceived = data.clients.filter(c => c.status === 'paid').reduce((sum, c) => sum + c.value, 0);
-      const totalExpenses = data.fixed.reduce((s, x) => s + x.value, 0) + data.company.reduce((s, x) => s + x.value, 0) + data.extra.reduce((s, x) => s + x.value, 0);
-      const totalInvested = data.investments.reduce((s, x) => s + x.value, 0);
-      const totalPending = data.clients.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.value, 0);
+      const clients = getMonthClients();
+      const fixed = getMonthFixed();
+      const company = getMonthCompany();
+      const extra = data.extra.filter(e => e.month === getCurrentMonth());
+      const third = getMonthThird();
+
+      const totalReceived = clients.filter(c => c.status === 'paid').reduce((sum, c) => sum + c.value, 0);
+      const totalExpenses =
+        fixed.reduce((s, x) => s + x.value, 0) +
+        company.reduce((s, x) => s + x.value, 0) +
+        extra.reduce((s, x) => s + x.value, 0) +
+        third.reduce((s, x) => s + x.value, 0);
+
+      const totalInvested = data.investments.filter(i => i.month === getCurrentMonth()).reduce((s, x) => s + x.value, 0);
+      const totalPending = clients.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.value, 0);
 
       document.getElementById('kpi-revenue').textContent = formatCurrency(totalReceived);
       document.getElementById('kpi-expenses').textContent = formatCurrency(totalExpenses);
@@ -1171,7 +1222,7 @@
 
     function renderClientsTable() {
       const search = document.getElementById('clientSearch')?.value || '';
-      let filtered = data.clients.filter(c => c.name.toLowerCase().includes(search));
+      let filtered = getMonthClients().filter(c => c.name.toLowerCase().includes(search));
 
       document.getElementById('clientsBody').innerHTML = filtered.map(c => `
         <tr>
@@ -1182,79 +1233,94 @@
           <td>${c.paid || '-'}</td>
           <td>
             <div class="action-buttons">
-              <button class="action-btn" onclick="deleteClient('${c.id}')">Deletar</button>
+              <button class="action-btn" onclick="updateClientStatus('${c.baseId}', '${c.status === 'paid' ? 'pending' : 'paid'}')">Marcar</button>
+              <button class="action-btn" onclick="deleteClientTemplate('${c.baseId}')">Deletar</button>
             </div>
           </td>
         </tr>
       `).join('');
 
-      const total = data.clients.reduce((s, c) => s + c.value, 0);
+      const total = getMonthClients().reduce((s, c) => s + c.value, 0);
       document.getElementById('clientTotal').textContent = formatCurrency(total);
     }
 
     function renderFixedTable() {
-      document.getElementById('fixedBody').innerHTML = data.fixed.map(f => `
+      const fixed = getMonthFixed();
+      document.getElementById('fixedBody').innerHTML = fixed.map(f => `
         <tr>
           <td>${f.name}</td>
           <td>${formatCurrency(f.value)}</td>
           <td>${f.category}</td>
           <td>${f.payment}</td>
-          <td><span class="status-badge pending">Pendente</span></td>
-          <td><button class="action-btn" onclick="deleteFixed('${f.id}')">Deletar</button></td>
+          <td><span class="status-badge ${f.status}">${f.status === 'paid' ? 'Pago' : 'Pendente'}</span></td>
+          <td>
+            <button class="action-btn" onclick="updateFixedStatus('${f.baseId}', '${f.status === 'paid' ? 'pending' : 'paid'}')">Marcar</button>
+            <button class="action-btn" onclick="deleteFixedTemplate('${f.baseId}')">Deletar</button>
+          </td>
         </tr>
       `).join('');
 
-      const total = data.fixed.reduce((s, f) => s + f.value, 0);
+      const total = fixed.reduce((s, f) => s + f.value, 0);
       document.getElementById('fixedTotal').textContent = formatCurrency(total);
     }
 
     function renderCompanyTable() {
-      document.getElementById('companyBody').innerHTML = data.company.map(c => `
+      const company = getMonthCompany();
+      document.getElementById('companyBody').innerHTML = company.map(c => `
         <tr>
           <td>${c.name}</td>
           <td>${formatCurrency(c.value)}</td>
           <td>${c.category}</td>
-          <td><span class="status-badge pending">Pendente</span></td>
-          <td><button class="action-btn" onclick="deleteCompany('${c.id}')">Deletar</button></td>
+          <td><span class="status-badge ${c.status}">${c.status === 'paid' ? 'Pago' : 'Pendente'}</span></td>
+          <td>
+            <button class="action-btn" onclick="updateCompanyStatus('${c.baseId}', '${c.status === 'paid' ? 'pending' : 'paid'}')">Marcar</button>
+            <button class="action-btn" onclick="deleteCompanyTemplate('${c.baseId}')">Deletar</button>
+          </td>
         </tr>
       `).join('');
 
-      const total = data.company.reduce((s, c) => s + c.value, 0);
+      const total = company.reduce((s, c) => s + c.value, 0);
       document.getElementById('companyTotal').textContent = formatCurrency(total);
     }
 
     function renderExtraTable() {
-      document.getElementById('extraBody').innerHTML = data.extra.map(e => `
+      const month = getCurrentMonth();
+      const extra = data.extra.filter(e => e.month === month);
+      document.getElementById('extraBody').innerHTML = extra.map(e => `
         <tr>
           <td>${e.name}</td>
           <td>${formatCurrency(e.value)}</td>
           <td>${e.category}</td>
-          <td>Não</td>
+          <td>${e.parcelas > 1 ? `${e.parcela}/${e.parcelas}` : 'Não'}</td>
           <td><button class="action-btn" onclick="deleteExtra('${e.id}')">Deletar</button></td>
         </tr>
       `).join('');
 
-      const total = data.extra.reduce((s, e) => s + e.value, 0);
+      const total = extra.reduce((s, e) => s + e.value, 0);
       document.getElementById('extraTotal').textContent = formatCurrency(total);
     }
 
     function renderThirdTable() {
-      document.getElementById('thirdBody').innerHTML = data.third.map(t => `
+      const third = getMonthThird();
+      document.getElementById('thirdBody').innerHTML = third.map(t => `
         <tr>
           <td>${t.name}</td>
           <td>${t.desc}</td>
-          <td>${formatCurrency(t.value)}</td>
-          <td><span class="status-badge ${t.status}">${t.status === 'paid' ? 'Recebido' : 'Pendente'}</span></td>
+          <td>${formatCurrency(t.value / t.parcelas)}</td>
+          <td>${t.parcelas > 1 ? `${t.parcela}/${t.parcelas}` : '-'}</td>
+          <td><span class="status-badge ${t.status}">${t.status === 'received' ? 'Recebido' : 'Pendente'}</span></td>
           <td><button class="action-btn" onclick="deleteThird('${t.id}')">Deletar</button></td>
         </tr>
       `).join('');
 
-      const total = data.third.filter(t => t.status === 'pending').reduce((s, t) => s + t.value, 0);
+      const total = third.reduce((s, t) => s + t.value / t.parcelas, 0);
       document.getElementById('thirdTotal').textContent = formatCurrency(total);
     }
 
     function renderInvestmentTable() {
-      document.getElementById('investmentBody').innerHTML = data.investments.map(i => `
+      const month = getCurrentMonth();
+      const investments = data.investments.filter(i => i.month === month);
+      document.getElementById('investmentBody').innerHTML = investments.map(i => `
         <tr>
           <td>${i.name}</td>
           <td>${i.category}</td>
@@ -1264,7 +1330,7 @@
         </tr>
       `).join('');
 
-      const total = data.investments.reduce((s, i) => s + i.value, 0);
+      const total = investments.reduce((s, i) => s + i.value, 0);
       document.getElementById('investmentTotal').textContent = formatCurrency(total);
       document.getElementById('investmentValue').textContent = formatCurrency(total);
       const progress = Math.min((total / 7500) * 100, 100);
@@ -1272,22 +1338,34 @@
     }
 
     function renderSummary() {
-      const received = data.clients.filter(c => c.status === 'paid').reduce((s, c) => s + c.value, 0);
-      const pending = data.clients.filter(c => c.status === 'pending').reduce((s, c) => s + c.value, 0);
-      const fixed = data.fixed.reduce((s, f) => s + f.value, 0);
-      const company = data.company.reduce((s, c) => s + c.value, 0);
-      const extra = data.extra.reduce((s, e) => s + e.value, 0);
-      const expenses = fixed + company + extra;
-      const balance = received - expenses;
+      const clients = getMonthClients();
+      const fixed = getMonthFixed();
+      const company = getMonthCompany();
+      const extra = data.extra.filter(e => e.month === getCurrentMonth());
+      const third = getMonthThird();
+      const investments = data.investments.filter(i => i.month === getCurrentMonth());
+
+      const received = clients.filter(c => c.status === 'paid').reduce((s, c) => s + c.value, 0);
+      const pending = clients.filter(c => c.status === 'pending').reduce((s, c) => s + c.value, 0);
+      const fixedTotal = fixed.reduce((s, f) => s + f.value, 0);
+      const companyTotal = company.reduce((s, c) => s + c.value, 0);
+      const extraTotal = extra.reduce((s, e) => s + e.value, 0);
+      const thirdTotal = third.reduce((s, t) => s + t.value / t.parcelas, 0);
+      const investedTotal = investments.reduce((s, i) => s + i.value, 0);
+
+      const totalExpenses = fixedTotal + companyTotal + extraTotal + thirdTotal;
+      const balance = received - totalExpenses;
 
       document.getElementById('summaryReceived').textContent = formatCurrency(received);
       document.getElementById('summaryPending').textContent = formatCurrency(pending);
       document.getElementById('summaryTotal').textContent = formatCurrency(received + pending);
-      document.getElementById('summaryFixed').textContent = formatCurrency(fixed);
-      document.getElementById('summaryCompany').textContent = formatCurrency(company);
-      document.getElementById('summaryExtra').textContent = formatCurrency(extra);
-      document.getElementById('summaryExpenses').textContent = formatCurrency(expenses);
+      document.getElementById('summaryFixed').textContent = formatCurrency(fixedTotal);
+      document.getElementById('summaryCompany').textContent = formatCurrency(companyTotal);
+      document.getElementById('summaryExtra').textContent = formatCurrency(extraTotal);
+      document.getElementById('summaryThird').textContent = formatCurrency(thirdTotal);
+      document.getElementById('summaryExpenses').textContent = formatCurrency(totalExpenses);
       document.getElementById('summaryBalance').textContent = formatCurrency(balance);
+      document.getElementById('summaryInvested').textContent = formatCurrency(investedTotal);
     }
 
     function openModal(type) {
@@ -1303,13 +1381,14 @@
     function saveClient(e) {
       e.preventDefault();
       const id = '_' + Math.random().toString(36).substr(2, 9);
-      data.clients.push({
+      data.clientsTemplate.push({
         id,
+        baseId: id,
         name: document.getElementById('clientName').value,
         value: parseFloat(document.getElementById('clientValue').value),
         day: parseInt(document.getElementById('clientDay').value),
         status: document.getElementById('clientStatus').value,
-        paid: new Date().toISOString().split('T')[0]
+        paid: null
       });
       saveToStorage();
       closeModal();
@@ -1323,13 +1402,14 @@
     function saveFixed(e) {
       e.preventDefault();
       const id = '_' + Math.random().toString(36).substr(2, 9);
-      data.fixed.push({
+      data.fixedTemplate.push({
         id,
+        baseId: id,
         name: document.getElementById('fixedName').value,
         value: parseFloat(document.getElementById('fixedValue').value),
         category: document.getElementById('fixedCategory').value,
         payment: document.getElementById('fixedPayment').value,
-        date: document.getElementById('fixedDate').value
+        status: document.getElementById('fixedStatus').value
       });
       saveToStorage();
       closeModal();
@@ -1342,11 +1422,13 @@
     function saveCompany(e) {
       e.preventDefault();
       const id = '_' + Math.random().toString(36).substr(2, 9);
-      data.company.push({
+      data.companyTemplate.push({
         id,
+        baseId: id,
         name: document.getElementById('companyName').value,
         value: parseFloat(document.getElementById('companyValue').value),
-        category: document.getElementById('companyCategory').value
+        category: document.getElementById('companyCategory').value,
+        status: document.getElementById('companyStatus').value
       });
       saveToStorage();
       closeModal();
@@ -1359,12 +1441,25 @@
     function saveExtra(e) {
       e.preventDefault();
       const id = '_' + Math.random().toString(36).substr(2, 9);
-      data.extra.push({
-        id,
-        name: document.getElementById('extraName').value,
-        value: parseFloat(document.getElementById('extraValue').value),
-        category: document.getElementById('extraCategory').value
-      });
+      const parcelas = parseInt(document.getElementById('extraParcelado').value);
+      const valor = parseFloat(document.getElementById('extraValue').value);
+      const month = getCurrentMonth();
+      const [year, monthNum] = month.split('-').map(Number);
+
+      for (let i = 0; i < parcelas; i++) {
+        const currentDate = new Date(year, monthNum - 1 + i, 1);
+        const currentMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+
+        data.extra.push({
+          id: id + '_' + i,
+          name: document.getElementById('extraName').value,
+          value: valor / parcelas,
+          category: document.getElementById('extraCategory').value,
+          month: currentMonth,
+          parcela: i + 1,
+          parcelas: parcelas
+        });
+      }
       saveToStorage();
       closeModal();
       renderExtraTable();
@@ -1376,12 +1471,21 @@
     function saveThird(e) {
       e.preventDefault();
       const id = '_' + Math.random().toString(36).substr(2, 9);
+      const parcelas = parseInt(document.getElementById('thirdParcelas').value);
+      const valor = parseFloat(document.getElementById('thirdValue').value);
+      const month = getCurrentMonth();
+      const [year, monthNum] = month.split('-').map(Number);
+
       data.third.push({
         id,
         name: document.getElementById('thirdName').value,
         desc: document.getElementById('thirdDesc').value,
-        value: parseFloat(document.getElementById('thirdValue').value),
-        status: document.getElementById('thirdStatus').value
+        value: valor,
+        status: document.getElementById('thirdStatus').value,
+        parcelas: parcelas,
+        parcela: 1,
+        month: monthNum,
+        year: year
       });
       saveToStorage();
       closeModal();
@@ -1389,6 +1493,7 @@
       document.getElementById('thirdName').value = '';
       document.getElementById('thirdDesc').value = '';
       document.getElementById('thirdValue').value = '';
+      document.getElementById('thirdParcelas').value = '1';
     }
 
     function saveInvestment(e) {
@@ -1399,7 +1504,8 @@
         name: document.getElementById('investmentName').value,
         category: document.getElementById('investmentCategory').value,
         value: parseFloat(document.getElementById('investmentAmount').value),
-        date: document.getElementById('investmentDate').value
+        date: document.getElementById('investmentDate').value,
+        month: getCurrentMonth()
       });
       saveToStorage();
       closeModal();
@@ -1410,27 +1516,58 @@
       document.getElementById('investmentAmount').value = '';
     }
 
-    function deleteClient(id) {
-      if (confirm('Deletar este cliente?')) {
-        data.clients = data.clients.filter(c => c.id !== id);
+    function updateClientStatus(id, status) {
+      const client = data.clientsTemplate.find(c => c.id === id);
+      if (client) {
+        client.status = status;
+        client.paid = new Date().toISOString().split('T')[0];
         saveToStorage();
         renderClientsTable();
         loadDashboard();
       }
     }
 
-    function deleteFixed(id) {
-      if (confirm('Deletar?')) {
-        data.fixed = data.fixed.filter(f => f.id !== id);
+    function updateFixedStatus(id, status) {
+      const fixed = data.fixedTemplate.find(f => f.id === id);
+      if (fixed) {
+        fixed.status = status;
         saveToStorage();
         renderFixedTable();
         loadDashboard();
       }
     }
 
-    function deleteCompany(id) {
-      if (confirm('Deletar?')) {
-        data.company = data.company.filter(c => c.id !== id);
+    function updateCompanyStatus(id, status) {
+      const company = data.companyTemplate.find(c => c.id === id);
+      if (company) {
+        company.status = status;
+        saveToStorage();
+        renderCompanyTable();
+        loadDashboard();
+      }
+    }
+
+    function deleteClientTemplate(id) {
+      if (confirm('Deletar este cliente (será removido de TODOS os meses)?')) {
+        data.clientsTemplate = data.clientsTemplate.filter(c => c.id !== id);
+        saveToStorage();
+        renderClientsTable();
+        loadDashboard();
+      }
+    }
+
+    function deleteFixedTemplate(id) {
+      if (confirm('Deletar este gasto (será removido de TODOS os meses)?')) {
+        data.fixedTemplate = data.fixedTemplate.filter(f => f.id !== id);
+        saveToStorage();
+        renderFixedTable();
+        loadDashboard();
+      }
+    }
+
+    function deleteCompanyTemplate(id) {
+      if (confirm('Deletar esta despesa (será removida de TODOS os meses)?')) {
+        data.companyTemplate = data.companyTemplate.filter(c => c.id !== id);
         saveToStorage();
         renderCompanyTable();
         loadDashboard();
@@ -1439,7 +1576,7 @@
 
     function deleteExtra(id) {
       if (confirm('Deletar?')) {
-        data.extra = data.extra.filter(e => e.id !== id);
+        data.extra = data.extra.filter(e => !e.id.startsWith(id));
         saveToStorage();
         renderExtraTable();
         loadDashboard();
